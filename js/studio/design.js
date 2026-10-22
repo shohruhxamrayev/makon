@@ -1,5 +1,5 @@
 // Makon Studio — Design mode: photo, style, render (AI or on-device), versions, refine, palette
-import { $, $$, el, esc, toast, confirmBox, uid, fileToDataURL, scaleImage, loadImage, thumbOf, download, isTouch } from "./util.js";
+import { $, $$, el, esc, toast, confirmBox, modal, uid, fileToDataURL, scaleImage, loadImage, thumbOf, download, isTouch } from "./util.js";
 import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName } from "./data.js";
 import { renderMood, extractPalette } from "./engine.js";
 
@@ -313,7 +313,7 @@ function buildPrompt(extra) {
   ].filter(Boolean).join(" ");
 }
 
-async function callAI(image, prompt) {
+async function callAI(image, prompt, retried) {
   const ar = await aspect(image);
   const body = { image: scaleImage(await loadImage(image), ctx.ai.maxInput || 1280, 0.88), prompt, aspect: +ar.toFixed(3), orientation: ar > 1.15 ? "landscape" : ar < 0.87 ? "portrait" : "square" };
   let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
@@ -321,6 +321,15 @@ async function callAI(image, prompt) {
   try {
     const r = await fetch("api/redesign", { method: "POST", headers: { "Content-Type": "application/json", "x-makon-code": code }, body: JSON.stringify(body), signal: c.signal });
     const j = await r.json().catch(() => ({}));
+    if (r.status === 401 && /access code/i.test(j.error || "") && !retried) {
+      clearTimeout(t);
+      const v = await modal({ title: "AI access code", body: code ? "That code wasn't right. Type the access code again." : "This site asks for a password before making AI renders. Type the access code the site owner gave you.",
+        fields: [{ label: "Access code", type: "password", value: "", required: true, maxlength: 100 }], ok: "Render" });
+      if (!v) throw new Error("No access code entered.");
+      try { localStorage.setItem(CODE_KEY, v[0].trim()); } catch (e) {}
+      renderControls();
+      return callAI(image, prompt, true);
+    }
     if (!r.ok || !j.image) throw new Error(j.error || "The AI service returned an error (" + r.status + ").");
     return j.image;
   } catch (e) {
