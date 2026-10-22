@@ -234,13 +234,15 @@ $("#help-btn").addEventListener("click", help);
 
 // ---------- AI availability ----------
 async function checkAI() {
+  ctx.recheckAI = checkAI;
   try {
     const c = new AbortController(); const t = setTimeout(() => c.abort(), 5000);
-    const r = await fetch("api/redesign", { signal: c.signal, headers: { Accept: "application/json" } });
+    let code = ""; try { code = localStorage.getItem("makon_ai_code") || ""; } catch (e) {}
+    const r = await fetch("api/redesign", { signal: c.signal, headers: { Accept: "application/json", "x-makon-code": code } });
     clearTimeout(t);
     if (r.ok && (r.headers.get("content-type") || "").includes("json")) {
       const j = await r.json();
-      ctx.ai = { enabled: !!j.enabled, provider: j.provider || null, model: j.model || null, needsCode: !!j.needsCode, maxInput: j.maxInput || 1280, configError: j.configError || null, limit: j.limit || 0, remaining: j.remaining ?? null, checked: true };
+      ctx.ai = { enabled: !!j.enabled, provider: j.provider || null, model: j.model || null, needsCode: !!j.needsCode, maxInput: j.maxInput || 1280, configError: j.configError || null, limit: j.limit || 0, remaining: j.remaining ?? null, owner: !!j.owner, checked: true };
     } else ctx.ai.checked = true;
   } catch (e) { ctx.ai.checked = true; }
   ctx.bus.emit("ai", ctx.ai);

@@ -12,6 +12,7 @@
 // If both are set, OpenAI is used. Optional for either:
 //   MAKON_ACCESS_CODE  — a password visitors must type once in the Studio
 //   MAKON_DAILY_LIMIT  — AI renders per person per day (default 5; 0 = no per-person limit)
+//   MAKON_OWNER_CODE   — your private password: typed once in the Studio, it skips the access code and the daily limit
 //   UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN — free Upstash Redis to make the per-person limit exact
 //                         across all servers (without it the limit is kept in each server's memory: good, not perfect)
 //
@@ -76,18 +77,20 @@ module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const c = config();
 
-  const limit = dailyLimit(), key = "makon:" + today() + ":" + who(req);
+  const sent = String(req.headers["x-makon-code"] || "");
+  const owner = !!process.env.MAKON_OWNER_CODE && sent === process.env.MAKON_OWNER_CODE;
+  const limit = owner ? 0 : dailyLimit(), key = "makon:" + today() + ":" + who(req);
   if (req.method === "GET") {
     const u = limit && c.provider ? await used(key) : 0;
     return res.status(200).json({
       enabled: !!c.provider, provider: c.provider, model: c.model, needsCode: !!c.code,
       maxInput: c.provider === "cloudflare" ? 496 : 1280, configError: c.configError,
-      limit, remaining: limit ? Math.max(0, limit - u) : null
+      limit, remaining: limit ? Math.max(0, limit - u) : null, owner
     });
   }
   if (req.method !== "POST") { res.setHeader("Allow", "GET, POST"); return res.status(405).json({ error: "Method not allowed" }); }
   if (!c.provider) return res.status(501).json({ error: c.configError || "AI rendering is not configured on this deployment." });
-  if (c.code && req.headers["x-makon-code"] !== c.code) return res.status(401).json({ error: "Wrong or missing AI access code." });
+  if (c.code && !owner && sent !== c.code) return res.status(401).json({ error: "Wrong or missing AI access code." });
   if (limit && (await used(key)) >= limit) return res.status(429).json({ error: "You've used your " + limit + " free AI renders for today. More tomorrow (from 05:00 Tashkent time) — mood previews still work.", limitReached: true, remaining: 0 });
 
   let body = req.body;

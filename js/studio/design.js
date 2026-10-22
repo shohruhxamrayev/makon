@@ -160,8 +160,15 @@ function renderControls() {
   if (!ctx.ai.checked) ai.innerHTML = '<span class="dot"></span>Checking AI connection…';
   else if (ctx.ai.enabled) {
     ai.className = "ai-state on";
-    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.limit && ctx.ai.remaining != null ? '<small><b>' + ctx.ai.remaining + ' of ' + ctx.ai.limit + '</b> AI renders left for you today' + (ctx.ai.remaining === 0 ? ' — more tomorrow from 05:00 Tashkent time. Mood previews still work.' : '.') + '</small>' : "");
-    if (ctx.ai.needsCode) {
+    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.owner ? '<small><b>Owner</b> · no daily limit for you.</small>' : "") + (ctx.ai.limit && ctx.ai.remaining != null ? '<small><b>' + ctx.ai.remaining + ' of ' + ctx.ai.limit + '</b> AI renders left for you today' + (ctx.ai.remaining === 0 ? ' — more tomorrow from 05:00 Tashkent time. Mood previews still work.' : '.') + '</small>' : "");
+    if (!ctx.ai.owner) ai.append(el("button", { type: "button", class: "link-btn owner-link", text: "Site owner? Enter your code", onclick: async () => {
+      const v = await modal({ title: "Owner code", body: "Type the MAKON_OWNER_CODE you set in Vercel. This browser will then have no daily limit.", fields: [{ label: "Owner code", type: "password", required: true, maxlength: 100 }], ok: "Save" });
+      if (!v) return;
+      try { localStorage.setItem(CODE_KEY, v[0].trim()); } catch (e) {}
+      if (ctx.recheckAI) await ctx.recheckAI();
+      toast(ctx.ai.owner ? "Owner mode on — no daily limit in this browser." : "That code didn't match MAKON_OWNER_CODE.", ctx.ai.owner ? "" : "error");
+    } }));
+    if (ctx.ai.needsCode && !ctx.ai.owner) {
       let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
       const inp = el("input", { class: "input small", type: "password", placeholder: "Access code", value: code, "aria-label": "AI access code", oninput: e => { try { localStorage.setItem(CODE_KEY, e.target.value); } catch (er) {} } });
       ai.append(inp);
