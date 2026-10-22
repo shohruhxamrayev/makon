@@ -202,7 +202,8 @@ function fit(pad = 56) {
   let b = bounds(P());
   if (!b) b = { x0: -0.5, y0: -0.5, x1: 6, y1: 4.5, w: 6.5, h: 5 };
   const bw = Math.max(b.w, 2), bh = Math.max(b.h, 2);
-  const top = 64, bottom = 44;
+  const narrow = window.innerWidth <= 900;
+  const top = narrow ? (ctx.mode === "furnish" ? 150 : 112) : (ctx.mode === "furnish" ? 108 : 64), bottom = narrow ? 56 : 44;
   view.s = clamp(Math.min((W - pad * 2) / bw, (H - top - bottom - pad) / bh), 8, 400);
   view.tx = W / 2 - (b.x0 + b.w / 2) * view.s;
   view.ty = top + (H - top - bottom) / 2 - (b.y0 + b.h / 2) * view.s;

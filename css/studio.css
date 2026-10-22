@@ -507,3 +507,11 @@ body[data-mode="furnish"] #three-tb { top: 60px; }
 .owner-link { display: block; margin-top: 6px; font-size: 11.5px; color: inherit; }
 
 .s-brand .wordmark { height: 30px; width: auto; display: block; }
+
+/* phones: the 3D camera bar wraps instead of hiding Reset */
+@media (max-width: 420px) {
+  #three-tb { flex-wrap: wrap; }
+  #three-tb .tb-group:first-child { flex-wrap: wrap; }
+  #three-tb button { padding: 7px 8px; font-size: 11.5px; }
+  #three-tb .tb-group + .tb-group { border-left: 0; padding-left: 0; }
+}
