@@ -114,7 +114,8 @@ export function init(c) {
 }
 
 const cur = () => { const d = ctx.p.design; return d.versions.find(v => v.id === d.current) || null; };
-const engineChoice = () => { const e = ctx.p.design.engine; return ctx.ai.enabled && e !== "local" ? "ai" : "local"; };
+const aiLeft = () => !(ctx.ai.limit && ctx.ai.remaining === 0);
+const engineChoice = () => { const e = ctx.p.design.engine; return ctx.ai.enabled && e !== "local" && aiLeft() ? "ai" : "local"; };
 
 async function okToReplace() {
   if (!ctx.p.design.versions.length) return true;
@@ -152,14 +153,14 @@ function renderControls() {
 
   const eng = engineChoice();
   $$("#engine button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.e === eng)); if (b.dataset.e === "ai") b.classList.toggle("off", !ctx.ai.enabled); });
-  $("#engine-hint").textContent = eng === "ai"
+  $("#engine-hint").textContent = ctx.ai.enabled && !aiLeft() ? "You've used today's AI renders, so Makon makes mood previews until tomorrow." : eng === "ai"
     ? "Redraws furniture and finishes in your photo. Takes 20–60 seconds."
     : "Instant and private: re-grades colour and light toward the style on your device. Furniture stays as photographed.";
   const ai = $("#ai-state");
   if (!ctx.ai.checked) ai.innerHTML = '<span class="dot"></span>Checking AI connection…';
   else if (ctx.ai.enabled) {
     ai.className = "ai-state on";
-    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.provider === "cloudflare" ? '<small>Free daily allowance — about 100 renders a day, resets at 05:00 Tashkent time.</small>' : "");
+    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.limit && ctx.ai.remaining != null ? '<small><b>' + ctx.ai.remaining + ' of ' + ctx.ai.limit + '</b> AI renders left for you today' + (ctx.ai.remaining === 0 ? ' — more tomorrow from 05:00 Tashkent time. Mood previews still work.' : '.') + '</small>' : "");
     if (ctx.ai.needsCode) {
       let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
       const inp = el("input", { class: "input small", type: "password", placeholder: "Access code", value: code, "aria-label": "AI access code", oninput: e => { try { localStorage.setItem(CODE_KEY, e.target.value); } catch (er) {} } });
@@ -330,6 +331,7 @@ async function callAI(image, prompt, retried) {
       renderControls();
       return callAI(image, prompt, true);
     }
+    if (j.remaining != null) { ctx.ai.remaining = j.remaining; renderControls(); }
     if (!r.ok || !j.image) throw new Error(j.error || "The AI service returned an error (" + r.status + ").");
     return j.image;
   } catch (e) {

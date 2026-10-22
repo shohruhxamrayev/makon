@@ -37,7 +37,9 @@ Without any key everything works and Design makes on-device mood previews. Pick 
 **Paid — OpenAI (best quality, a few cents per render)**
 - Add `OPENAI_API_KEY` (starts with `sk-`). Optional: `MAKON_IMAGE_MODEL` (default `gpt-image-1.5`, cheaper: `gpt-image-1-mini`), `MAKON_IMAGE_QUALITY` = `low` | `medium` | `high`.
 
-For either: add `MAKON_ACCESS_CODE` = any password so strangers can't use up your renders, then **Redeploy**. If both providers are set, OpenAI is used.
+**Per-person daily limit:** each visitor gets 5 AI renders a day by default (failed renders don't count). Change it with `MAKON_DAILY_LIMIT` (e.g. `10`, or `0` for no per-person limit). The count is kept in server memory, which is good but can reset when Vercel starts a new server. For an exact limit, create a free database at upstash.com (Redis) and add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
+
+For either: add `MAKON_ACCESS_CODE` = any password (optional) so only people you share it with can render, then **Redeploy**. If both providers are set, OpenAI is used.
 
 GitHub Pages also works (no AI renders there — it can’t run the function).
 
