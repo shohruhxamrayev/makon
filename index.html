@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Makon — Redesign your room with AI</title>
+  <meta name="description" content="Photograph one room. Makon keeps its walls, windows and light, redesigns what sits inside, then turns it into a measured plan, a 3D model, a furniture list and a build brief.">
+  <meta name="theme-color" content="#121614">
+  <meta property="og:title" content="Makon — Redesign your room with AI">
+  <meta property="og:description" content="From the room you have to the room you want: redesign, plan, 3D, furnish and budget in one place.">
+  <meta property="og:image" content="img/room-after.jpg">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" as="image" href="img/room-before.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body class="landing">
+  <a class="skip-link" href="#room">Skip to content</a>
+  <div class="loader" id="loader" role="status"><span class="label">Preparing the room</span></div>
+
+  <!-- ============ FIXED ROOM STAGE ============ -->
+  <div class="stage">
+    <div class="frame" id="frame">
+      <img id="img-before" src="img/room-before.jpg" alt="The living room as it is today: grey sofa, dark coffee table, bare walls">
+      <img id="img-after" src="img/room-after.jpg" alt="The same living room redesigned: curved bouclé sofa, oak table, linen curtains, framed landscape">
+      <div class="shade" id="shade"></div>
+
+      <!-- 02 Understand: structure tracing -->
+      <svg class="ov" id="ov-understand" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g class="draw">
+          <path class="trace" d="M395 0 L467 66 L1290 62 L1362 0"/>
+          <path class="trace" d="M467 66 L467 648 L1290 648 L1290 62"/>
+          <path class="trace" d="M467 648 L60 900 M1290 648 L1600 860"/>
+          <rect class="trace" x="52" y="0" width="268" height="543"/>
+          <path class="trace" d="M1076 648 L1076 236 A90 92 0 0 1 1257 236 L1257 648"/>
+          <path class="ray" d="M320 120 L900 520 M320 260 L760 760 M320 400 L520 900 M320 60 L1150 330"/>
+          <rect class="trace dash" x="495" y="476" width="515" height="348"/>
+          <rect class="trace dash" x="1267" y="510" width="333" height="390"/>
+        </g>
+        <g class="notes">
+          <circle class="pin" cx="320" cy="300" r="5"/>
+          <rect class="note-bg" x="330" y="280" width="190" height="52"/>
+          <text class="note-t" x="342" y="302">Window plane</text>
+          <text class="note-s" x="342" y="322">Kept exactly</text>
+
+          <circle class="pin" cx="700" cy="330" r="5"/>
+          <rect class="note-bg" x="712" y="308" width="300" height="52"/>
+          <text class="note-t" x="724" y="330">Daylight from the north-west</text>
+          <text class="note-s" x="724" y="350">Direction preserved</text>
+
+          <circle class="pin" cx="1076" cy="430" r="5"/>
+          <rect class="note-bg" x="858" y="410" width="210" height="52"/>
+          <text class="note-t" x="870" y="432">Archway and openings</text>
+          <text class="note-s" x="870" y="452">Structure untouched</text>
+
+          <circle class="pin" cx="1010" cy="520" r="5"/>
+          <rect class="note-bg" x="790" y="540" width="214" height="52"/>
+          <text class="note-t" x="802" y="562">What stands in the room</text>
+          <text class="note-s" x="802" y="582">Free to change</text>
+        </g>
+      </svg>
+
+      <div class="divider" id="divider"></div>
+
+      <!-- 04 Refine: material tags -->
+      <div class="layer ov" id="ov-refine">
+        <button class="tagpin hit" type="button" style="left:24.4%;top:31.8%" aria-label="Linen curtains"><span class="ring"></span><span class="tagname label">Linen</span><span class="tip">Unlined washed linen softens the window wall without blocking the light.</span></button>
+        <button class="tagpin hit" type="button" style="left:46.4%;top:78.3%" aria-label="Oak table"><span class="ring"></span><span class="tagname label">Oak</span><span class="tip">Warmer, lighter oak — an organic low table instead of the dark rectangle.</span></button>
+        <button class="tagpin hit" type="button" style="left:89.2%;top:68.9%" aria-label="Sideboard kept"><span class="ring"></span><span class="tagname label">Kept</span><span class="tip">The walnut sideboard stays exactly where it is, as you asked.</span></button>
+      </div>
+
+      <!-- 05 Plan: perspective trace -->
+      <svg class="ov" id="ov-plan" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g class="draw">
+          <path class="trace" d="M467 66 L467 648 L1290 648 L1290 62"/>
+          <path class="trace" d="M467 648 L0 930 M1290 648 L1600 860"/>
+          <path class="trace" d="M320 0 L320 543"/>
+          <path class="trace" d="M1076 648 L1076 236 M1257 236 L1257 648"/>
+        </g>
+      </svg>
+
+      <!-- 06 Build: material hotspots -->
+      <div class="layer ov" id="ov-build">
+        <button class="spot hit" type="button" data-i="0" style="left:35%;top:16.7%" aria-label="Material 01: warm limewash">01</button>
+        <button class="spot hit" type="button" data-i="1" style="left:46.4%;top:83%" aria-label="Material 02: natural oak">02</button>
+        <button class="spot hit" type="button" data-i="2" style="left:89.2%;top:71%" aria-label="Material 03: existing sideboard">03</button>
+        <div class="spot-card" id="spot-card" role="tooltip"></div>
+      </div>
+      <div class="vignette"></div>
+    </div>
+  </div>
+
+  <!-- ============ HEADER / RAIL / CORNERS ============ -->
+  <header class="top" id="top">
+    <a class="brand" href="index.html" aria-label="Makon home"><span class="brand-box">M</span>Makon</a>
+    <span class="count label" aria-live="polite"><b id="c-num">01</b> / 06 &nbsp; <span id="c-name">Room</span></span>
+    <nav class="top-right">
+      <a class="top-link label" href="#tools">Tools</a>
+      <a class="top-link label" href="#faq">FAQ</a>
+      <a class="cta-top label" href="studio.html" data-auth-link><span class="full">Start designing</span><span class="short">Start</span> →</a>
+    </nav>
+  </header>
+
+  <nav class="rail" id="rail" aria-label="Chapters">
+    <button class="label" type="button" data-go="0"><span>01 Room</span><i></i></button>
+    <button class="label" type="button" data-go="1"><span>02 Understand</span><i></i></button>
+    <button class="label" type="button" data-go="2"><span>03 Design</span><i></i></button>
+    <button class="label" type="button" data-go="3"><span>04 Refine</span><i></i></button>
+    <button class="label" type="button" data-go="4"><span>05 Plan</span><i></i></button>
+    <button class="label" type="button" data-go="5"><span>06 Build</span><i></i></button>
+  </nav>
+
+  <span class="corner l label">Room 01 / Living</span>
+  <span class="corner r label">One room · One project</span>
+
+  <!-- ============ CHAPTER TEXT (scroll drives which is visible) ============ -->
+  <main class="chapters" id="main">
+    <section class="chapter" id="room" data-name="Room">
+      <div class="panel bl">
+        <span class="label">Begin with the room you have</span>
+        <h1>Your room.<br><span class="ital">Rebuilt around you.</span></h1>
+        <p>Photograph one room. Makon keeps its walls, windows and light, then redesigns what sits inside — through to a measured plan, a 3D model and a build brief.</p>
+        <div class="links">
+          <a class="link-line label" href="studio.html" data-auth-link>Upload your room <span>→</span></a>
+          <a class="link-plain label" href="#understand" data-scroll="1">See how it works <span>↓</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="understand" data-name="Understand">
+      <div class="panel tr">
+        <span class="label">Before anything changes</span>
+        <h2>Read the light.<br>Keep the structure.</h2>
+      </div>
+    </section>
+
+    <section class="chapter" id="design" data-name="Design">
+      <div class="panel tr">
+        <span class="label">The walls stay</span>
+        <h2>The interior<br><span class="ital">moves forward.</span></h2>
+      </div>
+      <div class="panel compare-bar" id="compare-bar">
+        <span class="label">Drag to compare</span>
+        <div class="cb-row">
+          <span class="label cb-end">Original</span>
+          <div class="cb-track">
+            <span class="cb-knob" id="cb-knob">↔</span>
+            <input type="range" id="cb-range" min="0" max="100" value="0" aria-label="Compare original and redesign">
+          </div>
+          <span class="label cb-end">Redesign</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="refine" data-name="Refine">
+      <div class="panel bl">
+        <span class="label">Then keep working</span>
+        <h2 class="small">Keep the sideboard. Warmer, lighter wood. Soften the window wall.</h2>
+        <div class="links">
+          <a class="link-line label" href="studio.html" data-auth-link>Refine your room in Studio <span>→</span></a>
+        </div>
+        <div class="m-pins" aria-label="Inspect changes"><button type="button" class="label" data-pin="tag" data-i="0">Linen</button><button type="button" class="label" data-pin="tag" data-i="1">Oak</button><button type="button" class="label" data-pin="tag" data-i="2">Kept</button></div>
+      </div>
+    </section>
+
+    <section class="chapter" id="plan" data-name="Plan">
+      <div class="panel tl">
+        <span class="label">One project</span>
+        <h2 class="small">The room becomes<br>editable space.</h2>
+        <p>Draw walls, doors and windows, set one known length, and every measurement becomes real.</p>
+      </div>
+      <div class="panel plan" id="plan-panel">
+        <div class="plan-head"><span class="label">Editable plan</span><span id="plan-sub">Walls, openings and objects · not yet to scale</span></div>
+        <svg viewBox="0 0 520 300" role="img" aria-label="Floor plan of the living room">
+          <rect class="p-obj" x="150" y="22" width="190" height="56"><title>Sideboard (kept)</title></rect>
+          <rect class="p-obj" x="190" y="110" width="120" height="60" rx="4"><title>Sofa</title></rect>
+          <rect class="p-obj" x="40" y="180" width="64" height="64"><title>Lounge chair</title></rect>
+          <rect class="p-wall" x="20" y="10" width="480" height="270"/>
+          <line class="p-win" x1="20" y1="60" x2="20" y2="200"/>
+          <line class="p-door" x1="380" y1="10" x2="460" y2="10"/>
+          <rect class="p-arch" x="472" y="150" width="28" height="90"/>
+          <text class="p-dim" x="260" y="-4" text-anchor="middle" id="dim-w">—</text>
+          <text class="p-dim" x="508" y="140" id="dim-d">—</text>
+          <text class="p-dim" x="28" y="135" id="dim-win">—</text>
+        </svg>
+        <button class="scale-btn label" id="scale-btn" type="button">Set a known length to scale</button>
+        <form class="scale-form" id="scale-form">
+          <label for="win-len">Window width</label>
+          <input id="win-len" type="number" inputmode="decimal" min="0.3" max="6" step="0.01" value="1.40" required>
+          <span>m</span>
+          <button class="label" type="submit">Apply</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="chapter" id="build" data-name="Build">
+      <div class="panel bl">
+        <span class="label">From a photograph to a room you can make</span>
+        <h1>Start with<br>your room.</h1>
+        <div class="links">
+          <a class="link-line label" href="signup.html?next=studio.html">Enter Makon <span>→</span></a>
+          <a class="link-plain label" href="#tools">Explore the tools <span>↓</span></a>
+        </div>
+        <div class="m-pins" aria-label="Inspect materials"><button type="button" class="label" data-pin="spot" data-i="0">01 Walls</button><button type="button" class="label" data-pin="spot" data-i="1">02 Table</button><button type="button" class="label" data-pin="spot" data-i="2">03 Kept</button></div>
+      </div>
+      <span class="panel inspect label" id="inspect">Point, tap or focus to inspect materials</span>
+    </section>
+  </main>
+
+  <!-- ============ AFTER THE STORY ============ -->
+  <div class="after" id="after">
+    <section class="sec" id="tools" aria-labelledby="tools-h">
+      <div class="sec-head">
+        <span class="label accent">Six tools · one project</span>
+        <h2 id="tools-h">Everything one room needs,<br><span class="ital">in one place.</span></h2>
+        <p>Every step works on the same room. Change the plan and the 3D model follows. Add a sofa and the budget updates.</p>
+      </div>
+      <div class="tools">
+        <article class="tool">
+          <span class="tool-n label">01 · Design</span>
+          <h3>Redesign from a photo</h3>
+          <p>Choose from 10 styles, lock what must stay, set the light direction. Get an AI render, or an instant on-device mood preview.</p>
+          <ul><li>Before / after slider</li><li>Every version saved</li><li>Refine in plain words, with undo</li></ul>
+        </article>
+        <article class="tool">
+          <span class="tool-n label">02 · Plan</span>
+          <h3>A floor plan you can edit</h3>
+          <p>Draw walls, drop doors and windows on them, and calibrate one known length. Area, perimeter and every wall length update live.</p>
+          <ul><li>Room templates · grid &amp; angle snap</li><li>Pinch-zoom on phones</li><li>Undo / redo · PNG export</li></ul>
+        </article>
+        <article class="tool">
+          <span class="tool-n label">03 · 3D</span>
+          <h3>Walk around it in 3D</h3>
+          <p>The plan becomes a lit 3D room with real wall openings. Orbit, switch to top, front or side, and drag furniture on the floor.</p>
+          <ul><li>Sun follows your light direction</li><li>Wall and floor finishes per style</li><li>Save a snapshot</li></ul>
+        </article>
+        <article class="tool">
+          <span class="tool-n label">04 · Furnish</span>
+          <h3>Furniture that actually fits</h3>
+          <p>40+ pieces at real sizes. Makon warns when something overlaps, blocks a door or leaves less than 60 cm to walk past.</p>
+          <ul><li>Search, filter, resize, recolour</li><li>Shop similar in real stores</li><li>Your own prices, never invented ones</li></ul>
+        </article>
+        <article class="tool">
+          <span class="tool-n label">05 · Quantities</span>
+          <h3>Paint, floor and skirting</h3>
+          <p>From the calibrated plan Makon works out wall area minus openings, litres of paint, floor area with waste, and skirting length.</p>
+          <ul><li>Coats and coverage you control</li><li>Metric and imperial</li></ul>
+        </article>
+        <article class="tool">
+          <span class="tool-n label">06 · Build</span>
+          <h3>A brief a builder can use</h3>
+          <p>Before and after, materials, kept elements, measurements, furniture list and a budget against your limit — printable as a PDF.</p>
+          <ul><li>Budget bar with overspend warning</li><li>Export / import the whole project</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="sec sec-split" aria-labelledby="phone-h">
+      <div>
+        <span class="label accent">Desktop and phone</span>
+        <h2 id="phone-h">Take the photo where you stand.</h2>
+        <p>On a phone Makon opens your camera straight from the upload button, the plan understands pinch and two-finger pan, and every tool sits one tap away in the bottom bar.</p>
+        <p>Projects are saved automatically as you work — nothing to lose if you close the tab.</p>
+      </div>
+      <figure class="phone">
+        <img src="img/room-after.jpg" alt="Makon showing a redesigned living room on a phone" loading="lazy">
+        <figcaption><span class="label">Warm Oak &amp; Linen</span><span>Version 3 · saved</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="sec" id="faq" aria-labelledby="faq-h">
+      <div class="sec-head">
+        <span class="label accent">Questions</span>
+        <h2 id="faq-h">Good to know</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Does Makon change my walls or windows?</summary>
+          <p>No. You choose what to keep — window plane, openings, floor, ceiling light, built-ins — and those are locked in every render and in the brief.</p>
+        </details>
+        <details>
+          <summary>How accurate are the measurements?</summary>
+          <p>Until you calibrate, lengths are estimates. Measure one wall or window with a tape, enter it once, and the whole plan scales to match. Quantities are only marked final after calibration.</p>
+        </details>
+        <details>
+          <summary>What is the difference between an AI render and a mood preview?</summary>
+          <p>An AI render redraws the furniture and finishes in your photo. A mood preview runs instantly on your device and re-grades colour and light to the chosen style, so you can compare directions before spending a render.</p>
+        </details>
+        <details>
+          <summary>Where are my projects stored?</summary>
+          <p>In your browser, on this device. You can export any project as a file and import it on another device.</p>
+        </details>
+        <details>
+          <summary>Are furniture prices real?</summary>
+          <p>Makon never invents prices or stock. "Shop similar" opens live searches in real stores, and you type the price of what you pick — the budget adds it up.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="sec cta-end">
+      <h2>From the room you have<br><span class="ital">to the room you want.</span></h2>
+      <div class="links center">
+        <a class="btn-light label" href="signup.html?next=studio.html">Create a free account</a>
+        <a class="link-line label" href="studio.html" data-auth-link>Try the sample room <span>→</span></a>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <a class="brand" href="index.html"><span class="brand-box">M</span>Makon</a>
+      <span>Makon — “a place to live”. Design one room at a time.</span>
+      <nav><a href="signin.html">Sign in</a><a href="signup.html">Create account</a><a href="#tools">Tools</a><a href="#faq">FAQ</a></nav>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/auth.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

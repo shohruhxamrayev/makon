@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Studio — Makon</title>
+  <meta name="theme-color" content="#f0eadf">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/studio.css">
+  <script src="js/auth.js"></script>
+  <script>
+    if (!MakonAuth.current()) location.replace("signin.html?next=studio.html");
+  </script>
+</head>
+<body class="studio" data-mode="design">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-design" viewBox="0 0 24 24"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.6L12 15l-1.8-4.4L5.5 9l4.7-1.4z"/><path d="M18 15l.8 2 2 .8-2 .7-.8 2-.8-2-2-.7 2-.8z"/></symbol>
+      <symbol id="i-plan" viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 12h7v8M14 4v6h7"/></symbol>
+      <symbol id="i-3d" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></symbol>
+      <symbol id="i-furnish" viewBox="0 0 24 24"><path d="M5 11V8a3 3 0 013-3h8a3 3 0 013 3v3"/><path d="M3 13a2 2 0 014 0v2h10v-2a2 2 0 014 0v5H3z"/><path d="M5 18v2M19 18v2"/></symbol>
+      <symbol id="i-build" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></symbol>
+      <symbol id="i-select" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.5L10 19z"/></symbol>
+      <symbol id="i-wall" viewBox="0 0 24 24"><path d="M4 18L20 6"/><circle cx="4" cy="18" r="1.6"/><circle cx="20" cy="6" r="1.6"/></symbol>
+      <symbol id="i-door" viewBox="0 0 24 24"><path d="M4 20h16M6 20V5h9v15"/><path d="M15 5a10 10 0 01-9 9"/></symbol>
+      <symbol id="i-window" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM12 5v14M4 12h16"/></symbol>
+      <symbol id="i-measure" viewBox="0 0 24 24"><path d="M3 15l12-12 6 6-12 12z"/><path d="M7 11l2 2M10 8l2 2M13 5l2 2"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5"/><path d="M4 12h11a5 5 0 010 10h-2"/></symbol>
+      <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 7l5 5-5 5"/><path d="M20 12H9a5 5 0 000 10h2"/></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></symbol>
+      <symbol id="i-out" viewBox="0 0 24 24"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"/></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></symbol>
+      <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h11v12H8z"/><path d="M5 16V4h11"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+      <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol>
+      <symbol id="i-shop" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 016 0"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-1 .6-1.5 1.2-1.5 2.5M12 17v.5"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app" id="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="side" id="side" aria-label="Projects">
+      <div class="side-top">
+        <a class="s-brand" href="index.html"><span class="brand-box">M</span>Makon</a>
+        <button class="icon-btn side-close" id="side-close" type="button" aria-label="Close projects"><svg><use href="#i-x"/></svg></button>
+      </div>
+      <button class="btn-new" id="new-room" type="button"><svg><use href="#i-plus"/></svg>New room</button>
+      <div class="side-label"><span>Projects</span><span id="proj-count">0</span></div>
+      <input class="side-search" id="proj-search" type="search" placeholder="Search rooms" aria-label="Search rooms" hidden>
+      <ul class="projects" id="projects"></ul>
+      <div class="side-tools">
+        <button class="link-btn" id="import-btn" type="button"><svg><use href="#i-upload"/></svg>Import project</button>
+        <input type="file" id="import-file" accept=".json,.makon,application/json" hidden>
+      </div>
+      <p class="side-note" id="side-note">Projects and photos are saved in this browser. Export a project to move it to another device.</p>
+      <div class="me">
+        <span class="avatar" id="avatar">?</span>
+        <div class="me-txt"><b id="uname"></b><small id="uemail"></small></div>
+        <button class="icon-btn" id="signout" type="button" aria-label="Sign out" title="Sign out"><svg><use href="#i-out"/></svg></button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- ============ MAIN ============ -->
+    <div class="main">
+      <header class="bar">
+        <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Open projects"><svg><use href="#i-menu"/></svg></button>
+        <div class="room-title">
+          <span class="eyebrow">Current room</span>
+          <input id="room-name" value="Untitled room" maxlength="60" aria-label="Room name" spellcheck="false">
+        </div>
+        <span class="save-state" id="save-state" aria-live="polite">Saved</span>
+        <nav class="modes" id="modes" role="tablist" aria-label="Studio tools">
+          <button role="tab" data-mode="design" aria-selected="true"><svg><use href="#i-design"/></svg><span>Design</span></button>
+          <button role="tab" data-mode="plan"><svg><use href="#i-plan"/></svg><span>Plan</span></button>
+          <button role="tab" data-mode="3d"><svg><use href="#i-3d"/></svg><span>3D</span></button>
+          <button role="tab" data-mode="furnish"><svg><use href="#i-furnish"/></svg><span>Furnish</span></button>
+          <button role="tab" data-mode="build"><svg><use href="#i-build"/></svg><span>Build</span></button>
+        </nav>
+        <button class="icon-btn help-btn" id="help-btn" type="button" aria-label="Shortcuts and help" title="Shortcuts (?)"><svg><use href="#i-help"/></svg></button>
+      </header>
+
+      <div class="work">
+        <!-- ============ STAGE ============ -->
+        <section class="stage" id="stage">
+          <!-- DESIGN -->
+          <div class="st" id="st-design">
+            <label class="drop" id="drop">
+              <input type="file" id="photo-file" accept="image/*">
+              <span class="drop-tag">Design · empty canvas</span>
+              <span class="drop-icon"><svg><use href="#i-upload"/></svg></span>
+              <span class="eyebrow light">Start with your room</span>
+              <strong class="drop-h">Drop in a<br>photograph.</strong>
+              <span class="drop-sub">JPG, PNG, WebP or HEIC · taken from the doorway in daylight works best · you can also paste</span>
+              <span class="drop-btns">
+                <span class="btn btn-light" role="button">Choose photo</span>
+                <button class="btn btn-ghost-light" type="button" id="take-photo"><svg><use href="#i-camera"/></svg>Camera</button>
+                <button class="btn btn-ghost-light" type="button" id="use-sample">Use sample room</button>
+              </span>
+            </label>
+            <input type="file" id="camera-file" accept="image/*" capture="environment" hidden>
+            <div class="viewer" id="viewer" hidden>
+              <div class="vtools">
+                <div class="seg" id="view-mode" role="group" aria-label="Compare mode">
+                  <button type="button" data-v="slider" aria-pressed="true">Slider</button>
+                  <button type="button" data-v="side" aria-pressed="false">Side by side</button>
+                  <button type="button" data-v="after" aria-pressed="false">Result</button>
+                  <button type="button" data-v="before" aria-pressed="false">Original</button>
+                </div>
+                <span class="vtag" id="vtag"></span>
+                <div class="vbtns">
+                  <button class="icon-btn light" type="button" id="v-download" title="Download image" aria-label="Download image"><svg><use href="#i-download"/></svg></button>
+                  <button class="icon-btn light" type="button" id="v-full" title="Full screen" aria-label="Full screen"><svg><use href="#i-expand"/></svg></button>
+                  <button class="icon-btn light" type="button" id="v-replace" title="Replace photo" aria-label="Replace photo"><svg><use href="#i-camera"/></svg></button>
+                </div>
+              </div>
+              <div class="cmp" id="cmp" data-v="slider">
+                <div class="cmp-in" id="cmp-in">
+                  <img id="c-before" alt="Original room photo">
+                  <div class="c-after"><img id="c-after" alt="Redesigned room"></div>
+                  <div class="c-handle" id="c-handle"><span>↔</span></div>
+                  <span class="c-lab l">Original</span><span class="c-lab r">Redesign</span>
+                </div>
+                <div class="busy" id="busy" hidden><span class="spin"></span><b id="busy-t">Rendering…</b><small id="busy-s"></small></div>
+              </div>
+              <div class="versions" id="versions" aria-label="Versions"></div>
+            </div>
+          </div>
+
+          <!-- PLAN (also used by Furnish) -->
+          <div class="st" id="st-plan" hidden>
+            <div class="tb" id="plan-tb">
+              <div class="tb-group" role="group" aria-label="Plan tools">
+                <button type="button" data-tool="select" aria-pressed="true" title="Select & move (V)"><svg><use href="#i-select"/></svg><span>Select</span></button>
+                <button type="button" data-tool="wall" aria-pressed="false" title="Draw walls (W)"><svg><use href="#i-wall"/></svg><span>Wall</span></button>
+                <button type="button" data-tool="door" aria-pressed="false" title="Door (D)"><svg><use href="#i-door"/></svg><span>Door</span></button>
+                <button type="button" data-tool="window" aria-pressed="false" title="Window (N)"><svg><use href="#i-window"/></svg><span>Window</span></button>
+                <button type="button" data-tool="measure" aria-pressed="false" title="Tape measure (M)"><svg><use href="#i-measure"/></svg><span>Measure</span></button>
+              </div>
+              <div class="tb-group">
+                <button type="button" id="p-finish" class="tb-finish" hidden>Finish</button>
+                <button type="button" id="p-fit" title="Fit to screen (F)" aria-label="Fit to screen"><svg><use href="#i-fit"/></svg></button>
+                <button type="button" id="p-undo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg><use href="#i-undo"/></svg></button>
+                <button type="button" id="p-redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg><use href="#i-redo"/></svg></button>
+              </div>
+            </div>
+            <div class="plan-tag" id="plan-tag"></div>
+            <svg class="plan-svg mk-plan" id="plan-svg" tabindex="0" aria-label="Floor plan editor"></svg>
+            <div class="plan-hint" id="plan-hint"></div>
+            <div class="zoom-ctl"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button></div>
+            <div class="begin" id="begin" hidden>
+              <div class="begin-card">
+                <span class="begin-ic">M</span>
+                <span class="eyebrow">No room plan yet</span>
+                <h2>Choose how to begin.</h2>
+                <p class="muted">Start from a rectangle you've measured, an L-shaped room, or draw the walls yourself.</p>
+                <form class="begin-form" id="begin-form">
+                  <label class="field"><span>Width (m)</span><input class="input" id="b-w" type="number" inputmode="decimal" step="0.01" min="1" max="30" value="4.80"></label>
+                  <label class="field"><span>Depth (m)</span><input class="input" id="b-d" type="number" inputmode="decimal" step="0.01" min="1" max="30" value="3.60"></label>
+                  <button class="btn btn-primary" type="submit">Create rectangle</button>
+                </form>
+                <div class="begin-alt">
+                  <button class="btn btn-ghost btn-small" type="button" id="b-lshape">L-shaped room</button>
+                  <button class="btn btn-ghost btn-small" type="button" id="b-draw">Draw walls myself</button>
+                </div>
+              </div>
+            </div>
+            <div class="stage-switch" id="stage-switch" hidden>
+              <button type="button" data-s="plan" aria-pressed="true">2D plan</button><button type="button" data-s="three" aria-pressed="false">3D</button>
+            </div>
+          </div>
+
+          <!-- 3D -->
+          <div class="st" id="st-three" hidden>
+            <div class="tb tb-left" id="three-tb">
+              <div class="tb-group" role="group" aria-label="Camera">
+                <button type="button" data-cam="persp" aria-pressed="true">Perspective</button>
+                <button type="button" data-cam="top" aria-pressed="false">Top</button>
+                <button type="button" data-cam="front" aria-pressed="false">Front</button>
+                <button type="button" data-cam="side" aria-pressed="false">Side</button>
+                <button type="button" data-cam="eye" aria-pressed="false">Eye level</button>
+              </div>
+              <div class="tb-group"><button type="button" id="t-reset" class="tb-accent">Reset</button></div>
+            </div>
+            <div class="three-host" id="three-host"></div>
+            <div class="plan-hint dark" id="three-hint">Drag furniture to move · drag empty space to orbit · R rotates · Delete removes</div>
+            <div class="three-empty" id="three-empty" hidden>
+              <div class="begin-card">
+                <span class="begin-ic">M</span>
+                <span class="eyebrow">No room model yet</span>
+                <h2>Choose how to begin.</h2>
+                <p class="muted">The 3D model is built from your plan. Create the room's walls first.</p>
+                <button class="btn btn-primary" type="button" id="three-goplan">Open the plan</button>
+              </div>
+            </div>
+            <div class="stage-switch" id="stage-switch-3" hidden>
+              <button type="button" data-s="plan" aria-pressed="false">2D plan</button><button type="button" data-s="three" aria-pressed="true">3D</button>
+            </div>
+          </div>
+
+          <!-- BUILD -->
+          <div class="st" id="st-build" hidden>
+            <div class="doc-scroll"><article class="doc" id="doc"></article></div>
+          </div>
+        </section>
+
+        <!-- ============ INSPECTOR ============ -->
+        <aside class="insp" id="insp">
+          <!-- DESIGN -->
+          <div class="ip" id="in-design">
+            <span class="step"><b>1</b> / 05 · Design</span>
+            <h2>Design direction</h2>
+            <div class="ai-state" id="ai-state"></div>
+            <label class="field"><span>Room type</span><select class="input" id="room-type"></select></label>
+            <div class="field"><span>Style</span><div class="styles" id="styles"></div></div>
+            <label class="field"><span>Change strength <output id="int-out">75%</output></span><input type="range" id="intensity" min="10" max="100" step="5" value="75"></label>
+            <div class="field"><span>Daylight comes from</span><div class="compass" id="compass" role="radiogroup" aria-label="Daylight direction"></div></div>
+            <div class="field"><span>Keep exactly as is</span><div class="chips" id="keep"></div></div>
+            <label class="field"><span>Anything else? <small>(used by AI renders)</small></span><textarea class="input" id="notes" rows="2" maxlength="600" placeholder="e.g. keep the sideboard, add a reading corner, no rugs"></textarea></label>
+            <div class="field"><span>Render with</span>
+              <div class="seg wide" id="engine" role="group" aria-label="Render engine">
+                <button type="button" data-e="ai" aria-pressed="false">AI render</button>
+                <button type="button" data-e="local" aria-pressed="false">Mood preview</button>
+              </div>
+              <small class="hint" id="engine-hint"></small>
+            </div>
+            <button class="btn btn-primary btn-block" type="button" id="generate">Generate redesign</button>
+
+            <div class="sub" id="refine-box" hidden>
+              <h3>Refine in plain words</h3>
+              <form id="refine-form" class="refine">
+                <textarea class="input" id="refine" rows="2" maxlength="300" placeholder="warmer wood, brighter walls, softer contrast…"></textarea>
+                <div class="chips small" id="refine-chips">
+                  <button type="button">warmer</button><button type="button">cooler</button><button type="button">brighter</button><button type="button">darker</button>
+                  <button type="button">more contrast</button><button type="button">softer</button><button type="button">richer colour</button><button type="button">muted</button>
+                </div>
+                <div class="row"><button class="btn btn-dark btn-small" type="submit">Apply</button><button class="btn btn-ghost btn-small" type="button" id="refine-undo">Undo last</button></div>
+              </form>
+            </div>
+
+            <div class="sub" id="palette-box" hidden>
+              <h3>Palette of this version</h3>
+              <div class="palette" id="palette"></div>
+              <small class="hint">Tap a colour to copy its code — take it to the paint shop.</small>
+            </div>
+          </div>
+
+          <!-- PLAN -->
+          <div class="ip" id="in-plan" hidden>
+            <span class="step"><b>2</b> / 05 · Plan</span>
+            <h2>Edit the room</h2>
+            <p class="muted small">Internal geometry uses metres. Lengths are estimates until you calibrate one wall you have measured.</p>
+            <div class="stats" id="plan-stats"></div>
+            <div class="sub" id="sel-box"></div>
+            <div class="sub" id="calib-box"></div>
+            <div class="sub">
+              <h3>Room settings</h3>
+              <div class="grid2">
+                <label class="field"><span>Ceiling height (m)</span><input class="input" id="ceil-h" type="number" inputmode="decimal" min="2" max="6" step="0.05"></label>
+                <label class="field"><span>Units</span><select class="input" id="units"><option value="m">Metric (m)</option><option value="ft">Imperial (ft/in)</option></select></label>
+              </div>
+              <div class="row wrap">
+                <button class="btn btn-ghost btn-small" type="button" id="p-template">New rectangle…</button>
+                <button class="btn btn-ghost btn-small" type="button" id="p-png">Export PNG</button>
+                <button class="btn btn-ghost btn-small danger-t" type="button" id="p-clear">Clear plan</button>
+              </div>
+            </div>
+            <details class="sub tips"><summary>How to draw</summary>
+              <ul>
+                <li><b>Wall:</b> click to place corners, click the first corner to close, double-click or Enter to stop.</li>
+                <li><b>Door / window:</b> click on a wall. Drag it along the wall later.</li>
+                <li><b>Move:</b> drag furniture, walls or corner dots. Hold Alt to turn off snapping.</li>
+                <li><b>Navigate:</b> scroll or pinch to zoom, drag empty space (or two fingers) to pan.</li>
+              </ul>
+            </details>
+          </div>
+
+          <!-- 3D -->
+          <div class="ip" id="in-three" hidden>
+            <span class="step"><b>3</b> / 05 · 3D</span>
+            <h2>Same plan, new view</h2>
+            <p class="muted small">Every wall, opening and piece of furniture comes from the plan. Change one and the other follows.</p>
+            <div class="stats" id="three-stats"></div>
+            <div class="sub">
+              <h3>Finishes</h3>
+              <div class="grid2">
+                <label class="field"><span>Wall colour</span><input class="input color" id="f-wall" type="color" value="#ece2d2"></label>
+                <label class="field"><span>Floor</span><select class="input" id="f-floor"></select></label>
+              </div>
+              <button class="link-btn" type="button" id="f-reset">Use the style's finishes</button>
+            </div>
+            <div class="sub">
+              <h3>View</h3>
+              <label class="check"><input type="checkbox" id="t-cut" checked> Cut away walls facing the camera</label>
+              <label class="check"><input type="checkbox" id="t-shadow" checked> Soft shadows</label>
+              <label class="field"><span>Sun direction <output id="sun-out"></output></span><input type="range" id="t-sun" min="0" max="345" step="15"></label>
+              <button class="btn btn-ghost btn-small" type="button" id="t-snap"><svg><use href="#i-camera"/></svg>Save snapshot</button>
+            </div>
+            <div class="sub" id="three-sel"></div>
+          </div>
+
+          <!-- FURNISH -->
+          <div class="ip" id="in-furnish" hidden>
+            <span class="step"><b>4</b> / 05 · Furnish</span>
+            <h2>Furniture &amp; shopping</h2>
+            <p class="muted small">Real-world sizes. Makon checks that every piece fits and never invents prices — type what you'd pay and the budget adds it up.</p>
+            <div class="issues" id="issues"></div>
+            <div class="sub" id="fsel-box"></div>
+            <div class="sub">
+              <h3>In this room <span class="count" id="placed-count"></span></h3>
+              <ul class="placed" id="placed"></ul>
+              <div class="total" id="f-total"></div>
+            </div>
+            <div class="sub">
+              <h3>Add furniture</h3>
+              <input class="input" id="cat-search" type="search" placeholder="Search sofa, desk, rug…" aria-label="Search furniture">
+              <div class="chips small cats" id="cats"></div>
+              <ul class="catalog" id="catalog"></ul>
+            </div>
+          </div>
+
+          <!-- BUILD -->
+          <div class="ip" id="in-build" hidden>
+            <span class="step"><b>5</b> / 05 · Build</span>
+            <h2>Complete the brief</h2>
+            <p class="muted small">Record what you know. The brief keeps estimates and confirmed figures apart.</p>
+            <div class="progress" id="brief-progress"></div>
+            <label class="field"><span>Project location</span><input class="input" id="b-loc" placeholder="City or region" maxlength="80"></label>
+            <div class="grid2">
+              <label class="field"><span>Budget</span><input class="input" id="b-budget" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 5000"></label>
+              <label class="field"><span>Currency</span><select class="input" id="b-cur"></select></label>
+            </div>
+            <label class="field"><span>Timing</span><input class="input" id="b-time" placeholder="e.g. Start in March, 3 weeks" maxlength="80"></label>
+            <label class="field"><span>Notes for the builder</span><textarea class="input" id="b-notes" rows="3" maxlength="1500" placeholder="Scope, constraints, access, materials you already have…"></textarea></label>
+            <div class="sub">
+              <h3>Quantities</h3>
+              <div class="grid3">
+                <label class="field"><span>Paint coats</span><input class="input" id="q-coats" type="number" min="1" max="5" step="1"></label>
+                <label class="field"><span>m² per litre</span><input class="input" id="q-cov" type="number" min="4" max="20" step="0.5"></label>
+                <label class="field"><span>Waste %</span><input class="input" id="q-waste" type="number" min="0" max="30" step="1"></label>
+              </div>
+            </div>
+            <div class="sub">
+              <h3>Export</h3>
+              <div class="row wrap">
+                <button class="btn btn-primary btn-small" type="button" id="x-print">Print / save PDF</button>
+                <button class="btn btn-ghost btn-small" type="button" id="x-copy"><svg><use href="#i-copy"/></svg>Copy text</button>
+                <button class="btn btn-ghost btn-small" type="button" id="x-txt">Download .txt</button>
+                <button class="btn btn-ghost btn-small" type="button" id="x-json">Export project</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/studio/app.js"></script>
+  <noscript><p style="padding:20px">Makon Studio needs JavaScript.</p></noscript>
+</body>
+</html>

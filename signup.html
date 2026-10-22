@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Create account — Makon</title>
+  <meta name="theme-color" content="#f0eadf">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body class="auth">
+  <div class="auth-wrap">
+    <aside class="auth-side">
+      <img src="img/room-after.jpg" alt="">
+      <a class="brand" href="index.html"><span class="brand-box">M</span>Makon</a>
+      <div class="mid">
+        <span class="label">One room · One project</span>
+        <h2>From the room<br>you have<br><span class="ital">to the room<br>you want.</span></h2>
+      </div>
+      <div class="side-foot">
+        <div class="auth-steps">
+          <span class="label"><sup>01</sup>Design</span><span class="label"><sup>02</sup>Plan</span><span class="label"><sup>03</sup>3D</span><span class="label"><sup>04</sup>Furnish</span><span class="label"><sup>05</sup>Build brief</span>
+        </div>
+        <p class="auth-note">Projects are saved in this browser. Photos only leave your device when you ask for an AI render.</p>
+      </div>
+    </aside>
+
+    <main class="auth-main">
+      <a class="back" href="index.html">← Back to the room journey</a>
+      <div class="auth-inner">
+        <span class="label">Begin with one room</span>
+        <h1>Make the<br>project<br>yours.</h1>
+        <div class="rule"></div>
+        <p class="lead">Create an account for your studio. Every room you start is saved and waiting next time.</p>
+        <p class="lead signed-note" id="signed-note" hidden>Already signed in as <b></b> — <a href="studio.html">open your studio →</a></p>
+
+        <form id="auth-form" data-mode="signup" novalidate>
+          <div class="u-field">
+            <label class="label" for="name">Your name</label>
+            <input id="name" name="name" placeholder="Alex Johnson" autocomplete="name" required maxlength="60">
+          </div>
+          <div class="u-field">
+            <label class="label" for="email">Email address</label>
+            <input id="email" name="email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" required>
+          </div>
+          <div class="u-field">
+            <label class="label" for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8">
+            <button type="button" class="eye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <div class="strength" id="strength" data-level="0"><i></i><i></i><i></i><i></i><span></span></div>
+          </div>
+          <p class="form-error" id="form-error" aria-live="polite"></p>
+          <button class="btn-black label" type="submit">Create account</button>
+          <div class="or"><span>or</span></div>
+          <button class="btn-outline label" type="button" id="guest">Continue as guest</button>
+        </form>
+        <p class="switch">Already have an account? <a href="signin.html" data-keep-next>Sign in</a></p>
+      </div>
+    </main>
+  </div>
+  <script src="js/auth.js"></script>
+  <script src="js/auth-page.js"></script>
+</body>
+</html>

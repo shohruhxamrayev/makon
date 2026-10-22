@@ -1,0 +1,9 @@
+{
+  "name": "Makon — AI room redesign",
+  "short_name": "Makon",
+  "start_url": "studio.html",
+  "display": "standalone",
+  "background_color": "#121614",
+  "theme_color": "#121614",
+  "icons": [{ "src": "img/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
