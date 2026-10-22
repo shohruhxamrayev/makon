@@ -165,6 +165,9 @@ function renderControls() {
       const inp = el("input", { class: "input small", type: "password", placeholder: "Access code", value: code, "aria-label": "AI access code", oninput: e => { try { localStorage.setItem(CODE_KEY, e.target.value); } catch (er) {} } });
       ai.append(inp);
     }
+  } else if (ctx.ai.configError) {
+    ai.className = "ai-state";
+    ai.innerHTML = '<span class="dot"></span><b>AI renders are set up wrongly.</b> ' + esc(ctx.ai.configError) + ' <small>Until then Makon makes on-device mood previews.</small>';
   } else {
     ai.className = "ai-state";
     ai.innerHTML = '<span class="dot"></span>AI renders aren\'t switched on for this site yet, so Makon makes an instant on-device mood preview. <small>Owner: add an OpenAI key in Vercel to enable — see README.</small>';
@@ -363,7 +366,8 @@ async function generate() {
         toast("AI render ready.");
         return;
       } catch (e) {
-        toast(e.message + " Making a mood preview instead.", "error");
+        clearInterval(timer);
+        toast(e.message + " Made an on-device mood preview instead.", "error");
         engine = "local";
       }
     }
