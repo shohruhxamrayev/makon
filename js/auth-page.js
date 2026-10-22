@@ -5,6 +5,7 @@
   const err = document.getElementById("form-error");
   const mode = form.dataset.mode; // "signin" | "signup"
   const next = MakonAuth.next();
+  const T = m => (window.MakonI18n ? window.MakonI18n.T(m) : m);
 
   // keep ?next= when switching between sign in / sign up
   document.querySelectorAll("[data-keep-next]").forEach(a => {
@@ -14,11 +15,19 @@
   // already signed in → offer to go straight through
   const cur = MakonAuth.current();
   const note = document.getElementById("signed-note");
-  if (cur && note) {
+  function fillNote() {
+    if (!cur || !note) return;
     note.hidden = false;
     note.querySelector("b").textContent = cur.name;
     note.querySelector("a").href = next;
   }
+  fillNote();
+  document.addEventListener("makon:lang", () => {
+    fillNote();
+    document.querySelectorAll("[data-keep-next]").forEach(a => { a.href = a.getAttribute("href").split("?")[0] + "?next=" + encodeURIComponent(next); });
+    if (pw && meter) pw.dispatchEvent(new Event("input"));
+    err.textContent = "";
+  });
 
   // show / hide password
   document.querySelectorAll(".eye").forEach(b => b.addEventListener("click", () => {
@@ -38,7 +47,7 @@
       if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++; if (/\d/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++;
       const lvl = !v ? 0 : v.length < 8 ? 1 : s <= 2 ? 2 : s <= 3 ? 3 : 4;
       meter.dataset.level = lvl;
-      meter.querySelector("span").textContent = ["", "Too short", "Fair", "Good", "Strong"][lvl];
+      meter.querySelector("span").textContent = T(["", "Too short", "Fair", "Good", "Strong"][lvl]);
     });
   }
 
@@ -48,12 +57,12 @@
     const fd = new FormData(form);
     const email = String(fd.get("email") || "").trim();
     const pass = String(fd.get("password") || "");
-    if (mode === "signup" && !String(fd.get("name") || "").trim()) { err.textContent = "Please enter your name."; form.name.focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Please enter a valid email."; form.email.focus(); return; }
-    if (!pass) { err.textContent = "Please enter your password."; form.password.focus(); return; }
-    if (mode === "signup" && pass.length < 8) { err.textContent = "Password must be at least 8 characters."; form.password.focus(); return; }
+    if (mode === "signup" && !String(fd.get("name") || "").trim()) { err.textContent = T("Please enter your name."); form.name.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = T("Please enter a valid email."); form.email.focus(); return; }
+    if (!pass) { err.textContent = T("Please enter your password."); form.password.focus(); return; }
+    if (mode === "signup" && pass.length < 8) { err.textContent = T("Password must be at least 8 characters."); form.password.focus(); return; }
     const btn = form.querySelector("button[type=submit]");
-    btn.disabled = true; const label = btn.textContent; btn.textContent = "Please wait…";
+    btn.disabled = true; const label = btn.textContent; btn.textContent = T("Please wait…");
     try {
       if (mode === "signup") await MakonAuth.signUp(String(fd.get("name")).trim(), email, pass);
       else await MakonAuth.signIn(email, pass);

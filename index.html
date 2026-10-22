@@ -94,16 +94,34 @@
     </div>
   </div>
 
-  <!-- ============ HEADER / RAIL / CORNERS ============ -->
+  <!-- ============ ANNOUNCEMENT / HEADER / MENU ============ -->
+  <div class="announce" id="announce" role="region" aria-label="Announcement" hidden>
+    <span class="announce-t"><i aria-hidden="true">✦</i> <span>Free AI room renders — 5 a day.</span></span>
+    <a class="announce-a" href="studio.html" data-auth-link>Try it →</a>
+    <button type="button" class="announce-x" id="announce-x" aria-label="Dismiss">×</button>
+  </div>
   <header class="top" id="top">
     <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"></a>
-    <span class="count label" aria-live="polite"><b id="c-num">01</b> / 06 &nbsp; <span id="c-name">Room</span></span>
-    <nav class="top-right">
+    <div class="chap" aria-live="polite"><span class="chap-t label"><b id="c-num">01</b> <span id="c-name" data-no-i18n>Room</span></span><span class="prog" aria-hidden="true"><i id="prog"></i></span></div>
+    <nav class="top-right" aria-label="Main">
       <a class="top-link label" href="#tools">Tools</a>
       <a class="top-link label" href="#faq">FAQ</a>
-      <a class="cta-top label" href="studio.html" data-auth-link><span class="full">Start designing</span><span class="short">Start</span> →</a>
+      <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="uz" aria-pressed="false">UZ</button><button type="button" data-lang="ru" aria-pressed="false">RU</button></div>
+      <a class="top-link label signin-link" href="signin.html" id="signin-link">Sign in</a>
+      <a class="me-chip" href="studio.html" id="me-chip" hidden aria-label="Open Studio"><span id="me-av">M</span></a>
+      <a class="cta-btn label" href="studio.html" data-auth-link><span class="cta-txt full">Start designing</span><span class="short">Start</span></a>
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mnav"><i></i><i></i></button>
     </nav>
   </header>
+  <div class="mnav" id="mnav" hidden>
+    <nav class="mnav-links" aria-label="Menu">
+      <a class="mnav-a" href="#tools">Tools</a>
+      <a class="mnav-a" href="#faq">FAQ</a>
+      <a class="mnav-a signin-link" href="signin.html">Sign in</a>
+    </nav>
+    <div class="mnav-lang"><span class="label">Language</span><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="uz" aria-pressed="false">UZ</button><button type="button" data-lang="ru" aria-pressed="false">RU</button></div></div>
+    <a class="btn-light label mnav-cta" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+  </div>
 
   <nav class="rail" id="rail" aria-label="Chapters">
     <button class="label" type="button" data-go="0"><span>01 Room</span><i></i></button>
@@ -317,6 +335,7 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/landing.js"></script>
 </body>

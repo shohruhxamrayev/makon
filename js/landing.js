@@ -5,8 +5,41 @@
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
   // ---------- auth-aware links ----------
-  const signedIn = !!(window.MakonAuth && MakonAuth.current());
+  const I = window.MakonI18n || { T: x => x, set: (el, k) => { if (el) el.innerHTML = k; } };
+  const T = s => I.T(s);
+  const me = window.MakonAuth && MakonAuth.current();
+  const signedIn = !!me;
   $$("[data-auth-link]").forEach(a => { a.href = signedIn ? "studio.html" : "signin.html?next=studio.html"; });
+  // signed in: avatar + "Open Studio" instead of "Sign in" / "Start designing"
+  if (signedIn) {
+    $$(".signin-link").forEach(a => { a.hidden = true; a.style.display = "none"; });
+    const chip = $("#me-chip"); if (chip) { chip.hidden = false; $("#me-av").textContent = (me.name || "?").trim().charAt(0).toUpperCase(); chip.title = me.name || ""; }
+    $$(".cta-txt").forEach(el => I.set(el, "Open Studio"));
+  }
+
+  // ---------- announcement strip ----------
+  const ANN = "makon_ann_closed_v1";
+  let annClosed = false; try { annClosed = localStorage.getItem(ANN) === "1"; } catch (e) {}
+  const ann = $("#announce");
+  if (ann && !annClosed) { ann.hidden = false; document.body.classList.add("has-announce"); }
+  $("#announce-x") && $("#announce-x").addEventListener("click", () => {
+    ann.hidden = true; document.body.classList.remove("has-announce");
+    try { localStorage.setItem(ANN, "1"); } catch (e) {}
+  });
+
+  // ---------- phone menu ----------
+  const mnav = $("#mnav"), mt = $("#menu-toggle");
+  function menu(open) {
+    if (!mnav) return;
+    if (open) { mnav.hidden = false; requestAnimationFrame(() => document.body.classList.add("menu-open")); }
+    else { document.body.classList.remove("menu-open"); setTimeout(() => { if (!document.body.classList.contains("menu-open")) mnav.hidden = true; }, 300); }
+    mt.setAttribute("aria-expanded", String(open));
+    if (open) { const f = mnav.querySelector("a"); f && f.focus({ preventScroll: true }); }
+  }
+  mt && mt.addEventListener("click", () => menu(!document.body.classList.contains("menu-open")));
+  mnav && mnav.addEventListener("click", e => { if (e.target.closest("a")) menu(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("menu-open")) { menu(false); mt.focus(); } });
+  window.addEventListener("resize", () => { if (window.innerWidth > 900 && document.body.classList.contains("menu-open")) menu(false); });
 
   // ---------- toast ----------
   let tt;
@@ -53,8 +86,11 @@
 
   // ---------- main scroll loop ----------
   let active = -1, past = false;
+  const prog = $("#prog");
   function update() {
     const vh = window.innerHeight, mid = window.scrollY + vh * 0.5;
+    document.body.classList.toggle("scrolled", window.scrollY > 30);
+    if (prog) { const total = Math.max(1, afterSec.offsetTop - vh); prog.style.width = Math.max(0, Math.min(100, window.scrollY / total * 100)).toFixed(1) + "%"; }
     const isPast = afterSec.offsetTop - window.scrollY < vh * 0.55;
     if (isPast !== past) {
       past = isPast;
@@ -73,7 +109,7 @@
       $$(".panel").forEach(el => el.classList.toggle("on", chapters[i].contains(el)));
       railBtns.forEach((b, k) => { b.classList.toggle("on", k === i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
       $("#c-num").textContent = String(i + 1).padStart(2, "0");
-      $("#c-name").textContent = c.dataset.name;
+      $("#c-name").textContent = T(c.dataset.name);
       ov.understand.classList.toggle("on", i === 1);
       ov.refine.classList.toggle("on", i === 3);
       ov.plan.classList.toggle("on", i === 4);
@@ -144,19 +180,27 @@
   form.addEventListener("submit", e => {
     e.preventDefault();
     const w = parseFloat($("#win-len").value);
-    if (!(w > 0) || w > 20) { toast("Enter a window width in metres, e.g. 1.40"); return; }
+    if (!(w > 0) || w > 20) { toast(T("Enter a window width in metres, e.g. 1.40")); return; }
     const k = w / 140;                       // window line is 140 plan units long
     const f = n => (n * k).toFixed(2) + " m";
     $("#dim-w").textContent = f(480);
     $("#dim-d").textContent = f(270);
     $("#dim-win").textContent = f(140);
     $("#plan-panel").classList.add("scaled");
-    $("#plan-sub").textContent = "Walls, openings and objects · true to scale";
-    $("#scale-btn").textContent = "Scale set · room " + f(480) + " × " + f(270) + " · " + (480 * k * 270 * k).toFixed(1) + " m²";
+    scaleK = k; scaleText();
     form.classList.remove("open");
     if (document.activeElement) document.activeElement.blur();
-    toast("Plan calibrated — every wall now has a real length.");
+    toast(T("Plan calibrated — every wall now has a real length."));
   });
+
+  let scaleK = 0;
+  function scaleText() {
+    if (!scaleK) return;
+    const f = n => (n * scaleK).toFixed(2) + " m";
+    I.set($("#plan-sub"), "Walls, openings and objects · true to scale");
+    const b = $("#scale-btn"); b.dataset.i18nSrc = "Scale set · room";
+    b.textContent = T("Scale set · room") + " " + f(480) + " × " + f(270) + " · " + (480 * scaleK * 270 * scaleK).toFixed(1) + " m²";
+  }
 
   // ---------- build hotspots ----------
   const MATS = [
@@ -166,7 +210,7 @@
   ];
   function showCard(i) {
     const s = spots[i], lr = layer.getBoundingClientRect(), sr = s.getBoundingClientRect();
-    card.innerHTML = '<span class="label">' + MATS[i][0] + "</span><strong>" + MATS[i][1] + "</strong><span>" + MATS[i][2] + "</span>";
+    card.innerHTML = '<span class="label">' + T(MATS[i][0]) + "</span><strong>" + T(MATS[i][1]) + "</strong><span>" + T(MATS[i][2]) + "</span>";
     const cw = Math.min(230, window.innerWidth - 32);
     card.style.width = cw + "px";
     // position in viewport space, then convert to layer space (layer is larger than viewport on narrow screens)
@@ -211,4 +255,19 @@
     s.addEventListener("click", e => { e.stopPropagation(); s.classList.contains("open") && !hoverable ? hideCard() : showCard(i); });
     s.addEventListener("blur", hideCard);
   });
+
+  // ---------- language: refresh dynamic text, fit the note boxes ----------
+  function fitNotes() {
+    $$("#ov-understand .note-t").forEach(t => {
+      const r = t.previousElementSibling, sub = t.nextElementSibling;
+      try { const w = Math.max(t.getBBox().width, sub ? sub.getBBox().width : 0) + 24; if (r && w > 30) r.setAttribute("width", Math.ceil(w)); } catch (e) {}
+    });
+  }
+  document.addEventListener("makon:lang", () => {
+    const c = chapters[Math.max(0, active)]; if (c) $("#c-name").textContent = T(c.dataset.name);
+    if (scaleK) scaleText();
+    if (signedIn) $$(".cta-txt").forEach(el => I.set(el, "Open Studio"));
+    hideCard(); fitNotes();
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNotes); else setTimeout(fitNotes, 800);
 })();

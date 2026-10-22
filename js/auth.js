@@ -13,6 +13,7 @@
     try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch (e) { return false; }
   }
   let memSession = null; // fallback when storage is blocked
+  const T = m => (window.MakonI18n ? window.MakonI18n.T(m) : m);
 
   async function hash(text) {
     try {
@@ -29,9 +30,9 @@
     async signUp(name, email, password) {
       email = email.trim().toLowerCase();
       const users = read(USERS, {});
-      if (users[email]) throw new Error("An account with this email already exists. Try signing in.");
+      if (users[email]) throw new Error(T("An account with this email already exists. Try signing in."));
       users[email] = { name: name.trim(), email, pw: await hash(email + ":" + password), created: Date.now() };
-      if (!write(USERS, users)) throw new Error("This browser is blocking storage. Use guest mode or allow site data.");
+      if (!write(USERS, users)) throw new Error(T("This browser is blocking storage. Use guest mode or allow site data."));
       Auth._start(users[email]);
       return users[email];
     },
@@ -39,7 +40,7 @@
       email = email.trim().toLowerCase();
       const users = read(USERS, {});
       const u = users[email];
-      if (!u || u.pw !== await hash(email + ":" + password)) throw new Error("Email or password is incorrect.");
+      if (!u || u.pw !== await hash(email + ":" + password)) throw new Error(T("Email or password is incorrect."));
       Auth._start(u);
       return u;
     },
