@@ -27,15 +27,17 @@ npx serve .          # or: python3 -m http.server 8000
 
 ### Switch on real AI renders (optional)
 
-Without a key everything works and Design makes on-device mood previews. To get real AI redesigns:
+Without any key everything works and Design makes on-device mood previews. Pick ONE provider:
 
-1. Vercel → your project → **Settings → Environment Variables**
-2. Add `OPENAI_API_KEY` = your key from platform.openai.com
-3. Optional: `MAKON_ACCESS_CODE` = any password (strongly recommended — otherwise anyone with your link can spend your credits; users enter the code once in the Design panel)
-4. Optional: `MAKON_IMAGE_MODEL` (default `gpt-image-1.5`), `MAKON_IMAGE_QUALITY` = `low` | `medium` | `high` (default `medium`)
-5. Redeploy. The Design panel will show “AI renders connected”.
+**Free — Cloudflare Workers AI (FLUX.2 Klein, about 100 renders a day)**
+1. Sign up free at dash.cloudflare.com. Copy your **Account ID** (Workers AI page, or the right side of the account home).
+2. My Profile → API Tokens → Create Token → template **Workers AI** → Create. Copy the token.
+3. In Vercel → Settings → Environment Variables add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`.
 
-The function is `api/redesign.js`. It sends the photo + a prompt built from the room type, style, kept elements, daylight and notes to OpenAI’s image-edit endpoint. Each render costs OpenAI credits.
+**Paid — OpenAI (best quality, a few cents per render)**
+- Add `OPENAI_API_KEY` (starts with `sk-`). Optional: `MAKON_IMAGE_MODEL` (default `gpt-image-1.5`, cheaper: `gpt-image-1-mini`), `MAKON_IMAGE_QUALITY` = `low` | `medium` | `high`.
+
+For either: add `MAKON_ACCESS_CODE` = any password so strangers can't use up your renders, then **Redeploy**. If both providers are set, OpenAI is used.
 
 GitHub Pages also works (no AI renders there — it can’t run the function).
 

@@ -159,7 +159,7 @@ function renderControls() {
   if (!ctx.ai.checked) ai.innerHTML = '<span class="dot"></span>Checking AI connection…';
   else if (ctx.ai.enabled) {
     ai.className = "ai-state on";
-    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "");
+    ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.provider === "cloudflare" ? '<small>Free daily allowance — about 100 renders a day, resets at 05:00 Tashkent time.</small>' : "");
     if (ctx.ai.needsCode) {
       let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
       const inp = el("input", { class: "input small", type: "password", placeholder: "Access code", value: code, "aria-label": "AI access code", oninput: e => { try { localStorage.setItem(CODE_KEY, e.target.value); } catch (er) {} } });
@@ -170,7 +170,7 @@ function renderControls() {
     ai.innerHTML = '<span class="dot"></span><b>AI renders are set up wrongly.</b> ' + esc(ctx.ai.configError) + ' <small>Until then Makon makes on-device mood previews.</small>';
   } else {
     ai.className = "ai-state";
-    ai.innerHTML = '<span class="dot"></span>AI renders aren\'t switched on for this site yet, so Makon makes an instant on-device mood preview. <small>Owner: add an OpenAI key in Vercel to enable — see README.</small>';
+    ai.innerHTML = '<span class="dot"></span>AI renders aren\'t switched on for this site yet, so Makon makes an instant on-device mood preview. <small>Owner: add a free Cloudflare token or an OpenAI key in Vercel — see README.</small>';
   }
   const g = $("#generate");
   g.disabled = busy || !p.photo;
@@ -315,7 +315,7 @@ function buildPrompt(extra) {
 
 async function callAI(image, prompt) {
   const ar = await aspect(image);
-  const body = { image: scaleImage(await loadImage(image), 1280, 0.86), prompt, orientation: ar > 1.15 ? "landscape" : ar < 0.87 ? "portrait" : "square" };
+  const body = { image: scaleImage(await loadImage(image), ctx.ai.maxInput || 1280, 0.88), prompt, aspect: +ar.toFixed(3), orientation: ar > 1.15 ? "landscape" : ar < 0.87 ? "portrait" : "square" };
   let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
   const c = new AbortController(); const t = setTimeout(() => c.abort(), 150000);
   try {

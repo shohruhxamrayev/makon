@@ -240,7 +240,7 @@ async function checkAI() {
     clearTimeout(t);
     if (r.ok && (r.headers.get("content-type") || "").includes("json")) {
       const j = await r.json();
-      ctx.ai = { enabled: !!j.enabled, model: j.model || null, needsCode: !!j.needsCode, configError: j.configError || null, checked: true };
+      ctx.ai = { enabled: !!j.enabled, provider: j.provider || null, model: j.model || null, needsCode: !!j.needsCode, maxInput: j.maxInput || 1280, configError: j.configError || null, checked: true };
     } else ctx.ai.checked = true;
   } catch (e) { ctx.ai.checked = true; }
   ctx.bus.emit("ai", ctx.ai);
