@@ -1,9 +1,27 @@
 {
-  "name": "Makon — AI room redesign",
+  "name": "Makon \u2014 AI room redesign",
   "short_name": "Makon",
   "start_url": "studio.html",
   "display": "standalone",
   "background_color": "#121614",
   "theme_color": "#121614",
-  "icons": [{ "src": "img/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
 }

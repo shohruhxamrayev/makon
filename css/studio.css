@@ -505,3 +505,5 @@ body[data-mode="furnish"] #three-tb { top: 60px; }
   .doc-imgs img { max-height: 260px; }
 }
 .owner-link { display: block; margin-top: 6px; font-size: 11.5px; color: inherit; }
+
+.s-brand .wordmark { height: 30px; width: auto; display: block; }
