@@ -23,7 +23,7 @@ export function init(c) {
     ["pointerup", "pointerleave", "pointercancel"].forEach(t => b.addEventListener(t, stop));
     b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav(b.dataset.nav); } });
   });
-  if (window.matchMedia && matchMedia("(pointer: coarse)").matches) $("#three-hint").textContent = "One finger turns · two fingers zoom and slide · tap a piece, then drag it";
+  $$("#drag-mode [data-drag]").forEach(b => b.addEventListener("click", () => { dragMode = b.dataset.drag; try { localStorage.setItem("makon_drag3d", dragMode); } catch (e) {} applyDrag(); }));
   $("#three-goplan").addEventListener("click", () => ctx.setMode("plan"));
   $("#t-cut").addEventListener("change", e => { cutaway = e.target.checked; frame(); });
   $("#t-shadow").addEventListener("change", e => { shadows = e.target.checked; if (renderer) { renderer.shadowMap.enabled = shadows; sun.castShadow = shadows; rebuild(); } });
@@ -175,7 +175,7 @@ function setCam(mode, reset) {
   cam.up.set(0, 1, 0);
   if (mode === "top") cam.position.set(cx, 60, cz + 0.02);   // straight down, north at the top — and free to tilt from there
   controls = new OrbitControls(cam, renderer.domElement);
-  controls.enableDamping = true; controls.dampingFactor = 0.09;
+  controls.enableDamping = true; controls.dampingFactor = 0.12;
   controls.target.set(cx, mode === "eye" ? 1.2 : mode === "top" ? 0 : (mode === "persp" ? 0.4 : H / 2), cz);
   // every view can be turned by hand: drag / one finger turns, wheel / pinch zooms, right-drag / two fingers slide
   controls.enableRotate = true; controls.enableZoom = true; controls.enablePan = true;
@@ -183,9 +183,15 @@ function setCam(mode, reset) {
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.minDistance = mode === "eye" ? 0.3 : 1; controls.maxDistance = 80;
   controls.minZoom = 0.35; controls.maxZoom = 6;
-  controls.screenSpacePanning = true;
-  controls.mouseButtons = { LEFT: T.MOUSE.ROTATE, MIDDLE: T.MOUSE.DOLLY, RIGHT: T.MOUSE.PAN };
-  controls.touches = { ONE: T.TOUCH.ROTATE, TWO: T.TOUCH.DOLLY_PAN };
+  controls.zoomToCursor = true;
+  applyDrag();
+  // keep the room in reach while sliding around (like a map that can't be dragged off the world)
+  controls.addEventListener("change", () => {
+    if (!bb) return;
+    const t = controls.target, m = 1.5;
+    const cxk = Math.min(bb.x1 + m, Math.max(bb.x0 - m, t.x)), czk = Math.min(bb.y1 + m, Math.max(bb.y0 - m, t.z));
+    if (cxk !== t.x || czk !== t.z) { const dx = cxk - t.x, dz = czk - t.z; t.x += dx; t.z += dz; cam.position.x += dx; cam.position.z += dz; }
+  });
   controls.addEventListener("start", () => { if (turning) setTurn(false); });
   controls.update();
   frame();
@@ -202,6 +208,21 @@ function eyePoint() {
   }
   const d = bb ? bb.h : 3;
   return [center[0] + 0.01, center[1] + Math.min(1.2, d * 0.3)];
+}
+// drag behaviour, like a map: "move" slides the view, "turn" orbits; the other one is always on right-drag (mouse) or two fingers
+let dragMode = (() => { try { return localStorage.getItem("makon_drag3d") || "move"; } catch (e) { return "move"; } })();
+function applyDrag() {
+  if (!controls || !T) return;
+  const move = dragMode === "move";
+  controls.screenSpacePanning = false;   // slide along the floor, not the screen
+  controls.mouseButtons = move ? { LEFT: T.MOUSE.PAN, MIDDLE: T.MOUSE.DOLLY, RIGHT: T.MOUSE.ROTATE } : { LEFT: T.MOUSE.ROTATE, MIDDLE: T.MOUSE.DOLLY, RIGHT: T.MOUSE.PAN };
+  controls.touches = move ? { ONE: T.TOUCH.PAN, TWO: T.TOUCH.DOLLY_ROTATE } : { ONE: T.TOUCH.ROTATE, TWO: T.TOUCH.DOLLY_PAN };
+  controls.panSpeed = 1.0;
+  $$("#drag-mode [data-drag]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.drag === dragMode)));
+  const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  $("#three-hint").textContent = coarse
+    ? (move ? "One finger moves · two fingers zoom and turn · tap a piece, then drag it" : "One finger turns · two fingers zoom and slide · tap a piece, then drag it")
+    : (move ? "Drag to move · right-drag or Ctrl+drag to turn · scroll to zoom · click a piece, then drag it" : "Drag to turn · right-drag to move · scroll to zoom · click a piece, then drag it");
 }
 // on-screen pad: turn, tilt and zoom with buttons as well as by hand
 let navAnim = null;
@@ -615,7 +636,7 @@ function onDown(e) {
   if (!id) return;
   const it = ctx.p.plan.items.find(i => i.id === id), f = floorAt(e);
   if (!it || !f) return;
-  if (e.pointerType === "touch" && !(ctx.sel && ctx.sel.kind === "item" && ctx.sel.id === id)) { tapPick = id; return; }
+  if (!(ctx.sel && ctx.sel.kind === "item" && ctx.sel.id === id)) { tapPick = id; return; }
   ctx.select("item", id);
   controls.enabled = false;
   drag = { id, off: [f.x - it.x, f.z - it.y], moved: false, pid: e.pointerId };

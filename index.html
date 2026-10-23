@@ -20,13 +20,15 @@
 </head>
 <body class="landing">
   <a class="skip-link" href="#room">Skip to content</a>
-  <div class="loader" id="loader" role="status"><span class="label">Preparing the room</span></div>
+  <div class="loader" id="loader" role="status"><div class="intro-mark"><img src="img/wordmark-cream.svg" alt="" width="236" height="68"><span class="label">Your room · redesigned</span></div><i class="intro-curtain"></i></div>
 
   <!-- ============ FIXED ROOM STAGE ============ -->
   <div class="stage">
     <div class="frame" id="frame">
       <img id="img-before" src="img/room-before.jpg" alt="The living room as it is today: grey sofa, dark coffee table, bare walls">
       <img id="img-after" src="img/room-after.jpg" alt="The same living room redesigned: curved bouclé sofa, oak table, linen curtains, framed landscape">
+      <img id="img-tease" src="img/room-after.jpg" alt="" aria-hidden="true">
+      <div class="tease-line" id="tease-line" aria-hidden="true"><span class="label">Before</span><span class="label">After</span></div>
       <div class="shade" id="shade"></div>
 
       <!-- 02 Understand: structure tracing -->
@@ -142,7 +144,7 @@
     <section class="chapter" id="room" data-name="Room">
       <div class="panel bl">
         <span class="label">Begin with the room you have</span>
-        <h1>Your room.<br><span class="ital">Rebuilt around you.</span></h1>
+        <h1 class="hero-h"><span class="ln"><span>Your room.</span></span><span class="ln"><span class="ital">Rebuilt around you.</span></span></h1>
         <p>Photograph one room. Makon keeps its walls, windows and light, then redesigns what sits inside — through to a measured plan, a 3D model and a build brief.</p>
         <div class="links">
           <a class="link-line label" href="studio.html" data-auth-link>Upload your room <span>→</span></a>
@@ -285,19 +287,41 @@
       </div>
     </section>
 
-    <section class="sec" id="templates" aria-labelledby="tpl-h">
-      <div class="sec-head">
+    <section class="reel" id="templates" aria-labelledby="tpl-h">
+      <div class="reel-head">
         <span class="label accent">Templates</span>
-        <h2 id="tpl-h">Start from a template</h2>
-        <p>Nine ready-made rooms — real plans, furniture and 3D. Open one and make it yours.</p>
+        <h2 id="tpl-h">Start from a room<br><span class="ital">you already love.</span></h2>
+        <p>Nine ready-made rooms with real plans, furniture lists and films. Open one, change anything, or put its look on a photo of your own room.</p>
+        <a class="link-line label" href="templates.html">See all templates <span>→</span></a>
       </div>
-      <div class="tpl-strip">
-        <a class="tpl-card" href="room.html?id=warm-living"><span class="tpl-img"><img src="img/templates/warm-living.jpg" alt="Warm living room — 3D view" loading="lazy" width="1500" height="1000"></span><span class="tpl-k label">Living room</span><b>Warm living room</b></a>
-        <a class="tpl-card" href="room.html?id=japandi-studio"><span class="tpl-img"><img src="img/templates/japandi-studio.jpg" alt="Japandi studio flat — 3D view" loading="lazy" width="1500" height="1000"></span><span class="tpl-k label">Studio flat</span><b>Japandi studio flat</b></a>
-        <a class="tpl-card" href="room.html?id=nordic-bedroom"><span class="tpl-img"><img src="img/templates/nordic-bedroom.jpg" alt="Nordic bedroom — 3D view" loading="lazy" width="1500" height="1000"></span><span class="tpl-k label">Bedroom</span><b>Nordic bedroom</b></a>
-        <a class="tpl-card" href="room.html?id=midnight-lounge"><span class="tpl-img"><img src="img/templates/midnight-lounge.jpg" alt="Midnight lounge — 3D view" loading="lazy" width="1500" height="1000"></span><span class="tpl-k label">Living room</span><b>Midnight lounge</b></a>
+      <div class="reel-track" aria-label="Templates">
+        <div class="reel-row">
+          <a class="reel-card" href="room.html?id=warm-living"><img src="img/templates/warm-living.jpg" alt="Warm living room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/warm-living-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Warm living room</span></a>
+          <a class="reel-card" href="room.html?id=japandi-studio"><img src="img/templates/japandi-studio.jpg" alt="Japandi studio flat" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/japandi-studio-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Japandi studio flat</span></a>
+          <a class="reel-card" href="room.html?id=nordic-bedroom"><img src="img/templates/nordic-bedroom.jpg" alt="Nordic bedroom" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/nordic-bedroom-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Nordic bedroom</span></a>
+          <a class="reel-card" href="room.html?id=midnight-lounge"><img src="img/templates/midnight-lounge.jpg" alt="Midnight lounge" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/midnight-lounge-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Midnight lounge</span></a>
+          <a class="reel-card" href="room.html?id=midcentury-dining"><img src="img/templates/midcentury-dining.jpg" alt="Mid-century dining room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/midcentury-dining-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Mid-century dining room</span></a>
+          <a class="reel-card" href="room.html?id=minimal-kitchen"><img src="img/templates/minimal-kitchen.jpg" alt="Gallery kitchen-diner" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/minimal-kitchen-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Gallery kitchen-diner</span></a>
+          <a class="reel-card" href="room.html?id=sage-kids"><img src="img/templates/sage-kids.jpg" alt="Sage kids' room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/sage-kids-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Sage kids' room</span></a>
+          <a class="reel-card" href="room.html?id=industrial-office"><img src="img/templates/industrial-office.jpg" alt="Industrial home office" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/industrial-office-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Industrial home office</span></a>
+          <a class="reel-card" href="room.html?id=mediterranean-bath"><img src="img/templates/mediterranean-bath.jpg" alt="Mediterranean bathroom" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/mediterranean-bath-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Mediterranean bathroom</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=warm-living"><img src="img/templates/warm-living.jpg" alt="Warm living room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/warm-living-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Warm living room</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=japandi-studio"><img src="img/templates/japandi-studio.jpg" alt="Japandi studio flat" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/japandi-studio-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Japandi studio flat</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=nordic-bedroom"><img src="img/templates/nordic-bedroom.jpg" alt="Nordic bedroom" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/nordic-bedroom-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Nordic bedroom</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=midnight-lounge"><img src="img/templates/midnight-lounge.jpg" alt="Midnight lounge" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/midnight-lounge-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Midnight lounge</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=midcentury-dining"><img src="img/templates/midcentury-dining.jpg" alt="Mid-century dining room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/midcentury-dining-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Mid-century dining room</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=minimal-kitchen"><img src="img/templates/minimal-kitchen.jpg" alt="Gallery kitchen-diner" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/minimal-kitchen-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Gallery kitchen-diner</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=sage-kids"><img src="img/templates/sage-kids.jpg" alt="Sage kids' room" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/sage-kids-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Sage kids' room</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=industrial-office"><img src="img/templates/industrial-office.jpg" alt="Industrial home office" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/industrial-office-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Industrial home office</span></a>
+          <a class="reel-card" aria-hidden="true" tabindex="-1" href="room.html?id=mediterranean-bath"><img src="img/templates/mediterranean-bath.jpg" alt="Mediterranean bathroom" loading="lazy" width="1200" height="800"><img class="reel-eve" src="img/templates/mediterranean-bath-evening.jpg" alt="" loading="lazy" width="1200" height="800"><span>Mediterranean bathroom</span></a>
+        </div>
       </div>
-      <div class="links"><a class="link-line label" href="templates.html">See all templates <span>→</span></a></div>
+      <div class="stats">
+        <div><b>10</b><span>interior styles</span></div>
+        <div><b>9</b><span>ready-made rooms</span></div>
+        <div><b>5</b><span>free AI renders a day</span></div>
+        <div><b>3</b><span>languages · EN · UZ · RU</span></div>
+      </div>
     </section>
 
     <section class="sec sec-split" aria-labelledby="phone-h">

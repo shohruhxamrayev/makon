@@ -46,7 +46,25 @@
   function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
 
   // ---------- loader ----------
-  const hideLoader = () => $("#loader").classList.add("done");
+  // cinematic opening: wordmark, then the curtain lifts onto the room (shorter on later visits, skipped for reduced motion)
+  const calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let seenIntro = false; try { seenIntro = sessionStorage.getItem("makon_intro") === "1"; sessionStorage.setItem("makon_intro", "1"); } catch (e) {}
+  const introMs = calm ? 0 : seenIntro ? 350 : 1500;
+  const t0 = performance.now();
+  let hid = false;
+  const hideLoader = () => {
+    if (hid) return; hid = true;
+    const wait = Math.max(0, introMs - (performance.now() - t0));
+    setTimeout(() => { $("#loader").classList.add("done"); document.body.classList.add("intro-done"); if (!calm) setTimeout(tease, 1600); }, wait);
+  };
+  // the opening view shows the redesign sweeping across the real room, then back — once, while you're at the top
+  function tease() {
+    const img = $("#img-tease"), line = $("#tease-line");
+    if (!img || scrollY > 40) return;
+    document.body.classList.add("teasing");
+    setTimeout(() => document.body.classList.remove("teasing"), 5200);
+  }
+  window.addEventListener("scroll", () => { if (scrollY > 40) document.body.classList.remove("teasing"); }, { passive: true });
   const first = $("#img-before");
   if (first.complete) setTimeout(hideLoader, 400); else { first.addEventListener("load", () => setTimeout(hideLoader, 250)); first.addEventListener("error", hideLoader); }
   setTimeout(hideLoader, 2500);

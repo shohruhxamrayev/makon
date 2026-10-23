@@ -324,6 +324,18 @@ async function checkAI() {
     checkAI();
     return;
   }
+  // "Use this look on my room" from a template page: a fresh project in that style, ready for a photo
+  const qs = new URLSearchParams(location.search).get("style");
+  if (qs && STYLES[qs]) {
+    const tid = new URLSearchParams(location.search).get("from");
+    const p = blankProject(user.email, "My " + STYLES[qs].name + " room");
+    p.design.style = qs; if (tid && templateById(tid)) p.roomType = templateById(tid).room;
+    await putProject(p); await refreshList(); await openProject(p.id);
+    setMode("design"); document.body.classList.add("ready");
+    toast("Style set to " + STYLES[qs].name + ". Upload a photo of your room, then press Redesign.");
+    checkAI();
+    return;
+  }
   if (!ctx.projects.length) {
     const p = blankProject(user.email, "Untitled room");
     await putProject(p); await refreshList();
