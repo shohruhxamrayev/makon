@@ -15,8 +15,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/gallery.css">
 </head>
-<body class="tplpage">
+<body class="tplpage gal">
   <a class="skip-link" href="#grid">Skip to content</a>
   <header class="lhead" id="lhead">
     <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-ink.svg" alt="Makon" width="118" height="34"></a>
@@ -37,78 +38,33 @@
   </div>
 
   <main>
-    <section class="t-hero">
-      <span class="t-eyebrow">Makon · Templates</span>
-      <h1><span>Ready-made rooms</span><sup id="t-total">09</sup></h1>
-      <p>Open any room and change everything — walls, furniture, style, budget. Every photo and film here is rendered from the exact plan you open: same walls, same furniture, same places.</p>
+    <section class="g-wrap g-hero">
+      <span class="g-eyebrow">Makon · Templates</span>
+      <h1 class="g-h1">Ready-made rooms<sup id="t-total">09</sup></h1>
+      <p class="g-lead">Photos and films rendered from the exact plan you open — same walls, same furniture, same places. Open a room, then change anything.</p>
     </section>
 
-    <nav class="t-filters" id="filters" aria-label="Filter templates"></nav>
+    <div class="g-wrap">
+      <nav class="g-filters" id="filters" aria-label="Filter templates"></nav>
+      <section class="g-grid" id="grid" aria-live="polite"></section>
+    </div>
 
-    <section class="t-grid" id="grid" aria-live="polite"></section>
-
-    <section class="t-film" aria-labelledby="film-h">
-      <div class="t-film-head">
-        <span class="t-eyebrow">Short films</span>
-        <h2 id="film-h">The moving image</h2>
-        <p>Walk through each room — from daylight to the moment the lamps come on. Every film can be downloaded.</p>
+    <section class="g-motion" aria-labelledby="mo-h">
+      <div class="g-wrap">
+        <div class="g-motion-head"><span class="g-eyebrow light">In motion</span><h2 class="g-h2" id="mo-h">The moving image.</h2></div>
+        <div class="g-clips" id="clips"></div>
       </div>
-      <div class="t-films" id="films"></div>
     </section>
 
-    <section class="t-dark" aria-labelledby="eve-h">
-      <div class="t-dark-head">
-        <span class="t-eyebrow light">Day and evening</span>
-        <h2 id="eve-h">After dark.</h2>
-      </div>
-      <p class="t-dark-p">Switch any room to evening in 3D: the daylight fades and every lamp you placed starts to glow.</p>
-      <div class="t-eve" id="eve"></div>
-    </section>
-
-    <section class="t-end">
-      <span class="t-eyebrow light">Have a room in mind?</span>
-      <h2>Let's make it<br>feel like home.</h2>
-      <div class="t-end-row">
-        <a class="lcta inv" href="studio.html" data-auth-link><span>Start with your own photo</span></a>
-        <a class="t-link" href="index.html">How Makon works →</a>
-      </div>
-      <div class="t-foot">
-        <img class="wordmark" src="img/wordmark-cream.svg" alt="Makon" width="118" height="34">
-        <span>Design one room at a time.</span>
-        <nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="signin.html">Sign in</a></nav>
+    <section class="g-end">
+      <div class="g-wrap">
+        <span class="g-eyebrow light">Have a room in mind?</span>
+        <div class="g-end-row"><h2>Let's make it<br>feel like home.</h2><a class="g-arrow" href="studio.html" data-auth-link aria-label="Start designing">↗</a></div>
+        <div class="g-end-links"><a href="studio.html" data-auth-link>Start with your own photo</a><a href="index.html">How Makon works</a></div>
+        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="signin.html">Sign in</a></nav></div>
       </div>
     </section>
   </main>
-
-  <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Template">
-    <div class="lb-top"><span class="lb-count" id="lb-count">01 / 09</span><button type="button" class="lb-close" id="lb-close">Close ✕</button></div>
-    <div class="lb-body">
-      <div class="lb-stage">
-        <button type="button" class="lb-arrow prev" id="lb-prev" aria-label="Previous picture">←</button>
-        <figure class="lb-fig"><img id="lb-img" alt=""><video id="lb-vid" hidden controls muted loop playsinline preload="none"></video><figcaption id="lb-cap"></figcaption></figure>
-        <button type="button" class="lb-arrow next" id="lb-next" aria-label="Next picture">→</button>
-        <div class="lb-dots" id="lb-dots"></div>
-      </div>
-      <aside class="lb-info">
-        <span class="t-eyebrow light" id="lb-cat"></span>
-        <h2 id="lb-name"></h2>
-        <p id="lb-desc"></p>
-        <dl class="lb-facts" id="lb-facts"></dl>
-        <div class="lb-pal" id="lb-pal"></div>
-        <a class="lcta inv wide" id="lb-open" href="studio.html"><span>Open in Studio</span></a>
-        <div class="lb-dl" id="lb-dl">
-          <span class="t-eyebrow light">Download</span>
-          <div class="lb-dl-row">
-            <a id="dl-pic" href="#" download><span>↓</span> This picture</a>
-            <a id="dl-vid" href="#" download><span>↓</span> Film (MP4)</a>
-            <a id="dl-zip" href="#" download><span>↓</span> Everything (ZIP)</a>
-            <button type="button" id="dl-proj"><span>↓</span> Project file</button>
-          </div>
-        </div>
-        <div class="lb-nav"><button type="button" id="lb-ptpl">← Previous room</button><button type="button" id="lb-ntpl">Next room →</button></div>
-      </aside>
-    </div>
-  </div>
 
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
