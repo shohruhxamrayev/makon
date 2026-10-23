@@ -131,6 +131,7 @@ export const CATALOG = [
   { id: "rugr", name: "Round rug Ø160", cat: "Decor", w: 1.6, d: 1.6, h: 0.01, shape: "rrug", color: "#cdbb9c", flat: true, q: "round rug 160" },
   { id: "plant", name: "Large plant", cat: "Decor", w: 0.5, d: 0.5, h: 1.4, shape: "plant", color: "#6b7a4e", q: "large indoor plant" },
   { id: "art", name: "Framed art", cat: "Decor", w: 1.0, d: 0.04, h: 0.7, shape: "art", color: "#d9cbb0", elev: 1.25, wall: true, q: "framed wall art" },
+  { id: "wallmirror", name: "Wall mirror", cat: "Decor", w: 0.6, d: 0.03, h: 0.8, shape: "mirror", color: "#c9d3d8", elev: 1.05, wall: true, q: "round wall mirror" },
   { id: "mirror", name: "Floor mirror", cat: "Decor", w: 0.6, d: 0.05, h: 1.7, shape: "mirror", color: "#c9d3d8", q: "floor standing mirror" },
   { id: "tv", name: "TV 55″", cat: "Decor", w: 1.23, d: 0.06, h: 0.71, shape: "tv", color: "#111111", elev: 0.75, wall: true, q: "55 inch tv" },
 

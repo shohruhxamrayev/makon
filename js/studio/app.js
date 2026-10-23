@@ -6,6 +6,9 @@ import * as Plan from "./plan.js";
 import * as Three from "./scene3d.js";
 import * as Furnish from "./furnish.js";
 import * as Build from "./build.js";
+import { TEMPLATES, templateById, templateImage, buildPlan } from "./templates.js";
+import { STYLES } from "./data.js";
+import { polyArea } from "./geom.js";
 
 const user = window.MakonAuth && MakonAuth.current();
 if (!user) { location.replace("signin.html?next=studio.html"); throw new Error("not signed in"); }
@@ -144,7 +147,48 @@ async function newProject(silent) {
   setMode("design");
   if (!silent) toast("New room created. Start with a photo or open the plan.");
 }
-$("#new-room").addEventListener("click", () => { newProject(); openSide(false); });
+$("#new-room").addEventListener("click", () => { openSide(false); chooseStart(); });
+
+// ---------- templates ----------
+const tplArea = t => polyArea(t.pts || [[0, 0], [t.w, 0], [t.w, t.d], [0, t.d]]);
+async function fromTemplate(id, silent) {
+  const tpl = templateById(id); if (!tpl) { toast("That template doesn't exist.", "error"); return null; }
+  flush();
+  const p = blankProject(user.email, tpl.name);
+  p.roomType = tpl.room; p.design.style = tpl.style; p.plan = buildPlan(tpl);
+  p.photo = templateImage(tpl.id); p.sample = false; p.thumb = templateImage(tpl.id); p.template = tpl.id; p.photoSource = "template"; p.finish.az = tpl.cam || "se";
+  await putProject(p); await refreshList(); await openProject(p.id);
+  setMode("3d");
+  if (!silent) toast(tpl.name + " opened — it's your own copy, change anything.");
+  return p;
+}
+ctx.chooseStart = chooseStart;
+ctx.confirm = confirmBox;
+function chooseStart() {
+  if (document.querySelector(".chooser-wrap")) return;
+  const prev = document.activeElement;
+  const close = () => { wrap.classList.remove("show"); document.removeEventListener("keydown", onKey, true); setTimeout(() => wrap.remove(), 200); if (prev && prev.focus) prev.focus({ preventScroll: true }); };
+  const onKey = e => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+  const grid = el("div", { class: "ch-grid" }, TEMPLATES.map(t => el("button", { type: "button", class: "ch-card", onclick: async () => { close(); await fromTemplate(t.id); } },
+    el("span", { class: "ch-img" }, el("img", { src: templateImage(t.id), alt: "", loading: "lazy" })),
+    el("b", { text: t.name }),
+    el("small", { text: (STYLES[t.style] || {}).name + " · " + tplArea(t).toFixed(1) + " m²" }))));
+  const box = el("div", { class: "chooser", role: "dialog", "aria-modal": "true", "aria-label": "New room" },
+    el("button", { type: "button", class: "icon-btn ch-x", "aria-label": "Close", html: '<svg><use href="#i-x"/></svg>', onclick: close }),
+    el("span", { class: "eyebrow", text: "New room" }),
+    el("h3", { text: "How do you want to start?" }),
+    el("button", { type: "button", class: "ch-blank", onclick: async () => { close(); await newProject(); } },
+      el("span", { class: "ch-plus", html: '<svg><use href="#i-plus"/></svg>' }),
+      el("span", {}, el("b", { text: "Blank room" }), el("small", { text: "Upload a photo of your room, or draw its plan yourself." }))),
+    el("div", { class: "ch-sub" }, el("span", { text: "Or open a ready-made room and change anything" }), el("a", { href: "templates.html", text: "See all templates →" })),
+    grid);
+  const wrap = el("div", { class: "modal-wrap chooser-wrap" }, box);
+  wrap.addEventListener("pointerdown", e => { if (e.target === wrap) close(); });
+  document.addEventListener("keydown", onKey, true);
+  document.body.append(wrap);
+  requestAnimationFrame(() => wrap.classList.add("show"));
+  box.querySelector(".ch-blank").focus();
+}
 
 // import
 $("#import-btn").addEventListener("click", () => $("#import-file").click());
@@ -215,6 +259,21 @@ document.addEventListener("keydown", e => {
   if (/^[1-5]$/.test(e.key)) { setMode(MODES[+e.key - 1]); e.preventDefault(); }
   if (e.key === "?") { help(); e.preventDefault(); }
 });
+const GUIDE = "makon_guide_v1";
+function guide() {
+  try { localStorage.setItem(GUIDE, "1"); } catch (e) {}
+  const st = [["Design", "Upload a photo of your room, pick a style and get a redesigned picture."],
+    ["Plan", "Draw the walls, doors and windows — or trace the room from your photo."],
+    ["3D", "Walk around the room, switch day and evening, and send any view back to Design."],
+    ["Furnish", "Add real-size furniture. Makon warns you when something doesn't fit."],
+    ["Build", "Get paint, flooring and furniture quantities with a cost estimate."]];
+  return modal({
+    title: "How Makon works", cancel: null, ok: "Start",
+    body: '<span class="guide">' + st.map(([k, v], i) => '<span class="g-step"><b>' + (i + 1) + '</b><span><strong>' + k + '</strong>' + v + '</span></span>').join("") +
+      '<span class="g-tip">Everything saves automatically in this browser. Press <kbd>?</kbd> any time for shortcuts.</span></span>'
+  });
+}
+ctx.guide = guide;
 function help() {
   modal({
     title: "Shortcuts", cancel: null, ok: "Got it",
@@ -227,8 +286,11 @@ function help() {
       '<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Undo / redo in the plan</td></tr>' +
       '<tr><td><kbd>Arrows</kbd></td><td>Nudge selection 5 cm (Shift: 1 cm)</td></tr>' +
       '<tr><td><kbd>Alt</kbd> while dragging</td><td>Turn off snapping</td></tr>' +
-      '<tr><td><kbd>F</kbd></td><td>Fit plan to screen</td></tr></table>'
+      '<tr><td><kbd>F</kbd></td><td>Fit plan to screen</td></tr></table>' +
+      '<button type="button" class="g-open">New here? See how Makon works →</button>'
   });
+  const b = document.querySelector(".modal-wrap:last-of-type .g-open");
+  if (b) b.addEventListener("click", () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); setTimeout(guide, 230); });
 }
 $("#help-btn").addEventListener("click", help);
 
@@ -253,6 +315,15 @@ async function checkAI() {
   Design.init(ctx); Plan.init(ctx); Three.init(ctx); Furnish.init(ctx); Build.init(ctx);
   if (!(await persistent())) $("#side-note").textContent = "This browser is blocking storage, so rooms only last until you close the tab. Export to keep them.";
   await refreshList();
+  const qt = new URLSearchParams(location.search).get("template");
+  if (qt && templateById(qt)) {
+    ctx.mode = "3d";
+    await fromTemplate(qt, true);
+    document.body.classList.add("ready");
+    toast(templateById(qt).name + " opened — it's your own copy, change anything.");
+    checkAI();
+    return;
+  }
   if (!ctx.projects.length) {
     const p = blankProject(user.email, "Untitled room");
     await putProject(p); await refreshList();
@@ -265,4 +336,6 @@ async function checkAI() {
   setMode(ctx.mode);
   document.body.classList.add("ready");
   checkAI();
+  let seen = null; try { seen = localStorage.getItem(GUIDE); } catch (e) { seen = "1"; }
+  if (!seen) setTimeout(guide, 400);
 })().catch(err => { console.error(err); toast("Something went wrong loading the studio. Try reloading the page.", "error"); });

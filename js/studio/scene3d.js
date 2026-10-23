@@ -8,6 +8,7 @@ let renderer, scene, persp, ortho, cam, controls, root, sun, hemi, raycaster, fl
 let host, built = false, dirty = true, camMode = "persp", cutaway = true, shadows = true, running = false;
 let wallsMeta = [], itemGroups = new Map(), center = [2.4, 1.8], span = 6, bb = null;
 let drag = null, downAt = null;
+let ground = null, glassMat = null, lampSpots = [], lampMats = [], moodLights = null, turning = false;
 const mats = new Map();
 
 export function init(c) {
@@ -20,6 +21,13 @@ export function init(c) {
   $("#t-shadow").addEventListener("change", e => { shadows = e.target.checked; if (renderer) { renderer.shadowMap.enabled = shadows; sun.castShadow = shadows; rebuild(); } });
   $("#t-sun").addEventListener("input", e => { ctx.p.design.light = +e.target.value; $("#sun-out").textContent = sunName(+e.target.value); placeSun(); frame(); ctx.save(); });
   $("#t-snap").addEventListener("click", snapshot);
+  $("#t-use").addEventListener("click", useInDesign);
+  $$("#three-act [data-mood]").forEach(b => b.addEventListener("click", () => { ctx.p.finish.mood = b.dataset.mood; ctx.save(); applyMood(); }));
+  $("#t-turn").addEventListener("click", () => setTurn(!turning));
+  $("#sb-rot").addEventListener("click", () => ctx.planOps.rotateSelected(90));
+  $("#sb-del").addEventListener("click", () => ctx.planOps.removeSelected());
+  $("#sb-done").addEventListener("click", () => ctx.select(null));
+  ctx.capture3D = capture;
   const ff = $("#f-floor");
   Object.entries(FLOORS).forEach(([k, f]) => ff.append(el("option", { value: k, text: f.name })));
   ff.addEventListener("change", () => { ctx.p.finish.floor = ff.value; ctx.save(); rebuild(); });
@@ -32,8 +40,8 @@ export function init(c) {
   ctx.bus.on("plan", () => { dirty = true; if (visible()) show(); renderInspector(); });
   ctx.bus.on("style", () => { dirty = true; renderInspector(); });
   ctx.bus.on("light", () => { renderInspector(); placeSun(); });
-  ctx.bus.on("select", () => { highlight(); renderInspector(); });
-  ctx.bus.on("mode", () => { if (visible()) show(); else running = false; renderInspector(); });
+  ctx.bus.on("select", () => { highlight(); renderInspector(); selBar(); });
+  ctx.bus.on("mode", () => { if (visible()) show(); else { running = false; setTurn(false); } renderInspector(); selBar(); });
 }
 let camReset = true;
 const visible = () => !$("#st-three").hidden;
@@ -86,7 +94,7 @@ function setup() {
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 4;
   scene.add(sun, sun.target);
   // a big ground so the room doesn't float
-  const ground = new T.Mesh(new T.PlaneGeometry(400, 400), new T.MeshStandardMaterial({ color: "#ddd5c8", roughness: 1 }));
+  ground = new T.Mesh(new T.PlaneGeometry(400, 400), new T.MeshStandardMaterial({ color: "#ddd5c8", roughness: 1 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = -0.011; ground.receiveShadow = true; scene.add(ground);
   const grid = new T.GridHelper(200, 200, "#cfc6b6", "#d8d0c2"); grid.position.y = -0.01; grid.material.transparent = true; grid.material.opacity = 0.5; scene.add(grid);
   raycaster = new T.Raycaster();
@@ -146,7 +154,8 @@ function setCam(mode, reset) {
   if (controls) controls.dispose();
   if (mode === "persp" || mode === "eye") {
     cam = persp; persp.fov = mode === "eye" ? 68 : 45; persp.updateProjectionMatrix();
-    if (mode === "persp") cam.position.set(cx + span * 0.75, span * 0.95, cz + span * 1.05);
+    const az = (ctx.p.finish && ctx.p.finish.az) || "se", sx = az.includes("e") ? 1 : -1, sz = az.includes("s") ? 1 : -1;
+    if (mode === "persp") cam.position.set(cx + sx * span * 0.6, span * 0.8, cz + sz * span * 0.84);
     else { const e = eyePoint(); cam.position.set(e[0], 1.6, e[1]); }
   } else {
     cam = ortho; fitOrtho();
@@ -176,7 +185,7 @@ function eyePoint() {
     const L = wlen(w), c = lerp(w.a, w.b, o.t);
     let n = [-(w.b[1] - w.a[1]) / L, (w.b[0] - w.a[0]) / L];
     if ((center[0] - c[0]) * n[0] + (center[1] - c[1]) * n[1] < 0) n = [-n[0], -n[1]];
-    return [c[0] + n[0] * 0.45, c[1] + n[1] * 0.45];
+    return [c[0] + n[0] * 0.75, c[1] + n[1] * 0.75];
   }
   const d = bb ? bb.h : 3;
   return [center[0] + 0.01, center[1] + Math.min(1.2, d * 0.3)];
@@ -186,7 +195,7 @@ function markCam() { $$("#three-tb [data-cam]").forEach(b => b.setAttribute("ari
 function placeSun() {
   if (!sun) return;
   const th = (ctx.p.design.light || 0) * Math.PI / 180, R = Math.max(8, span * 1.6);
-  sun.position.set(center[0] + Math.sin(th) * R, R * 0.95, center[1] - Math.cos(th) * R);
+  sun.position.set(center[0] + Math.sin(th) * R, R * 1.5, center[1] - Math.cos(th) * R);
   sun.target.position.set(center[0], 0, center[1]);
   const s = sun.shadow.camera, ext = span * 0.9 + 2;
   s.left = -ext; s.right = ext; s.top = ext; s.bottom = -ext; s.near = 0.5; s.far = R * 3; s.updateProjectionMatrix();
@@ -242,7 +251,7 @@ function rebuild() {
   dirty = false;
   if (root) { scene.remove(root); root.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.map) o.material.map.dispose(); }); }
   root = new T.Group(); scene.add(root);
-  wallsMeta = []; itemGroups = new Map();
+  wallsMeta = []; itemGroups = new Map(); lampSpots = []; lampMats = []; moodLights = null;
   const p = ctx.p.plan, H = p.height;
   const lp = loops(p.walls);
   const edges = new Set();
@@ -264,7 +273,7 @@ function rebuild() {
   // walls
   const wm = mat(wallColour(), { roughness: 0.92 });
   const trim = mat("#f4f1ea", { roughness: 0.6 });
-  const glass = new T.MeshStandardMaterial({ color: "#cfe3ef", transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.1, depthWrite: false });
+  const glass = glassMat = new T.MeshStandardMaterial({ color: "#cfe3ef", transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.1, depthWrite: false });
   const doorM = mat(shade(style().palette[2] || "#b98656", 1), { roughness: 0.6 });
   p.walls.forEach(w => {
     const L = wlen(w); if (L < 0.01) return;
@@ -315,10 +324,82 @@ function rebuild() {
     g.rotation.y = -(it.rot || 0) * Math.PI / 180;
     g.traverse(o => { o.userData.itemId = it.id; });
     root.add(g); itemGroups.set(it.id, g);
+    if (it.shape === "lamp") lampSpots.push([it.x, (it.elev || 0) + it.h - 0.18, it.y]);
   });
   placeSun();
+  applyMood();
   highlight();
   renderInspector();
+}
+
+// ---------------- day / evening ----------------
+const mood = () => (ctx.p.finish && ctx.p.finish.mood) || "day";
+function applyMood() {
+  $$("#three-act [data-mood]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mood === mood())));
+  if (!renderer || !root) return;
+  const night = mood() === "evening";
+  scene.background.set(night ? "#1b1e22" : "#e9e3d8"); scene.fog.color.set(night ? "#1b1e22" : "#e9e3d8");
+  if (ground) ground.material.color.set(night ? "#26282a" : "#ddd5c8");
+  hemi.color.set(night ? "#8a90b8" : "#fff8ee"); hemi.groundColor.set(night ? "#2a2420" : "#b8ab98"); hemi.intensity = night ? 0.32 : 1.25;
+  sun.color.set(night ? "#7f8fc0" : "#fff1dc"); sun.intensity = night ? 0.18 : 2.2;
+  renderer.toneMappingExposure = night ? 1.2 : 1.05;
+  if (glassMat) { glassMat.color.set(night ? "#16223a" : "#cfe3ef"); glassMat.opacity = night ? 0.75 : 0.28; }
+  lampMats.forEach(m => { m.emissiveIntensity = night ? 2.4 : 0.55; });
+  if (moodLights) { root.remove(moodLights); moodLights = null; }
+  if (night) {
+    moodLights = new T.Group();
+    const H = ctx.p.plan.height;
+    // a soft ceiling light so the room is never black, plus every floor lamp glowing
+    const fill = new T.PointLight("#ffd9a8", 6, span * 1.4, 1.6); fill.position.set(center[0], H - 0.15, center[1]); moodLights.add(fill);
+    lampSpots.slice(0, 6).forEach(([x, y, z]) => { const l = new T.PointLight("#ffc77a", 5, 5.5, 1.8); l.position.set(x, y, z); moodLights.add(l); });
+    root.add(moodLights);
+  }
+  frame();
+}
+function setTurn(on) {
+  turning = !!on && !!controls && (camMode === "persp");
+  if (on && camMode !== "persp" && renderer) { setCam("persp", true); turning = true; }
+  if (controls) { controls.autoRotate = turning; controls.autoRotateSpeed = 1.4; }
+  const b = $("#t-turn"); if (b) b.setAttribute("aria-pressed", String(turning));
+}
+
+// render the current view at a fixed size (used for "use in Design" and snapshots)
+function capture(w = 1536, h = 1024, type = "image/jpeg") {
+  if (!renderer || !cam) return null;
+  const pr = renderer.getPixelRatio(), oldAsp = persp.aspect;
+  const ol = outline && outline.visible; if (outline) outline.visible = false;
+  renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+  persp.aspect = w / h; persp.updateProjectionMatrix();
+  if (cam === ortho) { const a = w / h, half = span * 0.62; ortho.left = -half * Math.max(1, a); ortho.right = half * Math.max(1, a); ortho.top = half * Math.max(1, 1 / a); ortho.bottom = -half * Math.max(1, 1 / a); ortho.updateProjectionMatrix(); }
+  frame();
+  const url = renderer.domElement.toDataURL(type, 0.92);
+  if (outline) outline.visible = ol;
+  renderer.setPixelRatio(pr); persp.aspect = oldAsp; persp.updateProjectionMatrix();
+  resize();
+  return url;
+}
+async function useInDesign() {
+  if (!renderer) { toast("Open the 3D view first."); return; }
+  const p = ctx.p;
+  if (p.design.versions.length) {
+    const ok = await ctx.confirm("Use this 3D view as the room photo?", "The " + p.design.versions.length + " design version(s) made from the current photo will be removed.", "Use this view");
+    if (!ok) return;
+  }
+  const url = capture(1536, 1024);
+  if (!url) return;
+  p.photo = url; p.sample = false; p.design.versions = []; p.design.current = null; p.photoSource = "3d";
+  p.thumb = url;
+  ctx.save(); ctx.setMode("design");
+  toast("This view is now the room photo. Press Generate — an AI render turns it into a realistic room.");
+}
+
+// floating bar for the selected piece (handy on phones)
+function selBar() {
+  const bar = $("#sel-bar"); if (!bar || !ctx.p) return;
+  const s = ctx.sel, it = s && s.kind === "item" && ctx.p.plan.items.find(i => i.id === s.id);
+  const show = !!it && visible();
+  bar.hidden = !show;
+  if (show) $("#sb-name").textContent = it.name;
 }
 
 function recolourWalls() {
@@ -407,6 +488,7 @@ function buildItem(it) {
     case "lamp": {
       g.add(cyl(0.14, 0.15, 0.03, 0, 0, 0, leg), cyl(0.012, 0.012, h - 0.28, 0, 0.03, 0, leg, 8));
       const shadeM = new T.MeshStandardMaterial({ color: c, emissive: "#ffcf8a", emissiveIntensity: 0.55, roughness: 0.9, side: T.DoubleSide });
+      lampMats.push(shadeM);
       g.add(cyl(0.12, 0.2, 0.3, 0, h - 0.3, 0, shadeM, 28));
       break;
     }
@@ -422,7 +504,7 @@ function buildItem(it) {
     case "rug": g.add(box(w, 0.012, d, 0, 0, 0, M, false)); g.add(box(w - 0.14, 0.013, d - 0.14, 0, 0, 0, L, false)); break;
     case "rrug": { const m = cyl(w / 2, w / 2, 0.012, 0, 0, 0, M, 40); m.castShadow = false; m.scale.z = d / w; g.add(m); break; }
     case "art": g.add(box(w, h, d, 0, 0, 0, mat("#2b2621")), box(w - 0.06, h - 0.06, 0.006, 0, 0.03, d / 2, mat(c, { roughness: 1 }), false)); break;
-    case "mirror": g.add(box(w, h, d, 0, 0, 0, D), box(w - 0.05, h - 0.05, 0.006, 0, 0.025, d / 2, new T.MeshStandardMaterial({ color: "#dfe8ec", metalness: 0.9, roughness: 0.08 }), false)); break;
+    case "mirror": g.add(box(w, h, d, 0, 0, 0, D), box(w - 0.05, h - 0.05, 0.006, 0, 0.025, d / 2, new T.MeshStandardMaterial({ color: "#d3dde2", metalness: 0.25, roughness: 0.12 }), false)); break;
     case "tv": g.add(box(w, h, d, 0, 0, 0, mat("#111111", { roughness: 0.3 })), box(w - 0.03, h - 0.03, 0.004, 0, 0.015, d / 2, mat("#1d2630", { roughness: 0.15, metalness: 0.3 }), false)); break;
     case "counter": case "sink": case "stove": {
       g.add(box(w, 0.1, d - 0.06, 0, 0, -0.03, mat("#3a3a38")));
@@ -487,6 +569,7 @@ function floorAt(e) {
 }
 function onDown(e) {
   downAt = { x: e.clientX, y: e.clientY };
+  if (turning) setTurn(false);
   if (e.button !== 0) return;
   const id = pickItem(e);
   if (!id) return;
@@ -531,8 +614,8 @@ function onKey(e) {
 
 function snapshot() {
   if (!renderer) { toast("Open the 3D view first."); return; }
-  frame();
-  download((ctx.p.name || "room").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() + "-3d.png", renderer.domElement.toDataURL("image/png"));
+  const url = capture(1920, 1280, "image/png");
+  download((ctx.p.name || "room").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() + "-3d.png", url);
   toast("Snapshot saved.");
 }
 

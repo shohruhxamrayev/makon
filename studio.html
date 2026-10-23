@@ -177,6 +177,7 @@
                 <div class="begin-alt">
                   <button class="btn btn-ghost btn-small" type="button" id="b-lshape">L-shaped room</button>
                   <button class="btn btn-ghost btn-small" type="button" id="b-draw">Draw walls myself</button>
+                  <button class="btn btn-ghost btn-small" type="button" id="b-tpl">Use a ready-made room</button>
                 </div>
               </div>
             </div>
@@ -198,6 +199,16 @@
               <div class="tb-group"><button type="button" id="t-reset" class="tb-accent">Reset</button></div>
             </div>
             <div class="three-host" id="three-host"></div>
+            <div class="three-act" id="three-act">
+              <div class="seg" role="group" aria-label="Lighting"><button type="button" data-mood="day" aria-pressed="true">Day</button><button type="button" data-mood="evening" aria-pressed="false">Evening</button></div>
+              <button type="button" class="t-turn" id="t-turn" aria-pressed="false" title="Slowly orbit the room"><svg><use href="#i-rotate"/></svg>Turntable</button>
+            </div>
+            <div class="sel-bar" id="sel-bar" hidden>
+              <b id="sb-name"></b>
+              <button type="button" id="sb-rot"><svg><use href="#i-rotate"/></svg>Rotate</button>
+              <button type="button" id="sb-del"><svg><use href="#i-trash"/></svg>Delete</button>
+              <button type="button" id="sb-done" aria-label="Done"><svg><use href="#i-check"/></svg></button>
+            </div>
             <div class="plan-hint dark" id="three-hint">Drag furniture to move · drag empty space to orbit · R rotates · Delete removes</div>
             <div class="three-empty" id="three-empty" hidden>
               <div class="begin-card">
@@ -309,7 +320,11 @@
               <label class="check"><input type="checkbox" id="t-cut" checked> Cut away walls facing the camera</label>
               <label class="check"><input type="checkbox" id="t-shadow" checked> Soft shadows</label>
               <label class="field"><span>Sun direction <output id="sun-out"></output></span><input type="range" id="t-sun" min="0" max="345" step="15"></label>
-              <button class="btn btn-ghost btn-small" type="button" id="t-snap"><svg><use href="#i-camera"/></svg>Save snapshot</button>
+              <div class="row wrap">
+                <button class="btn btn-ghost btn-small" type="button" id="t-snap"><svg><use href="#i-camera"/></svg>Save snapshot</button>
+                <button class="btn btn-dark btn-small" type="button" id="t-use"><svg><use href="#i-design"/></svg>Use this view in Design</button>
+              </div>
+              <small class="hint">“Use this view in Design” makes the current 3D view the room photo, so an AI render can turn it into a realistic picture.</small>
             </div>
             <div class="sub" id="three-sel"></div>
           </div>

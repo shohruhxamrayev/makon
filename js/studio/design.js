@@ -129,7 +129,7 @@ async function setPhoto(file) {
   try {
     const data = await fileToDataURL(file, 1600, 0.88);
     const p = ctx.p;
-    p.photo = data; p.sample = false; p.design.versions = []; p.design.current = null;
+    p.photo = data; p.sample = false; p.design.versions = []; p.design.current = null; p.photoSource = "upload";
     p.thumb = await thumbOf(data);
     ctx.save(); render();
     toast("Photo ready. Choose a style and press Generate.");
@@ -216,7 +216,7 @@ async function renderViewer() {
   setPos(pos);
   $("#vtag").innerHTML = v
     ? '<b>' + esc(STYLES[v.style] ? STYLES[v.style].name : "Version") + '</b> · ' + esc(v.label) + ' · v' + (p.design.versions.indexOf(v) + 1)
-    : "<b>Original photo</b> · " + (p.sample ? "sample room" : "your upload");
+    : "<b>Original photo</b> · " + (p.sample ? "sample room" : p.photoSource === "3d" ? "3D view" : p.photoSource === "template" ? "template render" : "your upload");
   $("#v-download").title = v ? "Download this version" : "Download the photo";
 }
 

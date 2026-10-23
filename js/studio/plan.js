@@ -70,6 +70,7 @@ export function init(c) {
     template("rect", w, d);
   });
   $("#b-lshape").addEventListener("click", () => template("L"));
+  $("#b-tpl").addEventListener("click", () => ctx.chooseStart && ctx.chooseStart());
   $("#b-draw").addEventListener("click", () => { pushUndo(); P().started = true; commit(); setTool("wall"); toast("Click (or tap) to place corners. Click the first corner to close the room."); });
 
   // settings
@@ -640,7 +641,7 @@ function itemShape(it) {
     case "shelf": return body(0.01) + L(-hw, -hd + d / 3, hw, -hd + d / 3) + L(-hw, -hd + 2 * d / 3, hw, -hd + 2 * d / 3);
     case "bath": return body(0.08) + R(-hw + 0.08, -hd + 0.08, w - 0.16, d - 0.16, "det", 0.2);
     case "shower": return body(0.02) + L(-hw, -hd, hw, hd) + L(hw, -hd, -hw, hd);
-    case "toilet": return `<rect class="body" x="${f2(-hw)}" y="${f2(-hd)}" width="${f2(w)}" height="${f2(d * 0.28)}" fill="${fill}" fill-opacity=".6"/>` + E(0, d * 0.12, hw * 0.92, d * 0.34, "body") ;
+    case "toilet": return `<rect class="body" x="${f2(-hw)}" y="${f2(-hd)}" width="${f2(w)}" height="${f2(d * 0.28)}" fill="${fill}" fill-opacity=".6"/>` + `<ellipse class="body" cx="0" cy="${f2(d * 0.12)}" rx="${f2(hw * 0.92)}" ry="${f2(d * 0.34)}" fill="${fill}" fill-opacity=".6"/>`;
     case "crib": return body(0.02) + L(-hw + 0.05, -hd + 0.05, -hw + 0.05, hd - 0.05) + L(hw - 0.05, -hd + 0.05, hw - 0.05, hd - 0.05);
     case "art": case "tv": case "mirror": case "box": return body(0.005);
     default: return body(0.03);
@@ -685,7 +686,7 @@ function buildSVG(p, v, W, H, opt = {}) {
   const order = p.items.slice().sort((a, b) => (b.flat ? 1 : 0) - (a.flat ? 1 : 0) || (a.wall ? 1 : 0) - (b.wall ? 1 : 0));
   order.forEach(it => {
     const iss = issues.get(it.id), cls = "it" + (sel.kind === "item" && sel.id === it.id ? " sel" : "") + (iss ? (iss.some(x => x.kind === "err") ? " err" : " warn") : "");
-    const showLab = Math.min(it.w, it.d) * s > 26 && it.w * s > 60 && !it.wall && !it.flat;
+    const showLab = Math.min(it.w, it.d) * s > 26 && it.name.length * 6.3 + 10 < it.w * s && !it.wall && !it.flat;
     const flipText = ((it.rot % 360) + 360) % 360 > 90 && ((it.rot % 360) + 360) % 360 < 270;
     out.push(`<g class="${cls}" data-k="item" data-id="${it.id}" transform="translate(${f2(it.x)} ${f2(it.y)}) rotate(${f2(it.rot || 0)})" stroke-width="${px(1.3)}">`);
     out.push(itemShape(it));
