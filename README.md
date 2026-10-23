@@ -1,5 +1,7 @@
 # Makon — redesign your room with AI
 
+Made by [Shohruh Xamrayev](https://www.shohruhxamrayev.uz), founder of Makon. Case study: [shohruhxamrayev.uz/projects/makon](https://www.shohruhxamrayev.uz/projects/makon.html).
+
 Makon (“a place to live”) takes one photo of a room and carries it all the way to a build brief:
 
 | Tool | What it does |
