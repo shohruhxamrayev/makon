@@ -201,7 +201,7 @@
             <div class="three-host" id="three-host"></div>
             <div class="three-act" id="three-act">
               <div class="seg" role="group" aria-label="Lighting"><button type="button" data-mood="day" aria-pressed="true">Day</button><button type="button" data-mood="evening" aria-pressed="false">Evening</button></div>
-              <button type="button" class="t-turn" id="t-turn" aria-pressed="false" title="Slowly orbit the room"><svg><use href="#i-rotate"/></svg>Turntable</button>
+              <button type="button" class="t-turn" id="t-turn" aria-pressed="false" title="Slowly orbit the room"><svg><use href="#i-rotate"/></svg><span>Turntable</span></button>
             </div>
             <div class="sel-bar" id="sel-bar" hidden>
               <b id="sb-name"></b>
@@ -209,7 +209,15 @@
               <button type="button" id="sb-del"><svg><use href="#i-trash"/></svg>Delete</button>
               <button type="button" id="sb-done" aria-label="Done"><svg><use href="#i-check"/></svg></button>
             </div>
-            <div class="plan-hint dark" id="three-hint">Drag furniture to move · drag empty space to orbit · R rotates · Delete removes</div>
+            <div class="nav-pad" id="nav-pad" role="group" aria-label="Move the view">
+              <button type="button" data-nav="left" aria-label="Turn left" title="Turn left">↺</button>
+              <button type="button" data-nav="up" aria-label="Look from higher" title="Tilt up">▲</button>
+              <button type="button" data-nav="right" aria-label="Turn right" title="Turn right">↻</button>
+              <button type="button" data-nav="in" aria-label="Zoom in" title="Zoom in">+</button>
+              <button type="button" data-nav="down" aria-label="Look from lower" title="Tilt down">▼</button>
+              <button type="button" data-nav="out" aria-label="Zoom out" title="Zoom out">−</button>
+            </div>
+            <div class="plan-hint dark" id="three-hint">Drag to turn the room · scroll to zoom · right-drag to slide · drag a piece to move it</div>
             <div class="three-empty" id="three-empty" hidden>
               <div class="begin-card">
                 <span class="begin-ic">M</span>

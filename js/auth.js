@@ -67,5 +67,13 @@
       return /^[a-z0-9_\-]+\.html(\?[a-z0-9=&_\-]*)?(#[a-z0-9\-]+)?$/i.test(n) ? n : "studio.html";
     }
   };
+  // visits: a new browser session counts as a new visit — first visit says "Welcome", later ones "Welcome back"
+  let visits = 1;
+  try {
+    visits = parseInt(localStorage.getItem("makon_visits") || "0", 10) || 0;
+    if (!sessionStorage.getItem("makon_seen")) { sessionStorage.setItem("makon_seen", "1"); visits += 1; localStorage.setItem("makon_visits", String(visits)); }
+  } catch (e) { visits = 1; }
+  Auth.visits = () => visits;
+  Auth.returning = () => visits > 1;
   window.MakonAuth = Auth;
 })();

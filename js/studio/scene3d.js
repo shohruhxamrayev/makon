@@ -7,7 +7,7 @@ let ctx, T = null, OrbitControls = null, loading = null;
 let renderer, scene, persp, ortho, cam, controls, root, sun, hemi, raycaster, floorPlane;
 let host, built = false, dirty = true, camMode = "persp", cutaway = true, shadows = true, running = false;
 let wallsMeta = [], itemGroups = new Map(), center = [2.4, 1.8], span = 6, bb = null;
-let drag = null, downAt = null;
+let drag = null, downAt = null, tapPick = null;
 let ground = null, glassMat = null, lampSpots = [], lampMats = [], moodLights = null, turning = false;
 const mats = new Map();
 
@@ -16,6 +16,14 @@ export function init(c) {
   host = $("#three-host");
   $$("#three-tb [data-cam]").forEach(b => b.addEventListener("click", () => setCam(b.dataset.cam)));
   $("#t-reset").addEventListener("click", () => setCam(camMode, true));
+  $$("#nav-pad [data-nav]").forEach(b => {
+    let rep = null;
+    const stop = () => { clearInterval(rep); rep = null; };
+    b.addEventListener("pointerdown", e => { e.preventDefault(); nav(b.dataset.nav); stop(); rep = setInterval(() => nav(b.dataset.nav), 280); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(t => b.addEventListener(t, stop));
+    b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav(b.dataset.nav); } });
+  });
+  if (window.matchMedia && matchMedia("(pointer: coarse)").matches) $("#three-hint").textContent = "One finger turns · two fingers zoom and slide · tap a piece, then drag it";
   $("#three-goplan").addEventListener("click", () => ctx.setMode("plan"));
   $("#t-cut").addEventListener("change", e => { cutaway = e.target.checked; frame(); });
   $("#t-shadow").addEventListener("change", e => { shadows = e.target.checked; if (renderer) { renderer.shadowMap.enabled = shadows; sun.castShadow = shadows; rebuild(); } });
@@ -119,7 +127,7 @@ function frame() {
   const camPos = cam.position;
   wallsMeta.forEach(m => {
     let vis = true;
-    if (cutaway && m.outer && camMode !== "top" && camMode !== "eye") {
+    if (cutaway && m.outer && camMode !== "eye") {
       const vx = camPos.x - m.c[0], vz = camPos.z - m.c[1];
       vis = vx * m.n[0] + vz * m.n[1] < 0.2;
     }
@@ -164,16 +172,21 @@ function setCam(mode, reset) {
     else { cam.position.set(cx + 60, H / 2, cz); cam.up.set(0, 1, 0); }
     cam.zoom = 1; cam.updateProjectionMatrix();
   }
-  if (mode === "persp" || mode === "eye") cam.up.set(0, 1, 0);
+  cam.up.set(0, 1, 0);
+  if (mode === "top") cam.position.set(cx, 60, cz + 0.02);   // straight down, north at the top — and free to tilt from there
   controls = new OrbitControls(cam, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = 0.09;
   controls.target.set(cx, mode === "eye" ? 1.2 : mode === "top" ? 0 : (mode === "persp" ? 0.4 : H / 2), cz);
-  controls.enableRotate = mode === "persp" || mode === "eye";
+  // every view can be turned by hand: drag / one finger turns, wheel / pinch zooms, right-drag / two fingers slide
+  controls.enableRotate = true; controls.enableZoom = true; controls.enablePan = true;
+  controls.rotateSpeed = 0.8; controls.zoomSpeed = 0.9;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.minDistance = mode === "eye" ? 0.3 : 1; controls.maxDistance = 80;
+  controls.minZoom = 0.35; controls.maxZoom = 6;
   controls.screenSpacePanning = true;
-  if (mode === "top") controls.mouseButtons = { LEFT: T.MOUSE.PAN, MIDDLE: T.MOUSE.DOLLY, RIGHT: T.MOUSE.PAN };
-  if (mode === "top") controls.touches = { ONE: T.TOUCH.PAN, TWO: T.TOUCH.DOLLY_PAN };
+  controls.mouseButtons = { LEFT: T.MOUSE.ROTATE, MIDDLE: T.MOUSE.DOLLY, RIGHT: T.MOUSE.PAN };
+  controls.touches = { ONE: T.TOUCH.ROTATE, TWO: T.TOUCH.DOLLY_PAN };
+  controls.addEventListener("start", () => { if (turning) setTurn(false); });
   controls.update();
   frame();
 }
@@ -189,6 +202,33 @@ function eyePoint() {
   }
   const d = bb ? bb.h : 3;
   return [center[0] + 0.01, center[1] + Math.min(1.2, d * 0.3)];
+}
+// on-screen pad: turn, tilt and zoom with buttons as well as by hand
+let navAnim = null;
+function nav(kind) {
+  if (!controls || !cam) return;
+  if (turning) setTurn(false);
+  const tg = controls.target, off = cam.position.clone().sub(tg);
+  const sph = new T.Spherical().setFromVector3(off);
+  const to = { theta: sph.theta, phi: sph.phi, r: sph.radius, zoom: cam.zoom };
+  const step = Math.PI / 8;
+  if (kind === "left") to.theta -= step;
+  if (kind === "right") to.theta += step;
+  if (kind === "up") to.phi = Math.max(0.02, sph.phi - step * 0.6);
+  if (kind === "down") to.phi = Math.min(controls.maxPolarAngle, sph.phi + step * 0.6);
+  if (kind === "in") { if (cam.isOrthographicCamera) to.zoom = Math.min(controls.maxZoom, cam.zoom * 1.25); else to.r = Math.max(controls.minDistance, sph.radius / 1.25); }
+  if (kind === "out") { if (cam.isOrthographicCamera) to.zoom = Math.max(controls.minZoom, cam.zoom / 1.25); else to.r = Math.min(controls.maxDistance, sph.radius * 1.25); }
+  const from = { theta: sph.theta, phi: sph.phi, r: sph.radius, zoom: cam.zoom }, t0 = performance.now();
+  cancelAnimationFrame(navAnim);
+  const tick = now => {
+    const k = Math.min(1, (now - t0) / 260), e = 1 - Math.pow(1 - k, 3);
+    const s2 = new T.Spherical(from.r + (to.r - from.r) * e, from.phi + (to.phi - from.phi) * e, from.theta + (to.theta - from.theta) * e);
+    cam.position.copy(new T.Vector3().setFromSpherical(s2).add(tg));
+    if (cam.isOrthographicCamera) { cam.zoom = from.zoom + (to.zoom - from.zoom) * e; cam.updateProjectionMatrix(); }
+    cam.lookAt(tg); controls.update(); frame();
+    if (k < 1) navAnim = requestAnimationFrame(tick);
+  };
+  navAnim = requestAnimationFrame(tick);
 }
 function markCam() { $$("#three-tb [data-cam]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.cam === camMode))); }
 
@@ -575,6 +615,7 @@ function onDown(e) {
   if (!id) return;
   const it = ctx.p.plan.items.find(i => i.id === id), f = floorAt(e);
   if (!it || !f) return;
+  if (e.pointerType === "touch" && !(ctx.sel && ctx.sel.kind === "item" && ctx.sel.id === id)) { tapPick = id; return; }
   ctx.select("item", id);
   controls.enabled = false;
   drag = { id, off: [f.x - it.x, f.z - it.y], moved: false, pid: e.pointerId };
@@ -600,13 +641,19 @@ function onUp(e) {
     if (d.moved) ctx.planOps.commit();
     return;
   }
-  if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 4 && e.button === 0 && !pickItem(e) && ctx.sel) ctx.select(null);
+  const still = downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 8;
+  if (tapPick) { if (still) ctx.select("item", tapPick); tapPick = null; downAt = null; return; }
+  if (still && e.button === 0 && !pickItem(e) && ctx.sel) ctx.select(null);
   downAt = null;
 }
 function onKey(e) {
   const active = ctx.mode === "3d" || (ctx.mode === "furnish" && ctx.furnishView === "three");
   if (!active || e.target.closest("input, textarea, select") || document.querySelector(".modal-wrap") || e.ctrlKey || e.metaKey) return;
-  if (!ctx.sel || ctx.sel.kind !== "item") return;
+  if (!ctx.sel || ctx.sel.kind !== "item") {
+    const k = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down", "+": "in", "=": "in", "-": "out" }[e.key];
+    if (k) { e.preventDefault(); nav(k); }
+    return;
+  }
   if (e.key.toLowerCase() === "r") ctx.planOps.rotateSelected(e.shiftKey ? 15 : 90);
   if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); ctx.planOps.removeSelected(); }
   if (e.key === "Escape") ctx.select(null);

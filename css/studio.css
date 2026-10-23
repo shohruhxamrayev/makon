@@ -569,3 +569,25 @@ body[data-mode="furnish"] .three-act { top: 108px; }
 .g-step strong { display: block; color: var(--ink, #161a18); font-weight: 600; margin-bottom: 1px; }
 .g-tip { display: block; margin-top: 4px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); font-size: 12.5px; }
 .g-open { display: block; margin-top: 14px; padding: 0; border: 0; background: none; color: var(--accent-deep, #9c5a2c); font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+/* 3D: on-screen navigation pad */
+.nav-pad { position: absolute; right: 14px; bottom: 14px; z-index: 5; display: grid; grid-template-columns: repeat(3, 36px); gap: 4px; padding: 5px; background: rgba(255,255,255,.88); box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+.nav-pad button { width: 36px; height: 34px; border: 1px solid var(--line); background: #fff; font-size: 15px; line-height: 1; color: var(--ink); touch-action: none; user-select: none; -webkit-user-select: none; }
+.nav-pad button:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.nav-pad button:active { transform: scale(.94); }
+@media (max-width: 900px) {
+  .nav-pad { right: 8px; bottom: 8px; grid-template-columns: repeat(3, 34px); }
+  .nav-pad button { width: 34px; height: 32px; }
+  .sel-bar { bottom: 92px; }
+}
+
+/* furnish: details open right under the row you tapped */
+.inline-ed { list-style: none; margin: 4px 0 10px; animation: edIn .22s ease-out; }
+@keyframes edIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.ed-card { position: relative; margin: 0 !important; padding: 14px 14px 12px !important; border: 1px solid var(--ink) !important; background: #fff; box-shadow: 0 14px 30px -18px rgba(0,0,0,.35); }
+.ed-card h3 { margin-top: 0; padding-right: 30px; }
+.ed-close { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 0; background: transparent; font-size: 14px; color: var(--muted); cursor: pointer; }
+.ed-close:hover { color: var(--ink); background: var(--line); }
+.ed-see { margin-top: 10px; width: 100%; justify-content: center; }
+.catalog .inline-ed, .placed .inline-ed { display: block; }
+.placed li.pl.on { outline: 1px solid var(--ink); }

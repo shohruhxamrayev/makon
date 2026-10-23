@@ -22,8 +22,17 @@
     note.querySelector("a").href = next;
   }
   fillNote();
+  // greeting: "Welcome" on the very first visit, "Welcome back" after that
+  function greet() {
+    const I = window.MakonI18n, back = MakonAuth.returning();
+    const set = (el, k) => { if (!el) return; if (I && I.set) I.set(el, k); else el.innerHTML = k; };
+    const h = document.getElementById("greet"), lab = document.getElementById("greet-label");
+    if (mode === "signin") { set(h, back ? "Welcome<br>back." : "Welcome<br>to Makon."); set(lab, back ? "Return to your project" : "Nice to meet you"); }
+    else set(lab, back ? "Welcome back" : "Welcome to Makon");
+  }
+  greet();
   document.addEventListener("makon:lang", () => {
-    fillNote();
+    fillNote(); greet();
     document.querySelectorAll("[data-keep-next]").forEach(a => { a.href = a.getAttribute("href").split("?")[0] + "?next=" + encodeURIComponent(next); });
     if (pw && meter) pw.dispatchEvent(new Event("input"));
     err.textContent = "";

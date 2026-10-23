@@ -2,7 +2,7 @@
 import { $, $$, el, toast, money, fmtCm } from "./util.js";
 import { CATALOG, CATS, catalogItem, STYLES, SHOPS } from "./data.js";
 
-let ctx, cat = "All", q = "";
+let ctx, cat = "All", q = "", anchor = null;   // anchor: where the details open ({ where: "catalog", cid, id } or { where: "placed", id })
 
 export function init(c) {
   ctx = c;
@@ -13,7 +13,18 @@ export function init(c) {
   ctx.bus.on("mode", m => { if (m === "furnish") render(); });
 }
 
-function render() { if (!ctx.p) return; renderIssues(); renderSel(); renderPlaced(); renderCatalog(); }
+const isPhone = () => window.matchMedia("(max-width: 900px)").matches;
+// keep the row the person touched exactly where it was on screen while the panel re-renders
+function steady(rowSel, fn) {
+  const before = document.querySelector(rowSel), y0 = before ? before.getBoundingClientRect().top : null;
+  fn();
+  const after = document.querySelector(rowSel);
+  if (y0 == null || !after) return;
+  const dy = after.getBoundingClientRect().top - y0;
+  if (Math.abs(dy) < 1) return;
+  if (isPhone()) window.scrollBy(0, dy); else $("#insp").scrollTop += dy;
+}
+function render() { if (!ctx.p) return; renderIssues(); renderPlaced(); renderCatalog(); renderSel(); }
 
 function shopQuery(it) {
   const c = catalogItem(it.type) || {};
@@ -47,12 +58,24 @@ function renderIssues() {
 }
 
 function renderSel() {
-  const box = $("#fsel-box"), s = ctx.sel;
+  $("#fsel-box").hidden = true; $("#fsel-box").innerHTML = "";
+  $$(".inline-ed").forEach(n => n.remove());
+  const s = ctx.sel;
   const it = s && s.kind === "item" && ctx.p.plan.items.find(i => i.id === s.id);
-  if (!it) { box.hidden = true; box.innerHTML = ""; return; }
-  box.hidden = false;
+  if (!it) { anchor = null; return; }
+  const box = el("div", { class: "sub ed-card" });
   ctx.planOps.itemEditor(box, it);
   box.append(shopRow(it));
+  const close = el("button", { type: "button", class: "ed-close", "aria-label": "Close details", html: "✕", onclick: () => ctx.select(null) });
+  box.prepend(close);
+  if (isPhone()) box.append(el("button", { type: "button", class: "btn btn-ghost btn-small ed-see", text: "See it in the room ↑", onclick: () => window.scrollTo({ top: 0, behavior: "smooth" }) }));
+  const wrap = el("li", { class: "inline-ed" }, box);
+  let row = null;
+  if (anchor && anchor.where === "catalog" && anchor.id === it.id) row = document.querySelector('#catalog li[data-cid="' + anchor.cid + '"]');
+  if (!row) row = document.querySelector('#placed li[data-id="' + it.id + '"]');
+  if (row) row.after(wrap); else { $("#fsel-box").hidden = false; $("#fsel-box").append(box); }
+  // picked in the plan or 3D: bring the details into view inside the side panel (desktop only — on phones the room stays on screen)
+  if ((!anchor || anchor.id !== it.id) && !isPhone() && row) requestAnimationFrame(() => wrap.scrollIntoView({ block: "nearest", behavior: "smooth" }));
 }
 
 function renderPlaced() {
@@ -74,8 +97,12 @@ function renderPlaced() {
     });
     priceIn.addEventListener("click", e => e.stopPropagation());
     const sel = ctx.sel && ctx.sel.kind === "item" && ctx.sel.id === it.id;
-    ul.append(el("li", { class: "pl" + (sel ? " on" : "") },
-      el("button", { type: "button", class: "pl-main", onclick: () => ctx.select("item", it.id) },
+    ul.append(el("li", { class: "pl" + (sel ? " on" : ""), "data-id": it.id },
+      el("button", { type: "button", class: "pl-main", "aria-expanded": String(!!sel), onclick: () => {
+        const was = ctx.sel && ctx.sel.id === it.id;
+        anchor = { where: "placed", id: it.id };
+        steady('#placed li[data-id="' + it.id + '"]', () => ctx.select(was ? null : "item", was ? undefined : it.id));
+      } },
         el("i", { class: "dot", style: "background:" + it.color }),
         el("span", {}, el("b", { text: it.name }), el("small", { text: fmtCm(it.w) + " × " + fmtCm(it.d) + " × " + fmtCm(it.h) })),
         bad ? el("span", { class: "flag " + (bad.some(x => x.kind === "err") ? "err" : "warn"), title: bad.map(x => x.text).join(", "), html: '<svg><use href="#i-warn"/></svg>' }) : null),
@@ -90,16 +117,20 @@ function renderCatalog() {
   ul.innerHTML = "";
   const list = CATALOG.filter(c => (cat === "All" || c.cat === cat) && (!q || (c.name + " " + c.cat + " " + c.q).toLowerCase().includes(q)));
   if (!list.length) { ul.append(el("li", { class: "empty muted small", text: "No furniture matches “" + q + "”." })); return; }
-  list.forEach(c => ul.append(el("li", {},
+  list.forEach(c => ul.append(el("li", { "data-cid": c.id },
     el("span", { class: "ci-ic", style: "--c:" + c.color }),
     el("span", { class: "ci-t" }, el("b", { text: c.name }), el("small", { text: Math.round(c.w * 100) + " × " + Math.round(c.d * 100) + (c.h > 0.05 ? " × " + Math.round(c.h * 100) : "") + " cm · " + c.cat })),
     el("button", { class: "icon-btn add", type: "button", "aria-label": "Add " + c.name, title: "Add to room", html: '<svg><use href="#i-plus"/></svg>', onclick: () => add(c.id) }))));
 }
 
 function add(id) {
-  const it = ctx.planOps.addItem(id);
+  let it = null;
+  steady('#catalog li[data-cid="' + id + '"]', () => {
+    anchor = { where: "catalog", cid: id, id: null };
+    it = ctx.planOps.addItem(id);
+    if (it) { anchor.id = it.id; renderSel(); }
+  });
   if (!it) return;
   const fit = ctx.planOps.checkFit(ctx.p.plan).get(it.id);
   toast(it.name + " added" + (fit ? " — " + fit[0].text.toLowerCase() + ", drag it into place." : ". Drag it into place."));
-  if (window.matchMedia("(max-width: 900px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
 }

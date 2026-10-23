@@ -119,7 +119,11 @@
     "Projects are saved in this browser. Photos only leave your device when you ask for an AI render.": ["Loyihalar shu brauzerda saqlanadi. Suratlar faqat AI vizualizatsiya so‘raganingizda qurilmadan chiqadi.", "Проекты хранятся в этом браузере. Фото покидают устройство, только когда вы запрашиваете AI-рендер."],
     "← Back to the room journey": ["← Bosh sahifaga qaytish", "← Назад на главную"],
     "Return to your project": ["Loyihangizga qayting", "Вернитесь к своему проекту"],
-    "Welcome<br>back.": ["Xush<br>kelibsiz.", "С<br>возвращением."],
+    "Welcome<br>back.": ["Yana xush<br>kelibsiz.", "С<br>возвращением."],
+    "Welcome<br>to Makon.": ["Makonga xush<br>kelibsiz.", "Добро пожаловать<br>в Makon."],
+    "Nice to meet you": ["Tanishganimizdan xursandmiz", "Рады знакомству"],
+    "Welcome to Makon": ["Makonga xush kelibsiz", "Добро пожаловать в Makon"],
+    "Welcome back": ["Yana xush kelibsiz", "С возвращением"],
     "Sign in to continue the same room across design, plan, 3D, furnishing and the build brief.": ["Dizayn, reja, 3D, jihozlash va topshiriq bo‘yicha xonangiz ustida ishlashni davom ettirish uchun kiring.", "Войдите, чтобы продолжить работу над комнатой: дизайн, план, 3D, мебель и ТЗ."],
     "Signed in as <b></b> — <a href=\"studio.html\">open your studio →</a>": ["Siz <b></b> sifatida kirgansiz — <a href=\"studio.html\">studiyani ochish →</a>", "Вы вошли как <b></b> — <a href=\"studio.html\">открыть студию →</a>"],
     "Already signed in as <b></b> — <a href=\"studio.html\">open your studio →</a>": ["Siz allaqachon <b></b> sifatida kirgansiz — <a href=\"studio.html\">studiyani ochish →</a>", "Вы уже вошли как <b></b> — <a href=\"studio.html\">открыть студию →</a>"],
@@ -175,6 +179,10 @@
     "Start from a template": ["Shablondan boshlang", "Начните с шаблона"],
     "Nine ready-made rooms — real plans, furniture and 3D. Open one and make it yours.": ["To‘qqizta tayyor xona — haqiqiy reja, mebel va 3D. Birini oching va o‘zingizniki qiling.", "Девять готовых комнат — настоящие планы, мебель и 3D. Откройте любую и сделайте её своей."],
     "See all templates <span>→</span>": ["Barcha shablonlar <span>→</span>", "Все шаблоны <span>→</span>"],
+    "Photo": ["Surat", "Фото"], "Another angle": ["Boshqa burchak", "Другой ракурс"], "Film": ["Film", "Видео"], "Short films": ["Qisqa filmlar", "Короткие видео"], "The moving image": ["Harakatdagi tasvir", "Движущееся изображение"],
+    "Walk through each room — from daylight to the moment the lamps come on. Every film can be downloaded.": ["Har bir xonani aylanib chiqing — kunduzgi yorug‘likdan chiroqlar yonguncha. Har bir filmni yuklab olish mumkin.", "Пройдитесь по каждой комнате — от дневного света до момента, когда загораются лампы. Каждое видео можно скачать."],
+    "Download": ["Yuklab olish", "Скачать"], "<span>↓</span> This picture": ["<span>↓</span> Shu surat", "<span>↓</span> Это изображение"], "<span>↓</span> Film (MP4)": ["<span>↓</span> Film (MP4)", "<span>↓</span> Видео (MP4)"], "<span>↓</span> Everything (ZIP)": ["<span>↓</span> Hammasi (ZIP)", "<span>↓</span> Всё (ZIP)"], "<span>↓</span> Project file": ["<span>↓</span> Loyiha fayli", "<span>↓</span> Файл проекта"],
+    "Open any room and change everything — walls, furniture, style, budget. Every photo and film here is rendered from the exact plan you open: same walls, same furniture, same places.": ["Istalgan xonani oching va hammasini o‘zgartiring — devorlar, mebel, uslub, byudjet. Bu yerdagi har bir surat va film siz ochadigan aynan shu rejadan chizilgan: o‘sha devorlar, o‘sha mebel, o‘sha joylar.", "Откройте любую комнату и меняйте всё — стены, мебель, стиль, бюджет. Каждое фото и видео здесь отрисовано по тому самому плану, который вы откроете: те же стены, та же мебель, те же места."],
     // page titles
     "Makon — Redesign your room with AI": ["Makon — xonangizni AI bilan qayta loyihalang", "Makon — редизайн комнаты с помощью AI"],
     "Sign in — Makon": ["Kirish — Makon", "Вход — Makon"], "Create account — Makon": ["Ro‘yxatdan o‘tish — Makon", "Регистрация — Makon"]
