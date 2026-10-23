@@ -742,3 +742,6 @@ body.teasing .tease-line { left: 42%; opacity: 1; }
   .stats { grid-template-columns: 1fr 1fr; row-gap: 34px; }
 }
 @media (prefers-reduced-motion: reduce) { .reel-row { animation: none; } .reel-track { overflow-x: auto; } }
+
+.foot-credit a { color: var(--white); text-decoration: underline; text-decoration-color: rgba(255,255,255,.3); text-underline-offset: 3px; }
+.foot-credit a:hover { text-decoration-color: currentColor; }

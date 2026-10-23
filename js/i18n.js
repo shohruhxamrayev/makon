@@ -110,6 +110,7 @@
     "From the room you have<br><span class=\"ital\">to the room you want.</span>": ["Bor xonangizdan<br><span class=\"ital\">orzuingizdagi xonagacha.</span>", "От комнаты, которая есть,<br><span class=\"ital\">к комнате мечты.</span>"],
     "Create a free account": ["Bepul hisob yaratish", "Создать бесплатный аккаунт"],
     "Try the sample room <span>→</span>": ["Namuna xonani sinab ko‘ring <span>→</span>", "Попробовать на примере <span>→</span>"],
+    "Founded by <a href=\"https://www.shohruhxamrayev.uz\" rel=\"author\">Shohruh Xamrayev</a>": ["Asoschisi: <a href=\"https://www.shohruhxamrayev.uz\" rel=\"author\">Shohruh Xamrayev</a>", "Основатель: <a href=\"https://www.shohruhxamrayev.uz\" rel=\"author\">Shohruh Xamrayev</a>"],
     "Makon — “a place to live”. Design one room at a time.": ["Makon — «yashash makoni». Har safar bitta xonani loyihalang.", "Makon — «место для жизни». Проектируйте по одной комнате."],
     "Create account": ["Ro‘yxatdan o‘tish", "Зарегистрироваться"],
     // sign in / sign up
