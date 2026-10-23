@@ -28,9 +28,9 @@ function renderFilters() {
 function renderGrid() {
   const items = TEMPLATES.filter(t => cat === "all" || t.cat === cat);
   $("#grid").innerHTML = items.map((t, i) => {
-    const tall = i % 2 === 1, st = STYLES[t.style] || {};
-    const img = tall ? pic(t.id, "d1") : pic(t.id), film = tall ? clip(t.id, "m1") : clip(t.id);
-    return `<a class="g-card${tall ? " tall" : ""}" href="${roomUrl(t.id)}">
+    const st = STYLES[t.style] || {};
+    const img = pic(t.id), film = clip(t.id, "m1");
+    return `<a class="g-card" href="${roomUrl(t.id)}">
       <span class="g-media"><img src="${img}" alt="${esc(T(t.name))}" loading="${i < 2 ? "eager" : "lazy"}"><video muted loop playsinline preload="none" aria-hidden="true">${sources(film)}</video><span class="g-plus" aria-hidden="true">+</span></span>
       <span class="g-meta"><span><h3>${esc(T(t.name))}</h3><small>${esc(T(roomName(t.room)))} · ${esc(st.name || "")}</small></span><span>${area(t).toFixed(1)} m²</span></span>
     </a>`;
@@ -38,7 +38,7 @@ function renderGrid() {
   hoverPlay($$("#grid .g-card"));
 }
 function renderClips() {
-  const pick = [["warm-living", "m1"], ["japandi-studio", "m3"], ["midnight-lounge", "m3"]];
+  const pick = [["warm-living", "m1"], ["japandi-studio", "m1"], ["midnight-lounge", "m1"]];
   $("#clips").innerHTML = pick.map(([id, m]) => {
     const t = TEMPLATES.find(x => x.id === id);
     return `<figure class="g-clip"><video controls muted loop playsinline preload="metadata" poster="${pic(id, m)}">${sources(clip(id, m))}</video>
