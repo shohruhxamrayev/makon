@@ -258,9 +258,13 @@
 
   const LANGS = ["en", "uz", "ru"], KEY = "makon_lang";
   const norm = s => String(s).replace(/\s+/g, " ").trim();
+  // English only for now. The Uzbek and Russian texts stay below so they can be switched back on later.
+  const ENGLISH_ONLY = true;
   let lang = "en";
-  try { lang = localStorage.getItem(KEY) || ""; } catch (e) {}
-  if (!LANGS.includes(lang)) { const n = (navigator.language || "en").slice(0, 2).toLowerCase(); lang = n === "uz" ? "uz" : n === "ru" ? "ru" : "en"; }
+  if (!ENGLISH_ONLY) {
+    try { lang = localStorage.getItem(KEY) || ""; } catch (e) {}
+    if (!LANGS.includes(lang)) { const n = (navigator.language || "en").slice(0, 2).toLowerCase(); lang = n === "uz" ? "uz" : n === "ru" ? "ru" : "en"; }
+  }
 
   function T(s) { if (lang === "en") return s; const e = D[norm(s)]; return e ? e[lang === "uz" ? 0 : 1] : s; }
   const SEL = "h1,h2,h3,p,summary,li,span,a,button,label,text,figcaption,b,option";
@@ -283,6 +287,7 @@
     document.dispatchEvent(new CustomEvent("makon:lang", { detail: lang }));
   }
   function setLang(l) {
+    if (ENGLISH_ONLY) l = "en";
     if (!LANGS.includes(l)) return;
     lang = l;
     try { localStorage.setItem(KEY, l); } catch (e) {}
