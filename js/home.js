@@ -6,7 +6,7 @@ const I = window.MakonI18n || { T: x => x, set: (el, k) => { if (el) el.innerHTM
 
 // ---------- signed-in aware header ----------
 const me = window.MakonAuth && MakonAuth.current();
-$$("[data-auth-link]").forEach(a => { a.href = me ? "studio.html" : "signin.html?next=studio.html"; });
+$$("[data-auth-link]").forEach(a => { a.href = "studio.html"; });
 if (me) {
   $$(".signin-link").forEach(a => { a.style.display = "none"; });
   const chip = $("#me-chip"); if (chip) { chip.hidden = false; $("#me-av").textContent = (me.name || "?").trim().charAt(0).toUpperCase(); chip.title = me.name || ""; }
@@ -53,3 +53,24 @@ new IntersectionObserver((es, o) => { if (!es[0].isIntersecting) return; o.disco
 // the template showreel only moves while it's on screen
 const reel = $(".reel-track");
 if (reel && "IntersectionObserver" in window) new IntersectionObserver(es => reel.classList.toggle("on", es[0].isIntersecting), { threshold: 0 }).observe(reel);
+
+// ---------- films: play silently while on screen; tap for sound (one at a time) ----------
+const films = $$(".ig-card video");
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    const v = e.target;
+    if (e.isIntersecting) { const p = v.play(); if (p) p.catch(() => {}); } else { v.pause(); }
+  }), { threshold: 0.35 });
+  films.forEach(v => io.observe(v));
+}
+function sound(v, on) {
+  films.forEach(o => { if (o !== v) { o.muted = true; o.parentElement.querySelector(".ig-snd").setAttribute("aria-pressed", "false"); } });
+  v.muted = !on; const b = v.parentElement.querySelector(".ig-snd");
+  b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-label", on ? "Turn sound off" : "Turn sound on");
+  if (on) { v.currentTime = 0; const p = v.play(); if (p) p.catch(() => {}); }
+}
+films.forEach(v => {
+  const b = v.parentElement.querySelector(".ig-snd");
+  const toggle = () => sound(v, v.muted);
+  b.addEventListener("click", toggle); v.addEventListener("click", toggle);
+});

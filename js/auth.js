@@ -55,6 +55,8 @@
       if (users[s.email]) { users[s.email].name = name; write(USERS, users); }
     },
     _start(u) {
+      const prev = Auth.current();
+      if (prev && prev.guest && !u.guest) { try { localStorage.setItem("makon_claim", prev.email); } catch (e) {} }
       const s = { name: u.name, email: u.email, guest: !!u.guest, at: Date.now() };
       memSession = s;
       write(SESSION, s);

@@ -19,7 +19,7 @@ export const sources = c => `<source src="${c.webm}" type="video/webm"><source s
 
 // signed-in aware links + header behaviour
 export const me = window.MakonAuth && MakonAuth.current();
-export const studioLink = q => me ? "studio.html" + q : "signin.html?next=" + encodeURIComponent("studio.html" + q);
+export const studioLink = q => "studio.html" + q;
 export function initHeader() {
   $$("[data-auth-link]").forEach(a => { a.href = studioLink(""); });
   if (me) { $$(".signin-link").forEach(a => { a.style.display = "none"; }); $$(".cta-txt").forEach(e => I.set(e, "Open Studio")); }

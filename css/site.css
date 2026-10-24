@@ -750,3 +750,5 @@ body.teasing .tease-line { left: 42%; opacity: 1; }
 
 .foot-credit a { color: var(--white); text-decoration: underline; text-decoration-color: rgba(255,255,255,.3); text-underline-offset: 3px; }
 .foot-credit a:hover { text-decoration-color: currentColor; }
+.cta-note { margin-top: 22px; font-size: 13px; letter-spacing: .04em; color: var(--muted, #8a8174); }
+.foot-ig { display: inline-flex; align-items: center; gap: 6px; }

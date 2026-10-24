@@ -10,8 +10,7 @@ import { TEMPLATES, templateById, templateImage, buildPlan } from "./templates.j
 import { STYLES } from "./data.js";
 import { polyArea } from "./geom.js";
 
-const user = window.MakonAuth && MakonAuth.current();
-if (!user) { location.replace("signin.html?next=studio.html"); throw new Error("not signed in"); }
+const user = window.MakonAuth && (MakonAuth.current() || MakonAuth.demo());
 
 const MODES = ["design", "plan", "3d", "furnish", "build"];
 const LAST = "makon_last_" + user.email;
@@ -46,7 +45,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // ---------- user ----------
 $("#uname").textContent = user.name || "Guest";
-$("#uemail").textContent = user.guest ? "Guest session" : user.email;
+$("#uemail").innerHTML = user.guest ? 'Guest · <a href="signup.html?next=studio.html" class="me-join">Create free account</a>' : esc(user.email);
 $("#avatar").textContent = (user.name || "?").trim().charAt(0).toUpperCase();
 $("#signout").addEventListener("click", async () => {
   if (user.guest && !(await confirmBox("Leave guest mode?", "Guest projects stay in this browser and will be here if you continue as guest again.", "Sign out", false))) return;
@@ -314,6 +313,11 @@ async function checkAI() {
 (async function boot() {
   Design.init(ctx); Plan.init(ctx); Three.init(ctx); Furnish.init(ctx); Build.init(ctx);
   if (!(await persistent())) $("#side-note").textContent = "This browser is blocking storage, so rooms only last until you close the tab. Export to keep them.";
+  // rooms made as a guest move into the account the person just created
+  let claim = null; try { claim = localStorage.getItem("makon_claim"); } catch (e) {}
+  if (claim && !user.guest && claim !== user.email) {
+    try { for (const g of await listProjects(claim)) { g.owner = user.email; await putProject(g); } localStorage.removeItem("makon_claim"); } catch (e) { console.warn(e); }
+  }
   await refreshList();
   const qt = new URLSearchParams(location.search).get("template");
   if (qt && templateById(qt)) {

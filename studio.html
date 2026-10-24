@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Studio — Makon</title>
   <meta name="theme-color" content="#f0eadf">
+  <meta property="og:title" content="Makon — Design your room before you move a thing">
+  <meta property="og:description" content="AI redesign, 3D plan and real furniture for your room. Free, no sign-up needed.">
+  <meta property="og:image" content="https://makon-khaki.vercel.app/img/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -14,7 +18,7 @@
   <link rel="stylesheet" href="css/studio.css">
   <script src="js/auth.js"></script>
   <script>
-    if (!MakonAuth.current()) location.replace("signin.html?next=studio.html");
+    if (!MakonAuth.current()) MakonAuth.demo(); // try first, sign up later
   </script>
 </head>
 <body class="studio" data-mode="design">

@@ -8,7 +8,9 @@
   <meta name="theme-color" content="#121614">
   <meta property="og:title" content="Makon — Redesign your room with AI">
   <meta property="og:description" content="From the room you have to the room you want: redesign, plan, 3D, furnish and budget in one place.">
-  <meta property="og:image" content="https://makon-khaki.vercel.app/img/room-after.jpg">
+  <meta property="og:image" content="https://makon-khaki.vercel.app/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <link rel="canonical" href="https://makon-khaki.vercel.app/">
   <meta name="author" content="Shohruh Xamrayev">
   <meta property="og:url" content="https://makon-khaki.vercel.app/">
@@ -127,10 +129,26 @@
         </div>
       </div>
       <div class="stats">
-        <div><b>10</b><span>interior styles</span></div>
-        <div><b>9</b><span>ready-made rooms</span></div>
+        <div><b>13</b><span>interior styles</span></div>
+        <div><b>12</b><span>rooms to start from</span></div>
         <div><b>5</b><span>free AI renders a day</span></div>
-        <div><b>3</b><span>languages · EN · UZ · RU</span></div>
+        <div><b>0</b><span>sign-ups needed to start</span></div>
+      </div>
+    </section>
+
+
+    <section class="sec ig" id="films" aria-labelledby="ig-h">
+      <div class="ig-head">
+        <span class="label accent">In motion</span>
+        <h2 id="ig-h">Rooms you can<br><span class="ital">almost walk into.</span></h2>
+        <p>Short films of rooms designed in Makon. Tap one for sound — and follow along for a new room every week.</p>
+        <a class="link-line label" href="https://www.instagram.com/makon.build/" target="_blank" rel="noopener me">Follow @makon.build <span>↗</span></a>
+      </div>
+      <div class="ig-row">
+          <figure class="ig-card"><video muted loop playsinline preload="none" poster="img/reels/mix.jpg" aria-label="Makon in 10 seconds — short film"><source src="img/reels/mix.mp4" type="video/mp4"></video><button type="button" class="ig-snd" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button><figcaption>Makon in 10 seconds</figcaption></figure>
+          <figure class="ig-card"><video muted loop playsinline preload="none" poster="img/reels/ivory.jpg" aria-label="Ivory Residence — short film"><source src="img/reels/ivory.mp4" type="video/mp4"></video><button type="button" class="ig-snd" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button><figcaption>Ivory Residence</figcaption></figure>
+          <figure class="ig-card"><video muted loop playsinline preload="none" poster="img/reels/concrete.jpg" aria-label="Concrete & Oak House — short film"><source src="img/reels/concrete.mp4" type="video/mp4"></video><button type="button" class="ig-snd" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button><figcaption>Concrete & Oak House</figcaption></figure>
+          <figure class="ig-card"><video muted loop playsinline preload="none" poster="img/reels/library.jpg" aria-label="Oak Library Lounge — short film"><source src="img/reels/library.mp4" type="video/mp4"></video><button type="button" class="ig-snd" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button><figcaption>Oak Library Lounge</figcaption></figure>
       </div>
     </section>
 
@@ -146,8 +164,8 @@
           <p>Yes. Planning, 3D, furnishing, templates and the build brief are free with no card. Every person also gets 5 free AI renders a day (they reset at 05:00 Tashkent time), and instant mood previews are unlimited.</p>
         </details>
         <details>
-          <summary>Do I need design skills or an app?</summary>
-          <p>No. Makon runs in your browser on a phone or a computer. Take one photo, pick a style you like and Makon does the rest — or start from a ready-made room and change what you want.</p>
+          <summary>Do I need design skills, an app or an account?</summary>
+          <p>No. Makon runs in your browser on a phone or a computer, and you can start without signing up. Take one photo, pick a style you like and Makon does the rest — or start from a ready-made room and change what you want.</p>
         </details>
         <details>
           <summary>What will my room look like — will it still be my room?</summary>
@@ -187,16 +205,17 @@
     <section class="sec cta-end">
       <h2>From the room you have<br><span class="ital">to the room you want.</span></h2>
       <div class="links center">
-        <a class="btn-light label" href="signup.html?next=studio.html">Create a free account</a>
-        <a class="link-line label" href="studio.html" data-auth-link>Try the sample room <span>→</span></a>
+        <a class="btn-light label" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+        <a class="link-line label" href="templates.html">Browse templates <span>→</span></a>
       </div>
+      <p class="cta-note">Free · no sign-up needed · works on your phone</p>
     </section>
 
     <footer class="foot">
       <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"></a>
       <span>Makon — “a place to live”. Design one room at a time.</span>
       <span class="foot-credit">Founded by <a href="https://www.shohruhxamrayev.uz" rel="author">Shohruh Xamrayev</a></span>
-      <nav><a href="templates.html">Templates</a><a href="signin.html">Sign in</a><a href="signup.html">Create account</a><a href="#tools">Tools</a><a href="#faq">FAQ</a></nav>
+      <nav><a href="templates.html">Templates</a><a href="signin.html">Sign in</a><a href="signup.html">Create account</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a class="foot-ig" href="https://www.instagram.com/makon.build/" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor"/></svg>@makon.build</a></nav>
     </footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
