@@ -2,7 +2,10 @@
 import { TEMPLATES, TEMPLATE_CATS } from "./studio/templates.js";
 import { STYLES, roomName } from "./studio/data.js";
 import { polyArea } from "./studio/geom.js";
-import { $, $$, T, esc, pad, pic, clip, clipSm, thumb, srcset, sources, initHeader, autoplayInView, hoverPlay } from "./gallery-common.js";
+import { $, $$, T, esc, pad, pic, clip, clipSm, thumb, srcset, sources, initHeader, autoplayInView, hoverPlay, lightbox } from "./gallery-common.js";
+const lb = lightbox();
+const VIEWS = [["", "Daylight"], ["d1", "Close-up"], ["angle", "Another angle"], ["evening", "Evening, lamps on"], ["plan", "Floor plan"]];
+const quick = t => VIEWS.map(([s, c]) => ({ src: pic(t.id, s), thumb: thumb(t.id, s), cap: T(t.name) + " — " + T(c), name: "makon-" + t.id + (s ? "-" + s : "") + ".jpg", room: roomUrl(t.id) }));
 
 initHeader();
 const area = t => polyArea(t.pts || [[0, 0], [t.w, 0], [t.w, t.d], [0, t.d]]);
@@ -30,12 +33,14 @@ function renderGrid() {
   $("#grid").innerHTML = items.map((t, i) => {
     const st = STYLES[t.style] || {};
     const film = clipSm(t.id, "m1");
-    return `<a class="g-card" href="${roomUrl(t.id)}">
-      <span class="g-media"><img src="${thumb(t.id)}" srcset="${srcset(t.id)}" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(T(t.name))}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async"><video muted loop playsinline preload="none" aria-hidden="true">${sources(film)}</video><span class="g-plus" aria-hidden="true">+</span></span>
-      <span class="g-meta"><span><h3>${esc(T(t.name))}</h3><small>${esc(T(roomName(t.room)))} · ${esc(st.name || "")}</small></span><span>${area(t).toFixed(1)} m²</span></span>
-    </a>`;
+    return `<div class="g-card">
+      <div class="g-mbox"><a class="g-media" href="${roomUrl(t.id)}" aria-label="${esc(T(t.name))}"><img src="${thumb(t.id)}" srcset="${srcset(t.id)}" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(T(t.name))}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async"><video muted loop playsinline preload="none" aria-hidden="true">${sources(film)}</video></a>
+        <button type="button" class="g-plus" data-id="${t.id}" aria-label="Quick view: ${esc(T(t.name))} photos" title="Quick view">+</button></div>
+      <a class="g-meta" href="${roomUrl(t.id)}"><span><h3>${esc(T(t.name))}</h3><small>${esc(T(roomName(t.room)))} · ${esc(st.name || "")}</small></span><span>${area(t).toFixed(1)} m²</span></a>
+    </div>`;
   }).join("");
   hoverPlay($$("#grid .g-card"));
+  $$("#grid .g-plus").forEach(b => b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); lb.open(quick(TEMPLATES.find(x => x.id === b.dataset.id)), 0); }));
 }
 function renderClips() {
   const pick = [["warm-living", "m1"], ["japandi-studio", "m1"], ["midnight-lounge", "m1"]];

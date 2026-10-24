@@ -15,7 +15,7 @@ const lb = lightbox();
 
 // every photo, in the order the page shows them
 const SHOTS = [["", "Daylight"], ["d1", "Detail"], ["angle", "Another angle"], ["evening", "Evening, lamps on"], ["plan", "Floor plan"]];
-const items = () => SHOTS.map(([s, c], k) => ({ src: pic(t.id, s), cap: T(t.name) + " — " + T(c), name: "makon-" + t.id + (s ? "-" + s : "") + ".jpg", k }));
+const items = () => SHOTS.map(([s, c], k) => ({ src: pic(t.id, s), thumb: thumb(t.id, s), cap: T(t.name) + " — " + T(c), name: "makon-" + t.id + (s ? "-" + s : "") + ".jpg", k }));
 
 function render() {
   document.title = T(t.name) + " — Makon";

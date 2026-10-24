@@ -74,39 +74,50 @@ export function hoverPlay(cards) {
 export function lightbox() {
   const box = document.createElement("div");
   box.className = "glb"; box.hidden = true; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true");
-  box.innerHTML = `<div class="glb-top"><span class="glb-count"></span><div class="glb-r"><a class="glb-dl" href="#" download>${T("Download")} ↓</a><button type="button" class="glb-x">${T("Close")} ×</button></div></div>
-    <div class="glb-stage"><button type="button" class="glb-arrow prev" aria-label="${T("Previous")}">←</button><img alt=""><button type="button" class="glb-arrow next" aria-label="${T("Next")}">→</button></div>
-    <div class="glb-cap"></div>`;
+  box.innerHTML = `<div class="glb-top"><span class="glb-count"></span><div class="glb-r"><a class="glb-room" href="#" hidden>Open this room ↗</a><a class="glb-dl" href="#" download>Download ↓</a><button type="button" class="glb-x">Close ×</button></div></div>
+    <div class="glb-stage"><button type="button" class="glb-arrow prev" aria-label="Previous">←</button><img alt="" draggable="false"><span class="glb-spin" aria-hidden="true"></span><button type="button" class="glb-arrow next" aria-label="Next">→</button></div>
+    <div class="glb-bot"><button type="button" class="glb-b prev" aria-label="Previous">←</button><span class="glb-cap"></span><button type="button" class="glb-b next" aria-label="Next">→</button></div>`;
   document.body.append(box);
-  let items = [], i = 0, last = null;
+  let items = [], i = 0, last = null, token = 0;
   const img = $("img", box);
+  // instant: show the light copy straight away, swap in the full-size photo the moment it arrives
   const paint = () => {
-    const it = items[i];
-    img.classList.add("fade");
-    const n = new Image(); n.src = it.src;
-    const show = () => { img.src = it.src; img.alt = it.cap; img.classList.remove("fade"); };
-    if (n.complete) show(); else { n.onload = show; n.onerror = show; }
+    const it = items[i], my = ++token;
+    const full = new Image(); full.decoding = "async"; full.src = it.src;
+    if (full.complete) { img.src = it.src; box.classList.remove("loading"); }
+    else {
+      img.src = it.thumb || it.src; box.classList.add("loading");
+      full.onload = () => { if (my === token) { img.src = it.src; box.classList.remove("loading"); } };
+      full.onerror = () => { if (my === token) box.classList.remove("loading"); };
+    }
+    img.alt = it.cap;
     $(".glb-count", box).textContent = pad(i + 1) + " / " + pad(items.length);
     $(".glb-cap", box).textContent = it.cap;
     const dl = $(".glb-dl", box); dl.href = it.src; dl.setAttribute("download", it.name || it.src.split("/").pop());
-    // preload neighbours
+    const rm = $(".glb-room", box); rm.hidden = !it.room; if (it.room) rm.href = it.room;
+    // warm up the neighbours so the next tap is instant
     [items[(i + 1) % items.length], items[(i - 1 + items.length) % items.length]].forEach(x => { const p = new Image(); p.src = x.src; });
   };
-  const step = d => { i = (i + d + items.length) % items.length; paint(); };
+  const step = d => { if (items.length < 2) return; i = (i + d + items.length) % items.length; paint(); };
   const close = () => { box.classList.remove("show"); document.body.classList.remove("lb-open"); setTimeout(() => { box.hidden = true; }, 250); if (last) last.focus({ preventScroll: true }); };
   $(".glb-x", box).addEventListener("click", close);
-  $(".prev", box).addEventListener("click", () => step(-1));
-  $(".next", box).addEventListener("click", () => step(1));
-  $(".glb-stage", box).addEventListener("click", e => { if (e.target.classList.contains("glb-stage")) close(); });
+  box.querySelectorAll(".prev").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); step(-1); }));
+  box.querySelectorAll(".next").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); step(1); }));
+  // tap the picture: right half → next, left half → previous; tap the dark area → close
+  $(".glb-stage", box).addEventListener("click", e => {
+    if (e.target === img) { const r = img.getBoundingClientRect(); step(e.clientX > r.left + r.width / 2 ? 1 : -1); }
+    else if (e.target.classList.contains("glb-stage")) close();
+  });
   document.addEventListener("keydown", e => {
     if (box.hidden) return;
     if (e.key === "Escape") close(); if (e.key === "ArrowLeft") step(-1); if (e.key === "ArrowRight") step(1);
   });
-  let sx = null;
-  box.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
-  box.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); sx = null; });
+  let sx = null, sy = null;
+  box.addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  box.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1); else if (dy > 90) close(); sx = null; });
   return {
-    open(list, start = 0) { items = list; i = start; last = document.activeElement; box.hidden = false; document.body.classList.add("lb-open"); requestAnimationFrame(() => box.classList.add("show")); paint(); $(".glb-x", box).focus(); },
-    relabel() { $(".glb-dl", box).innerHTML = T("Download") + " ↓"; $(".glb-x", box).textContent = T("Close") + " ×"; }
+    open(list, start = 0) { items = list; i = start; last = document.activeElement; box.hidden = false; box.classList.toggle("single", list.length < 2); document.body.classList.add("lb-open"); requestAnimationFrame(() => box.classList.add("show")); paint(); $(".glb-x", box).focus({ preventScroll: true }); },
+    relabel() {}
   };
 }
+
