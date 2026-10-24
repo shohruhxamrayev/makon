@@ -45,7 +45,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // ---------- user ----------
 $("#uname").textContent = user.name || "Guest";
-$("#uemail").innerHTML = user.guest ? 'Guest · <a href="signup.html?next=studio.html" class="me-join">Create free account</a>' : esc(user.email);
+$("#uemail").innerHTML = user.guest ? '<a href="signup.html?next=studio.html" class="me-join">Create free account</a>' : esc(user.email);
 $("#avatar").textContent = (user.name || "?").trim().charAt(0).toUpperCase();
 $("#signout").addEventListener("click", async () => {
   if (user.guest && !(await confirmBox("Leave guest mode?", "Guest projects stay in this browser and will be here if you continue as guest again.", "Sign out", false))) return;

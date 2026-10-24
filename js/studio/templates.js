@@ -11,6 +11,40 @@ export const TEMPLATE_CATS = [["all", "All"], ["living", "Living"], ["bedroom", 
 
 export const TEMPLATES = [
   {
+    id: "noir-bedroom", name: "Noir bedroom", cat: "bedroom", room: "bedroom", style: "noir", w: 5.2, d: 5.4, height: 2.85, premium: true,
+    desc: "A low upholstered bed against a grooved head wall framed by dark walnut slats, floating nightstands under black disc pendants and a full-height wardrobe wall.",
+    openings: [{ wall: 1, type: "window", t: 0.65, w: 2.6, h: 2.6, sill: 0.05 }, { wall: 2, type: "door", t: 0.12 }],
+    items: [
+      { id: "king", wall: 0, t: 0.5, w: 2.04, d: 2.3, color: "#8f8478" }, { id: "nightstand", wall: 0, t: 0.227, w: 0.6, d: 0.42, color: "#3a2a1f" }, { id: "nightstand", wall: 0, t: 0.773, w: 0.6, d: 0.42, color: "#3a2a1f" },
+      { id: "wardrobe", wall: 3, t: 0.42, w: 2.6, d: 0.6, h: 2.8, color: "#4a3527" }, { id: "console", wall: 3, t: 0.8052, w: 1.56, d: 0.6, color: "#3a2a1f" },
+      { id: "rug", x: 2.6, y: 2.0, w: 3.3, d: 3.3, color: "#d8d0c2" }, { id: "pouf", x: 1.0, y: 4.75, color: "#e9e4da" }, { id: "plant", x: 4.85, y: 0.95 }
+    ]
+  },
+  {
+    id: "obsidian-lounge", name: "Obsidian lounge", cat: "living", room: "living", style: "noir", w: 7.4, d: 6.0, height: 2.95, premium: true,
+    desc: "Dark slatted walls, a warm marble slab behind a floating cream TV unit, a long low modular sofa and glass from floor to ceiling.",
+    openings: [{ wall: 1, type: "window", t: 0.5, w: 5.0, h: 2.85, sill: 0.05 }, { wall: 2, type: "door", t: 0.12 }],
+    items: [
+      { id: "tvunit", wall: 0, t: 0.42, w: 3.2, d: 0.42, color: "#ece6dc" }, { id: "tv", wall: 0, t: 0.42, w: 1.45, color: "#111111", elev: 1.1 },
+      { id: "corner", x: 3.6, y: 4.4, rot: 180, w: 4.6, d: 2.4, color: "#d9cfbf" }, { id: "coffeer", x: 3.33, y: 2.75, w: 1.5, d: 0.75, color: "#121212" },
+      { id: "pouf", x: 5.18, y: 2.3, w: 1.0, d: 1.0, color: "#d9cfbf" }, { id: "rug", x: 3.5, y: 3.2, w: 4.6, d: 3.4, color: "#b9b2a6" },
+      { id: "floorlamp", x: 0.7, y: 3.2, color: "#1a1a1a" }, { id: "plant", x: 0.6, y: 0.6 }
+    ]
+  },
+  {
+    id: "umber-kitchen", name: "Umber kitchen-living", cat: "kitchen", room: "kitchen", style: "noir", w: 8.0, d: 6.2, height: 3.0, premium: true,
+    desc: "One open space: a dark island with a thick stone top under a linear light, tall walnut cabinets around a lit marble niche, and a sofa by the window.",
+    openings: [{ wall: 1, type: "window", t: 0.5, w: 5.0, h: 2.9, sill: 0.05 }, { wall: 3, type: "door", t: 0.8 }],
+    items: [
+      { id: "fridge", wall: 0, t: 0.075, color: "#2e231c" }, { id: "basecab", wall: 0, t: 0.15625, color: "#2e231c" }, { id: "sinkunit", wall: 0, t: 0.24375, color: "#2e231c" },
+      { id: "cooker", wall: 0, t: 0.33125, color: "#1a1a1a" }, { id: "basecab", wall: 0, t: 0.40625, color: "#2e231c" }, { id: "basecab", wall: 0, t: 0.48125, color: "#2e231c" },
+      { id: "island", x: 3.04, y: 2.35, w: 3.0, d: 1.0, color: "#2a1f19" },
+      { id: "stool", x: 2.24, y: 3.1 }, { id: "stool", x: 2.84, y: 3.1 }, { id: "stool", x: 3.44, y: 3.1 },
+      { id: "sofa2", x: 6.26, y: 5.1, rot: 180, w: 2.6, d: 1.0, color: "#d6ccbb" }, { id: "coffeer", x: 6.24, y: 4.05, w: 1.1, d: 0.6, color: "#121212" },
+      { id: "rug", x: 6.24, y: 4.4, w: 2.6, d: 2.6, color: "#b5ada0" }, { id: "plant", x: 7.5, y: 0.8 }
+    ]
+  },
+  {
     id: "warm-living", name: "Warm living room", cat: "living", room: "living", style: "warm", w: 5.2, d: 4.0,
     desc: "A sofa facing the TV wall, a low oak table on a wool rug and a reading chair turned toward the window.",
     openings: [{ wall: 0, type: "window", t: 0.5, w: 1.6 }, { wall: 2, type: "door", t: 0.25 }],
