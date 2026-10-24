@@ -71,6 +71,24 @@ export const STYLES = {
     mats: [["Walls", "Warm white"], ["Floor", "Teak parquet"], ["Sofa", "Mustard wool, tapered legs"], ["Tables", "Teak, oval"], ["Textiles", "Geometric rug"], ["Accents", "Teal ceramics, arc lamp"]],
     prompt: "mid-century modern interior: teak furniture with tapered legs, mustard wool sofa, oval teak coffee table, geometric rug, arc floor lamp, teal accents"
   },
+  ivory: {
+    name: "Ivory Calm", note: "Ivory panels, oak, black stone", palette: ["#f2efe9", "#e2dbcf", "#c9b79c", "#8a6a4a", "#1d1a18"],
+    t: { lift: 10, contrast: 1.02, sat: 0.78, warm: 0.12 }, wall: "#efebe4", floor: "stone",
+    mats: [["Walls", "Ivory lacquer panels with shadow gaps"], ["Floor", "Light terrazzo-look porcelain"], ["Sofa", "Ivory modular, rounded edges"], ["Tables", "Round oak, black marble plinths"], ["Textiles", "Bouclé, chunky knit pouf"], ["Accents", "Linear slot lights, halo ceiling lamp"]],
+    prompt: "warm minimalist ivory interior: ivory lacquer wall panels with shadow gaps, light terrazzo floor, ivory modular sofa with rounded edges, cream boucle armchairs, round oak coffee table, black marble plinth, slim linear ceiling lights, oversized halo ceiling lamp, soft diffuse daylight, premium architectural photography"
+  },
+  stone: {
+    name: "Concrete & Oak", note: "Raw concrete, warm oak, bouclé", palette: ["#e9e6e0", "#b9b2a6", "#c39a6b", "#3b3633", "#151413"],
+    t: { lift: 2, contrast: 1.06, sat: 0.8, warm: 0.15 }, wall: "#c9c4bc", floor: "concrete",
+    mats: [["Walls", "Board-formed concrete, white panels"], ["Floor", "Large dark stone tiles"], ["Sofa", "Cream bouclé, low and deep"], ["Tables", "Floating white bench, oak"], ["Textiles", "Jute rug, linen sheers"], ["Accents", "Oak volumes, black tube pendants"]],
+    prompt: "concrete and oak minimalist interior: raw board-formed concrete walls, warm quarter-sawn oak volumes, large dark stone floor tiles with white veins, low cream boucle sofa, floating white bench, black tube pendants, linen sheers, soft daylight, premium architectural photography"
+  },
+  noir: {
+    name: "Dark Modern", note: "Walnut slats, stone, warm light", palette: ["#1c1815", "#3a2a1f", "#8f8478", "#d8d0c2", "#ece6dc"],
+    t: { lift: -10, contrast: 1.1, sat: 0.85, warm: 0.25 }, wall: "#2a2725", floor: "walnut",
+    mats: [["Walls", "Dark walnut slats, grooved panels"], ["Floor", "Wide smoked-oak boards"], ["Sofa", "Cream bouclé, low modular"], ["Tables", "Black lacquer, warm marble"], ["Textiles", "Sheer linen, charcoal wool throw"], ["Accents", "Hidden LED strips, black disc pendants"]],
+    prompt: "dark modern minimalist interior: floor-to-ceiling dark walnut slat walls, grooved light panels, warm marble slab, low cream modular sofa, black lacquer oval coffee table, hidden warm LED cove lighting, slim linear ceiling lights, sheer floor-length curtains, moody premium architectural photography"
+  },
   minimal: {
     name: "Gallery Minimal", note: "White, black, oak", palette: ["#f7f7f5", "#e4e2dd", "#bdb8ae", "#1c1c1c", "#c8a77a"],
     t: { lift: 12, contrast: 1.06, sat: 0.7, warm: -0.05 }, wall: "#f6f6f3", floor: "ash",

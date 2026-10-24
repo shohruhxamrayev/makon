@@ -194,3 +194,28 @@ button.g-plus:hover, button.g-plus:focus-visible { background: #111; color: #fff
   .glb-top a, .glb-top button { padding: 8px 10px; font-size: 12px; }
   .glb-dl { font-size: 0 !important; } .glb-dl::after { content: "↓"; font-size: 15px; }
 }
+
+/* Signature interiors: tall photos, all 4:5 */
+.s-gal { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 4vw, 64px); }
+.s-gal figure { margin: 0; }
+.s-gal .s-media, body.sig .r-next-img img { aspect-ratio: 4 / 5 !important; cursor: zoom-in; }
+.s-gal figcaption { padding-top: 12px; font-size: 13px; color: var(--g-mute); }
+.s-gal figure:hover .g-plus { opacity: 1; transform: none; }
+.s-motion { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 40px; align-items: center; }
+.s-motion-text p { color: rgba(255,255,255,.6); margin: 16px 0 0; }
+.s-reel { margin: 0; }
+.s-reel video { width: 100%; aspect-ratio: 9 / 16; background: #000; display: block; }
+/* Signature row on the templates page */
+.sig-sec { margin-bottom: clamp(60px, 8vw, 110px); }
+.sig-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 26px; }
+.sig-head p { max-width: 460px; margin: 0; color: var(--g-mute); line-height: 1.6; }
+.sig-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+.sig-grid .g-media { aspect-ratio: 4 / 5 !important; }
+@media (max-width: 900px) {
+  .s-gal { grid-template-columns: 1fr; }
+  .s-motion { grid-template-columns: 1fr; }
+  .s-reel { max-width: 360px; }
+  .sig-grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .sig-grid::-webkit-scrollbar { display: none; }
+  .sig-grid > * { scroll-snap-align: start; }
+}

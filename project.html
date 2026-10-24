@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Signature interior — Makon</title>
+  <meta name="description" content="Ready-made rooms you can open and change: living rooms, bedrooms, a studio flat, kitchens, an office, a kids' room and a bathroom — each a real plan, 3D model and furniture list.">
+  <meta name="theme-color" content="#f0eadf">
+  <meta property="og:title" content="Makon templates — ready-made rooms">
+  <meta property="og:image" content="img/templates/warm-living.jpg">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="tplpage gal sig">
+  <a class="skip-link" href="#room">Skip to content</a>
+  <header class="lhead" id="lhead">
+    <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-ink.svg" alt="Makon" width="118" height="34"></a>
+    <nav class="lnav" aria-label="Main">
+      <a class="lnav-a" href="index.html">Home</a>
+      <a class="lnav-a on" href="templates.html">Templates</a>
+      <a class="lnav-a" href="index.html#faq">FAQ</a>
+      <a class="lnav-a signin-link" href="signin.html">Sign in</a>
+      <a class="lcta" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+      <button class="lmenu" id="lmenu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="lmnav"><i></i><i></i></button>
+    </nav>
+  </header>
+  <div class="lmnav" id="lmnav" hidden>
+    <a href="index.html">Home</a><a href="templates.html">Templates</a><a href="index.html#faq">FAQ</a><a class="signin-link" href="signin.html">Sign in</a>
+    <a class="lcta big" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+  </div>
+
+  <main id="room">
+    <div class="g-wrap">
+      <section class="r-top">
+        <div>
+          <a class="r-back" href="templates.html#signature">← <span>All interiors</span></a>
+          <span class="g-eyebrow" id="r-cat"></span>
+          <h1 class="g-h1" id="r-name"></h1>
+        </div>
+        <div class="r-side">
+          <p id="r-desc"></p>
+          <dl class="r-facts" id="r-facts"></dl>
+          <div class="r-pal" id="r-pal"></div>
+          <div class="r-actions"><a class="r-btn" id="r-use" href="studio.html"><span>Use this look on my room</span> ↗</a><a class="r-btn ghost" href="#motion"><span>Watch the film</span></a></div>
+          <div class="r-dl"><a id="dl-reel" href="#" download>↓ <span>Film for Reels &amp; Shorts (MP4)</span></a></div>
+        </div>
+      </section>
+      <section class="s-gal" id="s-gal"></section>
+    </div>
+
+    <section class="g-wrap r-look" id="look" aria-labelledby="look-h">
+      <div class="r-look-head"><span class="g-eyebrow">Make it yours</span><h2 class="g-h2" id="look-h">Get this look.</h2><p class="g-lead">The colours, the materials and the furniture to recreate this interior at home.</p></div>
+      <div class="r-look-grid">
+        <div><h3 class="r-h3">Colours</h3><div class="r-swatches" id="r-swatches"></div><p class="r-note"><span>Tap a colour to copy its code.</span></p></div>
+        <div><h3 class="r-h3">Materials</h3><dl class="r-mats" id="r-mats"></dl></div>
+        <div class="r-shop-col"><h3 class="r-h3">Shopping list</h3><ol class="r-shop" id="r-shop"></ol></div>
+      </div>
+    </section>
+
+    <section class="g-motion" id="motion" aria-labelledby="mo-h">
+      <div class="g-wrap s-motion">
+        <div class="s-motion-text"><span class="g-eyebrow light">In motion</span><h2 class="g-h2" id="mo-h">The moving image.</h2><p>Made for Reels and Shorts — 1080 × 1920, ready to post.</p></div>
+        <figure class="s-reel"><video id="reel" controls muted loop playsinline preload="none"></video></figure>
+      </div>
+    </section>
+
+    <div class="g-wrap"><a class="r-next" id="r-next" href="#"><div><span class="g-eyebrow">Next interior</span><h2 class="g-h2" id="r-next-name"></h2></div><span class="g-arrow">↗</span><div class="r-next-img" id="r-next-img"></div></a></div>
+
+    <section class="g-end">
+      <div class="g-wrap">
+        <span class="g-eyebrow light">Have a room in mind?</span>
+        <div class="g-end-row"><h2>Let's make it<br>feel like home.</h2><a class="g-arrow" href="studio.html" data-auth-link aria-label="Start designing">↗</a></div>
+        <div class="g-end-links"><a href="studio.html" data-auth-link>Start with your own photo</a><a href="templates.html">All templates</a></div>
+        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="signin.html">Sign in</a></nav></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+  <script type="module" src="js/project-page.js"></script>
+</body>
+</html>
