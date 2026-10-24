@@ -10,6 +10,10 @@ export const pad = n => String(n).padStart(2, "0");
 const B = "img/templates/";
 export const pic = (id, s) => B + id + (s ? "-" + s : "") + ".jpg";
 export const clip = (id, s) => ({ webm: B + id + (s ? "-" + s : "") + ".webm", mp4: B + id + (s ? "-" + s : "") + ".mp4" });
+// lighter copies for grids, posters and clips playing on the page (full size stays for the viewer and downloads)
+export const thumb = (id, s) => B + "sm/" + id + (s ? "-" + s : "") + ".jpg";
+export const clipSm = (id, s) => ({ webm: B + "sm/" + id + "-" + s + ".webm", mp4: B + "sm/" + id + "-" + s + ".mp4" });
+export const srcset = (id, s) => `${thumb(id, s)} 1200w, ${pic(id, s)} 1800w`;
 export const zip = id => B + id + ".zip";
 export const sources = c => `<source src="${c.webm}" type="video/webm"><source src="${c.mp4}" type="video/mp4">`;
 
@@ -44,6 +48,14 @@ export function autoplayInView(vids) {
     io.observe(v);
   });
 }
+// going full screen swaps a page clip to its original full-size file, from the same moment
+document.addEventListener("fullscreenchange", () => {
+  const v = document.fullscreenElement; if (!v || v.tagName !== "VIDEO") return;
+  const src = v.currentSrc || ""; if (!/\/sm\//.test(src)) return;
+  const t = v.currentTime, playing = !v.paused;
+  v.src = src.replace("/sm/", "/"); v.currentTime = t; if (playing) { const p = v.play(); if (p) p.catch(() => {}); }
+});
+document.addEventListener("webkitbeginfullscreen", e => { const v = e.target; if (v && v.currentSrc && /\/sm\//.test(v.currentSrc)) { const t = v.currentTime; v.src = v.currentSrc.replace("/sm/", "/"); v.currentTime = t; v.play(); } }, true);
 const isOnScreen = el => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
 
 // hover a card → its film plays over the photo

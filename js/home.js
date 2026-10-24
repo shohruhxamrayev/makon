@@ -49,3 +49,7 @@ const setX = v => ba.style.setProperty("--x", v + "%");
 range.addEventListener("input", () => setX(range.value));
 // a gentle hint the first time it comes into view
 new IntersectionObserver((es, o) => { if (!es[0].isIntersecting) return; o.disconnect(); let t0 = null; const go = t => { t0 = t0 || t; const k = Math.min(1, (t - t0) / 1800); const v = 50 + Math.sin(k * Math.PI * 2) * 22 * (1 - k); setX(v); range.value = v; if (k < 1) requestAnimationFrame(go); }; requestAnimationFrame(go); }, { threshold: 0.5 }).observe(ba);
+
+// the template showreel only moves while it's on screen
+const reel = $(".reel-track");
+if (reel && "IntersectionObserver" in window) new IntersectionObserver(es => reel.classList.toggle("on", es[0].isIntersecting), { threshold: 0 }).observe(reel);

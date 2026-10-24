@@ -2,7 +2,7 @@
 import { TEMPLATES, buildPlan } from "./studio/templates.js";
 import { STYLES, roomName, catalogItem, SHOPS } from "./studio/data.js";
 import { polyArea } from "./studio/geom.js";
-import { $, $$, T, esc, pic, clip, sources, zip, studioLink, initHeader, autoplayInView, lightbox } from "./gallery-common.js";
+import { $, $$, T, esc, pic, clip, clipSm, thumb, srcset, sources, zip, studioLink, initHeader, autoplayInView, lightbox } from "./gallery-common.js";
 
 initHeader();
 const id = new URLSearchParams(location.search).get("id");
@@ -46,21 +46,21 @@ function render() {
 
   $("#r-hero").innerHTML = `<span class="g-media" data-k="0"><img src="${pic(t.id)}" alt="${esc(T(t.name))}"><span class="g-plus" aria-hidden="true">+</span></span><figcaption>${esc(T("Daylight"))}</figcaption>`;
   $("#r-gal").innerHTML = SHOTS.slice(1).map(([s, c], k) => {
-    return `<figure><span class="g-media" data-k="${k + 1}"><img src="${pic(t.id, s)}" alt="${esc(T(t.name) + " — " + T(c))}" loading="lazy"><span class="g-plus" aria-hidden="true">+</span></span><figcaption>${esc(T(c))}</figcaption></figure>`;
+    return `<figure><span class="g-media" data-k="${k + 1}"><img src="${thumb(t.id, s)}" srcset="${srcset(t.id, s)}" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(T(t.name) + " — " + T(c))}" loading="lazy" decoding="async"><span class="g-plus" aria-hidden="true">+</span></span><figcaption>${esc(T(c))}</figcaption></figure>`;
   }).join("");
   $$("#room [data-k]").forEach(m => { m.tabIndex = 0; m.setAttribute("role", "button"); m.setAttribute("aria-label", T("Open picture"));
     const go = () => lb.open(items(), +m.dataset.k);
     m.addEventListener("click", go); m.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
 
   const clips = [["m1", "From day to evening"], ["m2", "Another angle"], ["m3", "Close-up"]];
-  $("#clips").innerHTML = clips.map(([m, c]) => `<figure class="g-clip"><video controls muted loop playsinline preload="metadata" poster="${pic(t.id, m)}">${sources(clip(t.id, m))}</video><figcaption><span>${esc(T(c))}</span><a href="${clip(t.id, m).mp4}" download="makon-${t.id}-${m}.mp4">↓ MP4</a></figcaption></figure>`).join("");
-  const film = $("#film"); film.poster = pic(t.id); film.innerHTML = sources(clip(t.id));
+  $("#clips").innerHTML = clips.map(([m, c]) => `<figure class="g-clip"><video controls muted loop playsinline preload="none" poster="${thumb(t.id, m)}">${sources(clipSm(t.id, m))}</video><figcaption><span>${esc(T(c))}</span><a href="${clip(t.id, m).mp4}" download="makon-${t.id}-${m}.mp4">↓ MP4</a></figcaption></figure>`).join("");
+  const film = $("#film"); film.preload = "none"; film.poster = thumb(t.id); film.innerHTML = sources(clip(t.id));
   autoplayInView([...$$("#clips video")]);
 
   const nx = TEMPLATES[(idx + 1) % TEMPLATES.length];
   $("#r-next").href = "room.html?id=" + nx.id;
   $("#r-next-name").textContent = T(nx.name);
-  $("#r-next-img").innerHTML = ["", "d1", "evening"].map(s => `<img src="${pic(nx.id, s)}" alt="" loading="lazy">`).join("");
+  $("#r-next-img").innerHTML = ["", "d1", "evening"].map(s => `<img src="${thumb(nx.id, s)}" alt="" loading="lazy" decoding="async">`).join("");
   lb.relabel();
 }
 

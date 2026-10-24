@@ -2,7 +2,7 @@
 import { TEMPLATES, TEMPLATE_CATS } from "./studio/templates.js";
 import { STYLES, roomName } from "./studio/data.js";
 import { polyArea } from "./studio/geom.js";
-import { $, $$, T, esc, pad, pic, clip, sources, initHeader, autoplayInView, hoverPlay } from "./gallery-common.js";
+import { $, $$, T, esc, pad, pic, clip, clipSm, thumb, srcset, sources, initHeader, autoplayInView, hoverPlay } from "./gallery-common.js";
 
 initHeader();
 const area = t => polyArea(t.pts || [[0, 0], [t.w, 0], [t.w, t.d], [0, t.d]]);
@@ -29,9 +29,9 @@ function renderGrid() {
   const items = TEMPLATES.filter(t => cat === "all" || t.cat === cat);
   $("#grid").innerHTML = items.map((t, i) => {
     const st = STYLES[t.style] || {};
-    const img = pic(t.id), film = clip(t.id, "m1");
+    const film = clipSm(t.id, "m1");
     return `<a class="g-card" href="${roomUrl(t.id)}">
-      <span class="g-media"><img src="${img}" alt="${esc(T(t.name))}" loading="${i < 2 ? "eager" : "lazy"}"><video muted loop playsinline preload="none" aria-hidden="true">${sources(film)}</video><span class="g-plus" aria-hidden="true">+</span></span>
+      <span class="g-media"><img src="${thumb(t.id)}" srcset="${srcset(t.id)}" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(T(t.name))}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async"><video muted loop playsinline preload="none" aria-hidden="true">${sources(film)}</video><span class="g-plus" aria-hidden="true">+</span></span>
       <span class="g-meta"><span><h3>${esc(T(t.name))}</h3><small>${esc(T(roomName(t.room)))} · ${esc(st.name || "")}</small></span><span>${area(t).toFixed(1)} m²</span></span>
     </a>`;
   }).join("");
@@ -41,7 +41,7 @@ function renderClips() {
   const pick = [["warm-living", "m1"], ["japandi-studio", "m1"], ["midnight-lounge", "m1"]];
   $("#clips").innerHTML = pick.map(([id, m]) => {
     const t = TEMPLATES.find(x => x.id === id);
-    return `<figure class="g-clip"><video controls muted loop playsinline preload="metadata" poster="${pic(id, m)}">${sources(clip(id, m))}</video>
+    return `<figure class="g-clip"><video controls muted loop playsinline preload="none" poster="${thumb(id, m)}">${sources(clipSm(id, m))}</video>
       <figcaption><span>${esc(T(t.name))}</span><a href="${roomUrl(id)}">${esc(T("Open"))} ↗</a></figcaption></figure>`;
   }).join("");
   autoplayInView($$("#clips video"));

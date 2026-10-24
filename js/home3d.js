@@ -16,11 +16,14 @@ const calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)")
 
 export function start({ canvas, story, labels, onStep, roomId = "warm-living" }) {
   let renderer;
+  const touch = window.matchMedia && matchMedia("(hover: none)").matches;
+  const lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+  let dpr = Math.min(window.devicePixelRatio || 1, touch ? 1.5 : 2);
   try { renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" }); }
   catch (e) { return null; }
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
   renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;   // the sun never moves: shadows are redrawn only when the room changes
   renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   renderer.outputColorSpace = T.SRGBColorSpace;
 
@@ -262,7 +265,7 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
     sun.shadow.camera.left = -span; sun.shadow.camera.right = span; sun.shadow.camera.top = span; sun.shadow.camera.bottom = -span; sun.shadow.camera.far = span * 6; sun.shadow.camera.updateProjectionMatrix();
     sun.position.set(center.x - span * 0.9, span * 1.6, center.z - span * 0.5); sun.target.position.copy(center);
     labels && placeLabels(tpl);
-    dirty = true;
+    dirty = true; buildN++; shadowsDirty = true;
   }
   let labelEls = [];
   function placeLabels(tpl) {
@@ -297,10 +300,11 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
     return { pos, tgt };
   }
 
-  let lastT = 0;
+  let labelsShown = false;
+  let lastT = 0, lastKey = "", slow = 0, frames = 0, autoUntil = performance.now() + 25000, rect = canvas.getBoundingClientRect();
   function update(time) {
     const p = progress, dt = Math.min(0.1, Math.max(0.001, (time - (lastT || time)) / 1000 || 0.016)); lastT = time;
-    if (!calm && p < 0.04 && !dragging) auto += dt * 0.05;
+    if (!calm && !touch && p < 0.04 && !dragging && time < autoUntil) auto += dt * 0.05;
     yaw += (yawT - yaw) * Math.min(1, dt * 6);
     const { pos, tgt } = camAt(p, time);
     cam.position.copy(pos); cam.lookAt(tgt);
@@ -335,22 +339,41 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
     shadeMats.forEach(m => { m.emissiveIntensity = e * 2.2; });
     lamps.forEach(l => { l.userData.g.updateWorldMatrix(true, false); const sp = lampSpots.find(x => x[0] === l.userData.g); tmp.set(sp[1], sp[2], sp[3]).applyMatrix4(l.userData.g.matrixWorld); l.position.copy(tmp); l.intensity = e * 4.5 * sp[4] * (l.userData.g.scale.y > 0.5 ? 1 : 0); });
     // plan labels
-    labelEls.forEach(({ el, p: lp }) => {
-      const v = lp.clone().project(cam), r = canvas.getBoundingClientRect();
-      el.style.transform = `translate(${(v.x * 0.5 + 0.5) * r.width}px, ${(-v.y * 0.5 + 0.5) * r.height}px) translate(-50%, -50%)`;
-      el.style.opacity = String(plan);
-    });
+    if (plan > 0.01 || labelsShown) {
+      labelsShown = plan > 0.01;
+      labelEls.forEach(({ el, p: lp }) => {
+        const v = lp.clone().project(cam);
+        el.style.transform = `translate(${(v.x * 0.5 + 0.5) * rect.width}px, ${(-v.y * 0.5 + 0.5) * rect.height}px) translate(-50%, -50%)`;
+        el.style.opacity = String(plan);
+      });
+    }
+    const key = [cam.position.x.toFixed(3), cam.position.y.toFixed(3), cam.position.z.toFixed(3), p.toFixed(4), evening.toFixed(3), rect.width, rect.height, buildN].join();
+    if (key === lastKey) return;          // nothing moved: don't redraw (keeps the page smooth and the battery cool)
+    const moving = Math.abs(p - (lastP || 0)) > 1e-5 || buildN !== lastBuild;
+    if (moving || shadowsDirty) { renderer.shadowMap.needsUpdate = true; shadowsDirty = false; }
+    lastKey = key; lastP = p; lastBuild = buildN;
+    const t0 = performance.now();
     renderer.render(scene, cam);
+    // adapt: if frames are slow on this device, lower the resolution, then drop shadows
+    const ft = performance.now() - t0; frames++;
+    slow = slow * 0.9 + (ft > 22 ? 1 : 0) * 0.1;
+    if (frames > 20 && slow > 0.6) {
+      frames = 0; slow = 0;
+      // only steps down to the screen's own sharpness (1×), never below — and shadows stay on
+      if (dpr > 1) { dpr = Math.max(1, dpr - 0.25); renderer.setPixelRatio(dpr); resize(); }
+    }
   }
+  let lastP = 0, lastBuild = -1, buildN = 0, shadowsDirty = true;
 
   // ---------- size, input, loop ----------
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
+    rect = canvas.getBoundingClientRect(); lastKey = "";
     renderer.setSize(w, h, false); cam.aspect = w / h;
     cam.fov = w / h < 0.8 ? 55 : 38; cam.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(canvas); resize();
-  canvas.addEventListener("pointerdown", e => { if (e.pointerType === "touch") return; dragging = true; lastX = e.clientX; canvas.setPointerCapture(e.pointerId); canvas.classList.add("grab"); });
+  canvas.addEventListener("pointerdown", e => { if (e.pointerType === "touch") return; autoUntil = 0; dragging = true; lastX = e.clientX; canvas.setPointerCapture(e.pointerId); canvas.classList.add("grab"); });
   canvas.addEventListener("pointermove", e => { if (!dragging) return; yawT -= (e.clientX - lastX) * 0.006; lastX = e.clientX; });
   const stop = () => { dragging = false; canvas.classList.remove("grab"); };
   canvas.addEventListener("pointerup", stop); canvas.addEventListener("pointercancel", stop);
