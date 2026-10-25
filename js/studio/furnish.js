@@ -1,6 +1,6 @@
 // Makon Studio — Furnish mode: catalogue, placed items, fit issues, prices and shopping links
 import { $, $$, el, toast, money, fmtCm } from "./util.js";
-import { CATALOG, CATS, catalogItem, STYLES, SHOPS } from "./data.js";
+import { CATALOG, CATS, catalogItem, STYLES, SHOPS, furnPic } from "./data.js";
 
 let ctx, cat = "All", q = "", anchor = null;   // anchor: where the details open ({ where: "catalog", cid, id } or { where: "placed", id })
 
@@ -103,7 +103,7 @@ function renderPlaced() {
         anchor = { where: "placed", id: it.id };
         steady('#placed li[data-id="' + it.id + '"]', () => ctx.select(was ? null : "item", was ? undefined : it.id));
       } },
-        el("i", { class: "dot", style: "background:" + it.color }),
+        catalogItem(it.type) ? el("img", { class: "pl-pic", src: furnPic(it.type), alt: "", loading: "lazy", width: 640, height: 480 }) : el("i", { class: "dot", style: "background:" + it.color }),
         el("span", {}, el("b", { text: it.name }), el("small", { text: fmtCm(it.w) + " × " + fmtCm(it.d) + " × " + fmtCm(it.h) })),
         bad ? el("span", { class: "flag " + (bad.some(x => x.kind === "err") ? "err" : "warn"), title: bad.map(x => x.text).join(", "), html: '<svg><use href="#i-warn"/></svg>' }) : null),
       priceIn));
@@ -117,10 +117,11 @@ function renderCatalog() {
   ul.innerHTML = "";
   const list = CATALOG.filter(c => (cat === "All" || c.cat === cat) && (!q || (c.name + " " + c.cat + " " + c.q).toLowerCase().includes(q)));
   if (!list.length) { ul.append(el("li", { class: "empty muted small", text: "No furniture matches “" + q + "”." })); return; }
-  list.forEach(c => ul.append(el("li", { "data-cid": c.id },
-    el("span", { class: "ci-ic", style: "--c:" + c.color }),
-    el("span", { class: "ci-t" }, el("b", { text: c.name }), el("small", { text: Math.round(c.w * 100) + " × " + Math.round(c.d * 100) + (c.h > 0.05 ? " × " + Math.round(c.h * 100) : "") + " cm · " + c.cat })),
-    el("button", { class: "icon-btn add", type: "button", "aria-label": "Add " + c.name, title: "Add to room", html: '<svg><use href="#i-plus"/></svg>', onclick: () => add(c.id) }))));
+  list.forEach(c => ul.append(el("li", { class: "cc", "data-cid": c.id },
+    el("button", { type: "button", class: "cc-btn", "aria-label": "Add " + c.name + " to the room", onclick: () => add(c.id) },
+      el("span", { class: "cc-img" }, el("img", { src: furnPic(c.id), alt: "", loading: "lazy", decoding: "async", width: 640, height: 480 })),
+      el("span", { class: "cc-t" }, el("b", { text: c.name }), el("small", { text: Math.round(c.w * 100) + " × " + Math.round(c.d * 100) + (c.h > 0.05 ? " × " + Math.round(c.h * 100) : "") + " cm" })),
+      el("span", { class: "cc-add", "aria-hidden": "true", html: '<svg><use href="#i-plus"/></svg>' })))));
 }
 
 function add(id) {

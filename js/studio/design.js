@@ -1,6 +1,6 @@
 // Makon Studio — Design mode: photo, style, render (AI or on-device), versions, refine, palette
 import { $, $$, el, esc, toast, confirmBox, modal, uid, fileToDataURL, scaleImage, loadImage, thumbOf, download, isTouch } from "./util.js";
-import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName } from "./data.js";
+import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName, STYLE_PIC } from "./data.js";
 import { renderMood, extractPalette } from "./engine.js";
 
 const SAMPLE_BEFORE = "img/room-before.jpg", SAMPLE_AFTER = "img/room-after.jpg";
@@ -31,6 +31,7 @@ export function init(c) {
   const st = $("#styles");
   Object.entries(STYLES).forEach(([k, s]) => {
     st.append(el("button", { type: "button", class: "style-opt", "data-k": k, "aria-pressed": "false", onclick: () => { p().design.style = k; p().finish = { wall: null, floor: null }; ctx.save(); renderControls(); ctx.bus.emit("style"); } },
+      STYLE_PIC[k] ? el("span", { class: "st-pic" }, el("img", { src: STYLE_PIC[k], alt: "", loading: "lazy", decoding: "async" })) : null,
       el("span", { class: "sw", html: s.palette.map(c => '<i style="background:' + c + '"></i>').join("") }),
       el("strong", { text: s.name }), el("small", { text: s.note })));
   });
@@ -64,6 +65,7 @@ export function init(c) {
   $("#camera-file").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if (f) setPhoto(f); });
   $("#take-photo").hidden = !isTouch();
   $("#take-photo").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); $("#camera-file").click(); });
+  $("#drop-tpl").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); ctx.chooseStart && ctx.chooseStart(); });
   $("#use-sample").addEventListener("click", async e => {
     e.preventDefault(); e.stopPropagation();
     if (!(await okToReplace())) return;
@@ -161,7 +163,9 @@ function renderControls() {
   else if (ctx.ai.enabled) {
     ai.className = "ai-state on";
     ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.owner ? '<small><b>Owner</b> · no daily limit for you.</small>' : "") + (ctx.ai.limit && ctx.ai.remaining != null ? '<small><b>' + ctx.ai.remaining + ' of ' + ctx.ai.limit + '</b> AI renders left for you today' + (ctx.ai.remaining === 0 ? ' — more tomorrow from 05:00 Tashkent time. Mood previews still work.' : '.') + '</small>' : "");
-    if (!ctx.ai.owner) ai.append(el("button", { type: "button", class: "link-btn owner-link", text: "Site owner? Enter your code", onclick: async () => {
+    // the owner's code box stays out of sight for visitors: open the Studio once with ?owner to see it
+    let ownerUI = /[?&]owner\b/.test(location.search); try { ownerUI = ownerUI || !!localStorage.getItem(CODE_KEY); } catch (e) {}
+    if (!ctx.ai.owner && ownerUI) ai.append(el("button", { type: "button", class: "link-btn owner-link", text: "Site owner? Enter your code", onclick: async () => {
       const v = await modal({ title: "Owner code", body: "Type the MAKON_OWNER_CODE you set in Vercel. This browser will then have no daily limit.", fields: [{ label: "Owner code", type: "password", required: true, maxlength: 100 }], ok: "Save" });
       if (!v) return;
       try { localStorage.setItem(CODE_KEY, v[0].trim()); } catch (e) {}
@@ -175,10 +179,11 @@ function renderControls() {
     }
   } else if (ctx.ai.configError) {
     ai.className = "ai-state";
-    ai.innerHTML = '<span class="dot"></span><b>AI renders are set up wrongly.</b> ' + esc(ctx.ai.configError) + ' <small>Until then Makon makes on-device mood previews.</small>';
+    console.warn("Makon AI config:", ctx.ai.configError);
+    ai.innerHTML = '<span class="dot"></span>AI renders are resting for a moment. <small>Makon makes an instant mood preview instead — try AI again later.</small>';
   } else {
     ai.className = "ai-state";
-    ai.innerHTML = '<span class="dot"></span>AI renders aren\'t switched on for this site yet, so Makon makes an instant on-device mood preview. <small>Owner: add a free Cloudflare token or an OpenAI key in Vercel — see README.</small>';
+    ai.innerHTML = '<span class="dot"></span>Instant preview mode. <small>Makon recolours your photo in the chosen style right on your device.</small>';
   }
   const g = $("#generate");
   g.disabled = busy || !p.photo;

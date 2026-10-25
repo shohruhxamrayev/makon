@@ -1,7 +1,8 @@
 // Makon Studio — 2D plan editor (SVG). World units are metres; y grows "down" the page (south).
 import { $, $$, el, esc, toast, modal, confirmBox, uid, clamp, round, fmtLen, fmtArea, download } from "./util.js";
 import { vkey, dist, wlen, lerp, project, corners, polyContains, polyArea, polyCentroid, satOverlap, polyDist, polySegDist, loops, bounds } from "./geom.js";
-import { CATALOG, catalogItem, LARGE } from "./data.js";
+import { CATALOG, catalogItem, furnPic, LARGE, STYLES } from "./data.js";
+import { setup as spriteSetup, spriteFor } from "./sprites.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const GRID = 0.05;
@@ -11,7 +12,7 @@ const GAP_EXEMPT = new Set(["coffee", "coffeer", "side", "nightstand", "pouf", "
 
 const PLAN_CSS = `
 .grid-min{stroke:#e7e0d3}.grid-maj{stroke:#d9cfbe}
-.floor{fill:#efe7d9}.area{font:600 13px Inter,system-ui,sans-serif;fill:#8a7f6e;text-anchor:middle}
+.floor{fill:#efe7d9}.area{font:600 13px Inter,system-ui,sans-serif;fill:#8a7f6e;text-anchor:middle;paint-order:stroke;stroke:#efe7d9;pointer-events:none}
 .wall{stroke:#2a2724;stroke-linecap:square}.wall.sel{stroke:#c4643a}.whit{stroke:transparent;stroke-linecap:round;cursor:move}
 .dim{font:600 11px Inter,system-ui,sans-serif;fill:#6b6355;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:#f5f0e7;stroke-width:3px}
 .dim.cal{fill:#2f6b4f}
@@ -23,6 +24,7 @@ const PLAN_CSS = `
 .it.sel rect.body,.it.sel path.body,.it.sel ellipse.body{stroke:#c4643a}
 .it.err rect.body,.it.err path.body,.it.err ellipse.body{stroke:#c0392b;stroke-dasharray:4 3}
 .it.warn rect.body,.it.warn path.body,.it.warn ellipse.body{stroke:#d08a1e;stroke-dasharray:4 3}
+.it rect.body.pic{fill:transparent;stroke-opacity:.16}.it.sel rect.body.pic,.it.err rect.body.pic,.it.warn rect.body.pic{stroke-opacity:1}
 .it{cursor:move}.rot{fill:#fff;stroke:#c4643a;cursor:grab}.rotl{stroke:#c4643a}
 .vtx{fill:#fff;stroke:#2a2724;cursor:move}.vtx.first{fill:#c4643a;stroke:#c4643a}
 .draft{stroke:#c4643a;stroke-linecap:round;fill:none}.draft-lab{font:600 12px Inter,system-ui,sans-serif;fill:#fff;text-anchor:middle;dominant-baseline:middle}
@@ -53,6 +55,7 @@ export function init(c) {
   svg = $("#plan-svg"); host = $("#st-plan");
   ctx.select = select;
   ctx.planOps = { addItem, removeSelected, rotateSelected, duplicateSelected, pushUndo, commit, checkFit, itemEditor, fit, undo, redo };
+  spriteSetup({ ready: () => draw(), style: () => (ctx.p && STYLES[ctx.p.design.style]) || {} });
 
   $$("#plan-tb [data-tool]").forEach(b => b.addEventListener("click", () => setTool(b.dataset.tool)));
   $("#p-finish").addEventListener("click", finishDraft);
@@ -617,6 +620,9 @@ function itemShape(it) {
   const E = (cx, cy, rx, ry, cls = "det") => `<ellipse class="${cls}" cx="${f2(cx)}" cy="${f2(cy)}" rx="${f2(rx)}" ry="${f2(ry)}"/>`;
   const body = (rx = 0.03) => `<rect class="body" x="${f2(-hw)}" y="${f2(-hd)}" width="${f2(w)}" height="${f2(d)}" rx="${rx}" fill="${fill}" fill-opacity=".55"/>`;
   const ell = () => `<ellipse class="body" cx="0" cy="0" rx="${f2(hw)}" ry="${f2(hd)}" fill="${fill}" fill-opacity=".55"/>`;
+  // a real top-down picture of the piece once it has been rendered
+  const pic = spriteFor(it);
+  if (pic) return `<image href="${pic}" x="${f2(-hw)}" y="${f2(-hd)}" width="${f2(w)}" height="${f2(d)}" preserveAspectRatio="none"/>` + `<rect class="body pic" x="${f2(-hw)}" y="${f2(-hd)}" width="${f2(w)}" height="${f2(d)}" rx="0.02"/>`;
   const arm = Math.min(0.2, w * 0.1), back = Math.min(0.22, d * 0.25);
   switch (it.shape) {
     case "sofa": case "armchair":
@@ -672,11 +678,11 @@ function buildSVG(p, v, W, H, opt = {}) {
   out.push(`<g>${g}</g>`);
 
   // floor
-  const lp = loops(p.walls);
+  const lp = loops(p.walls), areaLabs = [];
   lp.forEach(l => {
     out.push(`<polygon class="floor" points="${l.map(q => f2(q[0]) + "," + f2(q[1])).join(" ")}"/>`);
     const c = polyCentroid(l);
-    if (polyArea(l) * s * s > 9000) out.push(`<text class="area" x="${f2(c[0])}" y="${f2(c[1])}" font-size="${px(13)}" style="font-size:${px(13)}px">${esc(fmtArea(polyArea(l), ctx.p.units))}</text>`);
+    if (polyArea(l) * s * s > 9000) areaLabs.push(`<text class="area" x="${f2(c[0])}" y="${f2(c[1])}" font-size="${px(13)}" style="font-size:${px(13)}px;stroke-width:${px(4)}px">${esc(fmtArea(polyArea(l), ctx.p.units))}</text>`);
   });
   const centroid = lp.length ? polyCentroid(lp[0]) : null;
 
@@ -686,7 +692,7 @@ function buildSVG(p, v, W, H, opt = {}) {
   const order = p.items.slice().sort((a, b) => (b.flat ? 1 : 0) - (a.flat ? 1 : 0) || (a.wall ? 1 : 0) - (b.wall ? 1 : 0));
   order.forEach(it => {
     const iss = issues.get(it.id), cls = "it" + (sel.kind === "item" && sel.id === it.id ? " sel" : "") + (iss ? (iss.some(x => x.kind === "err") ? " err" : " warn") : "");
-    const showLab = Math.min(it.w, it.d) * s > 26 && it.name.length * 6.3 + 10 < it.w * s && !it.wall && !it.flat;
+    const showLab = !spriteFor(it) && Math.min(it.w, it.d) * s > 26 && it.name.length * 6.3 + 10 < it.w * s && !it.wall && !it.flat;
     const flipText = ((it.rot % 360) + 360) % 360 > 90 && ((it.rot % 360) + 360) % 360 < 270;
     out.push(`<g class="${cls}" data-k="item" data-id="${it.id}" transform="translate(${f2(it.x)} ${f2(it.y)}) rotate(${f2(it.rot || 0)})" stroke-width="${px(1.3)}">`);
     out.push(itemShape(it));
@@ -703,6 +709,7 @@ function buildSVG(p, v, W, H, opt = {}) {
     }
   });
 
+  out.push(...areaLabs);
   // walls
   p.walls.forEach(w => {
     const isSel = sel.kind === "wall" && sel.id === w.id;
@@ -824,7 +831,7 @@ function renderInspector() {
   const lp = loops(p.walls), area = lp.reduce((s, l) => s + polyArea(l), 0);
   const per = lp.reduce((s, l) => s + l.reduce((a, q, i) => a + dist(q, l[(i + 1) % l.length]), 0), 0);
   $("#plan-stats").innerHTML = stat("Walls", p.walls.length) + stat("Openings", p.openings.length) + stat("Objects", p.items.length) +
-    stat("Floor area", lp.length ? fmtArea(area, u) : "—") + stat("Perimeter", lp.length ? fmtLen(per, u) : "—") + stat("Scale", p.calibrated ? "✓ true" : "estimate");
+    stat("Floor area", lp.length ? fmtArea(area, u) : "—") + stat("Perimeter", lp.length ? fmtLen(per, u) : "—") + stat("Scale", p.calibrated ? "✓ Real" : "Estimate");
   if (document.activeElement !== $("#ceil-h")) $("#ceil-h").value = p.height;
   $("#units").value = u;
   renderSel($("#sel-box"));
@@ -903,6 +910,7 @@ function renderSel(box) {
 export function itemEditor(box, it) {
   box.innerHTML = "";
   box.append(el("h3", { text: it.name }));
+  if (catalogItem(it.type)) box.append(el("img", { class: "ed-pic", src: furnPic(it.type), alt: "", width: 640, height: 480 }));
   const nm = el("input", { class: "input", value: it.name, maxlength: 40, "aria-label": "Name" });
   nm.addEventListener("change", () => { pushUndo(); it.name = nm.value.trim() || catalogItem(it.type)?.name || "Item"; commit(); });
   box.append(el("label", { class: "field" }, el("span", { text: "Name" }), nm));

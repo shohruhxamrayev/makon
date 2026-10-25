@@ -3,7 +3,7 @@ import { $, $$, el, toast, download, fmtLen, fmtArea } from "./util.js";
 import { STYLES, FLOORS, LIGHT_NAMES } from "./data.js";
 import { loops, polyArea, polyCentroid, bounds, wlen, lerp, vkey } from "./geom.js";
 
-let ctx, T = null, OrbitControls = null, loading = null;
+let ctx, T = null, OrbitControls = null, loading = null, kit = null, RoomEnv = null;
 let renderer, scene, persp, ortho, cam, controls, root, sun, hemi, raycaster, floorPlane;
 let host, built = false, dirty = true, camMode = "persp", cutaway = true, shadows = true, running = false;
 let wallsMeta = [], itemGroups = new Map(), center = [2.4, 1.8], span = 6, bb = null;
@@ -60,7 +60,8 @@ const floorKey = () => ctx.p.finish.floor || style().floor;
 
 async function load() {
   if (T) return true;
-  if (!loading) loading = Promise.all([import("../../vendor/three.module.min.js"), import("../../vendor/OrbitControls.js")]).then(([a, b]) => { T = a; OrbitControls = b.OrbitControls; });
+  if (!loading) loading = Promise.all([import("../../vendor/three.module.min.js"), import("../../vendor/OrbitControls.js"), import("../../vendor/RoundedBoxGeometry.js"), import("../../vendor/RoomEnvironment.js"), import("./models.js")])
+    .then(([a, b, rb, re, mo]) => { T = a; OrbitControls = b.OrbitControls; RoomEnv = re.RoomEnvironment; kit = mo.createKit(a, rb.RoundedBoxGeometry); });
   try { await loading; return true; } catch (e) { console.error(e); loading = null; return false; }
 }
 
@@ -93,9 +94,11 @@ function setup() {
   scene = new T.Scene();
   scene.background = new T.Color("#e9e3d8");
   scene.fog = new T.Fog("#e9e3d8", 30, 80);
+  // soft studio reflections so wood, fabric and metal read as real materials
+  try { const pm = new T.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnv(), 0.04).texture; scene.environmentIntensity = 0.5; pm.dispose(); } catch (e) { console.warn(e); }
   persp = new T.PerspectiveCamera(45, 1, 0.05, 200);
   ortho = new T.OrthographicCamera(-5, 5, 5, -5, 0.05, 200);
-  hemi = new T.HemisphereLight("#fff8ee", "#b8ab98", 1.25); scene.add(hemi);
+  hemi = new T.HemisphereLight("#fff8ee", "#b8ab98", 0.7); scene.add(hemi);
   sun = new T.DirectionalLight("#fff1dc", 2.2);
   sun.castShadow = shadows;
   sun.shadow.mapSize.set(2048, 2048);
@@ -109,6 +112,8 @@ function setup() {
   floorPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
   const cv = renderer.domElement;
   cv.addEventListener("pointerdown", onDown);
+  cv.addEventListener("pointerdown", hideCoach, { once: true });
+  showCoach();
   cv.addEventListener("pointermove", onMove);
   cv.addEventListener("pointerup", onUp);
   cv.addEventListener("pointercancel", onUp);
@@ -116,11 +121,24 @@ function setup() {
   return true;
 }
 
+// a one-time picture of the gestures on phones
+function showCoach() {
+  if (!coarsePtr) return;
+  try { if (localStorage.getItem("makon_coach3d")) return; } catch (e) {}
+  const c = el("div", { class: "coach", "aria-hidden": "true", html: '<div><span class="g1"></span><b>Drag</b> to turn</div><div><span class="g2"></span><b>Pinch</b> to zoom</div><div><span class="g3"></span><b>Tap</b> a piece, then drag it</div>' });
+  host.parentElement.append(c); requestAnimationFrame(() => c.classList.add("show"));
+  setTimeout(hideCoach, 10000);
+}
+function hideCoach() {
+  const c = document.querySelector(".coach"); if (!c) return;
+  c.classList.remove("show"); setTimeout(() => c.remove(), 400);
+  try { localStorage.setItem("makon_coach3d", "1"); } catch (e) {}
+}
 function loop() {
   if (!running || !visible()) { running = false; return; }
   requestAnimationFrame(loop);
-  if (controls) controls.update();
-  frame();
+  // draw only when the view actually moves — the phone stays cool and smooth
+  if (controls && controls.update()) frame();
 }
 function frame() {
   if (!renderer || !cam) return;
@@ -210,7 +228,10 @@ function eyePoint() {
   return [center[0] + 0.01, center[1] + Math.min(1.2, d * 0.3)];
 }
 // drag behaviour, like a map: "move" slides the view, "turn" orbits; the other one is always on right-drag (mouse) or two fingers
-let dragMode = (() => { try { return localStorage.getItem("makon_drag3d") || "move"; } catch (e) { return "move"; } })();
+// phones: one finger turns around the room (the natural 3D gesture), two fingers pinch-zoom and slide.
+// computers: drag slides like a map, right-drag turns. Either can be switched with Move / Turn.
+const coarsePtr = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+let dragMode = (() => { try { return localStorage.getItem("makon_drag3d") || (coarsePtr ? "turn" : "move"); } catch (e) { return coarsePtr ? "turn" : "move"; } })();
 function applyDrag() {
   if (!controls || !T) return;
   const move = dragMode === "move";
@@ -270,33 +291,6 @@ function mat(color, o = {}) {
 }
 const shade = (hex, k) => { const c = new T.Color(hex); c.multiplyScalar(k); return "#" + c.getHexString(); };
 
-function floorTexture(key) {
-  const f = FLOORS[key] || FLOORS.oak;
-  const S = 512, c = document.createElement("canvas"); c.width = c.height = S;
-  const g = c.getContext("2d"), base = new T.Color(f.base);
-  const rnd = (seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647)(7);
-  const col = v => { const k = 1 + (rnd() - 0.5) * v / 50; const cc = base.clone().multiplyScalar(k); return "#" + cc.getHexString(); };
-  g.fillStyle = f.base; g.fillRect(0, 0, S, S);
-  const M = S / 2; // texture covers 2 m
-  if (f.plank) {
-    const [pw, pl] = f.plank, rows = Math.round(2 / pw);
-    for (let r = 0; r < rows; r++) {
-      let x = -rnd() * pl * M; const y = r * pw * M;
-      while (x < S) { g.fillStyle = col(f.var); g.fillRect(x, y, pl * M - 1.5, pw * M - 1.5); for (let k = 0; k < 6; k++) { g.fillStyle = "rgba(0,0,0," + (rnd() * 0.05) + ")"; g.fillRect(x, y + rnd() * pw * M, pl * M, 1); } x += pl * M; }
-    }
-  } else if (f.tile) {
-    const n = Math.round(2 / f.tile);
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { g.fillStyle = col(f.var); g.fillRect(i * f.tile * M + 1.5, j * f.tile * M + 1.5, f.tile * M - 3, f.tile * M - 3); }
-    g.fillStyle = "rgba(255,255,255,.0)";
-  } else {
-    for (let k = 0; k < 3000; k++) { g.fillStyle = "rgba(0,0,0," + (rnd() * 0.04) + ")"; g.fillRect(rnd() * S, rnd() * S, 2 + rnd() * 6, 2 + rnd() * 6); }
-  }
-  const t = new T.CanvasTexture(c);
-  t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(0.5, 0.5); t.colorSpace = T.SRGBColorSpace;
-  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-  return t;
-}
-
 // ---------------- build ----------------
 function box(w, h, d, x, y, z, m, cast = true) {
   const mesh = new T.Mesh(new T.BoxGeometry(Math.max(w, 0.001), Math.max(h, 0.001), Math.max(d, 0.001)), m);
@@ -310,7 +304,7 @@ function cyl(rt, rb, h, x, y, z, m, seg = 24) {
 function rebuild() {
   if (!renderer) { dirty = true; return; }
   dirty = false;
-  if (root) { scene.remove(root); root.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.map) o.material.map.dispose(); }); }
+  if (root) { scene.remove(root); root.traverse(o => { if (o.geometry && !o.geometry.userData.keep) o.geometry.dispose(); if (o.material && o.material.map && !o.material.map.userData.keep) o.material.map.dispose(); }); }
   root = new T.Group(); scene.add(root);
   wallsMeta = []; itemGroups = new Map(); lampSpots = []; lampMats = []; moodLights = null;
   const p = ctx.p.plan, H = p.height;
@@ -322,7 +316,8 @@ function rebuild() {
   span = Math.max(3, Math.hypot(b.w, b.h)); bb = b;
 
   // floor
-  const fmat = new T.MeshStandardMaterial({ map: floorTexture(floorKey()), roughness: floorKey() === "concrete" ? 0.55 : 0.75 });
+  const fmat = new T.MeshStandardMaterial({ map: kit.floorTex(FLOORS, floorKey()), roughness: floorKey() === "concrete" ? 0.5 : 0.62 });
+  fmat.map.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const addFloor = poly => {
     const sh = new T.Shape(poly.map(q => new T.Vector2(q[0], -q[1])));
     const m = new T.Mesh(new T.ShapeGeometry(sh), fmat);
@@ -380,12 +375,14 @@ function rebuild() {
 
   // furniture
   p.items.forEach(it => {
-    const g = buildItem(it);
+    const g = kit.buildItem(it, style());
     g.position.set(it.x, it.elev || 0, it.y);
     g.rotation.y = -(it.rot || 0) * Math.PI / 180;
     g.traverse(o => { o.userData.itemId = it.id; });
     root.add(g); itemGroups.set(it.id, g);
-    if (it.shape === "lamp") lampSpots.push([it.x, (it.elev || 0) + it.h - 0.18, it.y]);
+    g.updateMatrixWorld(true);
+    (g.userData.lamps || []).forEach(([x, y, z]) => { const v = g.localToWorld(new T.Vector3(x, y, z)); lampSpots.push([v.x, v.y, v.z]); });
+    lampMats.push(...(g.userData.shades || []));
   });
   placeSun();
   applyMood();
@@ -401,11 +398,12 @@ function applyMood() {
   const night = mood() === "evening";
   scene.background.set(night ? "#1b1e22" : "#e9e3d8"); scene.fog.color.set(night ? "#1b1e22" : "#e9e3d8");
   if (ground) ground.material.color.set(night ? "#26282a" : "#ddd5c8");
-  hemi.color.set(night ? "#8a90b8" : "#fff8ee"); hemi.groundColor.set(night ? "#2a2420" : "#b8ab98"); hemi.intensity = night ? 0.32 : 1.25;
-  sun.color.set(night ? "#7f8fc0" : "#fff1dc"); sun.intensity = night ? 0.18 : 2.2;
-  renderer.toneMappingExposure = night ? 1.2 : 1.05;
+  hemi.color.set(night ? "#8a90b8" : "#fff8ee"); hemi.groundColor.set(night ? "#2a2420" : "#b8ab98"); hemi.intensity = night ? 0.3 : 0.7;
+  sun.color.set(night ? "#7f8fc0" : "#fff1dc"); sun.intensity = night ? 0.18 : 2.6;
+  renderer.toneMappingExposure = night ? 1.15 : 0.98;
   if (glassMat) { glassMat.color.set(night ? "#16223a" : "#cfe3ef"); glassMat.opacity = night ? 0.75 : 0.28; }
-  lampMats.forEach(m => { m.emissiveIntensity = night ? 2.4 : 0.55; });
+  lampMats.forEach(m => { m.emissiveIntensity = night ? 2.2 : 0.12; });
+  scene.environmentIntensity = night ? 0.06 : 0.38;
   if (moodLights) { root.remove(moodLights); moodLights = null; }
   if (night) {
     moodLights = new T.Group();
@@ -468,132 +466,6 @@ function recolourWalls() {
   const m = mat(wallColour(), { roughness: 0.92 });
   wallsMeta.forEach(w => w.g.traverse(o => { if (o.isMesh && o.material && o.material.roughness === 0.92) o.material = m; }));
   frame();
-}
-
-function buildItem(it) {
-  const g = new T.Group(), w = it.w, d = it.d, h = it.h, c = it.color || "#cccccc";
-  const M = mat(c), D = mat(shade(c, 0.78)), L = mat(shade(c, 1.12)), leg = mat("#3a332c", { roughness: 0.5 });
-  const legs = (y = 0, hh = 0.08, inset = 0.06, r = 0.022) => [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => g.add(cyl(r, r * 0.8, hh, a * (w / 2 - inset), y, b * (d / 2 - inset), leg, 10)));
-  switch (it.shape) {
-    case "sofa": case "armchair": {
-      const arm = Math.min(0.2, w * 0.12), back = Math.min(0.22, d * 0.26), seatH = 0.42;
-      legs(0, 0.07);
-      g.add(box(w, seatH - 0.07, d, 0, 0.07, 0, D));
-      g.add(box(w, h - 0.07, back, 0, 0.07, -d / 2 + back / 2, M));
-      g.add(box(arm, 0.62 - 0.07, d, -w / 2 + arm / 2, 0.07, 0, M), box(arm, 0.62 - 0.07, d, w / 2 - arm / 2, 0.07, 0, M));
-      const n = it.shape === "sofa" ? (w > 1.9 ? 3 : 2) : 1, cw = (w - 2 * arm) / n;
-      for (let i = 0; i < n; i++) g.add(box(cw - 0.02, 0.13, d - back - 0.04, -w / 2 + arm + cw * i + cw / 2, seatH, back / 2, L));
-      break;
-    }
-    case "sectional": {
-      const s = 0.95, back = 0.22, seatH = 0.42;
-      g.add(box(w, seatH, s, 0, 0, -d / 2 + s / 2, D), box(s, seatH, d - s, w / 2 - s / 2, 0, s / 2, D));
-      g.add(box(w, h, back, 0, 0, -d / 2 + back / 2, M), box(back, h, d, w / 2 - back / 2, 0, 0, M));
-      g.add(box(0.2, 0.62, s, -w / 2 + 0.1, 0, -d / 2 + s / 2, M));
-      g.add(box(w - 0.2 - back, 0.13, s - back - 0.04, -0.1 - back / 2 + 0.1, seatH, -d / 2 + back + (s - back) / 2, L), box(s - back - 0.04, 0.13, d - s, w / 2 - back - (s - back) / 2, seatH, s / 2, L));
-      break;
-    }
-    case "chair": {
-      const sh = Math.min(0.46, h * 0.52);
-      legs(0, sh - 0.04, 0.04, 0.016);
-      g.add(box(w, 0.04, d, 0, sh - 0.04, 0, M));
-      g.add(box(w, h - sh, 0.04, 0, sh, -d / 2 + 0.02, M));
-      break;
-    }
-    case "stool": g.add(cyl(w / 2, w / 2, 0.05, 0, h - 0.05, 0, M), cyl(0.025, 0.025, h - 0.05, 0, 0, 0, leg, 10), cyl(w * 0.35, w * 0.35, 0.02, 0, 0, 0, leg)); break;
-    case "pouf": { const m = cyl(w / 2, w / 2, h, 0, 0, 0, M, 28); m.scale.z = d / w; g.add(m); break; }
-    case "table": case "desk": {
-      legs(0, h - 0.04, 0.06, 0.025);
-      g.add(box(w, 0.04, d, 0, h - 0.04, 0, M));
-      if (it.shape === "desk") g.add(box(0.42, h * 0.6, d - 0.06, w / 2 - 0.25, h * 0.36, 0, D));
-      break;
-    }
-    case "rtable": {
-      const top = cyl(w / 2, w / 2, 0.04, 0, h - 0.04, 0, M, 36); top.scale.z = d / w; g.add(top);
-      g.add(cyl(0.05, 0.07, h - 0.04, 0, 0, 0, D, 16));
-      const base = cyl(Math.min(w, d) * 0.3, Math.min(w, d) * 0.32, 0.03, 0, 0, 0, D, 24); g.add(base);
-      break;
-    }
-    case "cabinet": case "dresser": {
-      legs(0, 0.08, 0.05, 0.018);
-      g.add(box(w, h - 0.08, d, 0, 0.08, 0, M));
-      const n = Math.max(2, Math.round(w / 0.5));
-      for (let i = 0; i < n; i++) g.add(box(w / n - 0.012, h - 0.12, 0.012, -w / 2 + w / n * (i + 0.5), 0.1, d / 2, L, false));
-      break;
-    }
-    case "shelf": {
-      g.add(box(0.025, h, d, -w / 2 + 0.0125, 0, 0, M), box(0.025, h, d, w / 2 - 0.0125, 0, 0, M), box(w, h, 0.012, 0, 0, -d / 2 + 0.006, D));
-      const n = Math.max(3, Math.round(h / 0.38));
-      for (let i = 0; i <= n; i++) g.add(box(w - 0.05, 0.022, d - 0.012, 0, i * (h - 0.022) / n, 0.006, M));
-      const books = ["#8a5a3a", "#3f5f6f", "#c9b48a", "#6b7a4e", "#a33b2b"];
-      for (let i = 0; i < n; i++) for (let k = 0; k < 5; k++) g.add(box(0.03 + (k % 2) * 0.01, 0.2 + (k % 3) * 0.03, d * 0.7, -w / 2 + 0.08 + k * 0.05 + (i % 2) * 0.2, i * (h - 0.022) / n + 0.022, 0, mat(books[(i + k) % 5])));
-      break;
-    }
-    case "wardrobe": g.add(box(w, h, d, 0, 0, 0, M), box(0.006, h - 0.06, 0.01, 0, 0.03, d / 2, D, false), box(0.02, 0.3, 0.03, -0.04, h * 0.5, d / 2 + 0.015, leg), box(0.02, 0.3, 0.03, 0.04, h * 0.5, d / 2 + 0.015, leg)); break;
-    case "bed": {
-      g.add(box(w, 0.3, d, 0, 0.04, 0, M));
-      g.add(box(w - 0.04, 0.2, d - 0.1, 0, 0.34, 0.03, mat("#f6f3ee")));
-      g.add(box(w, Math.max(0.9, h + 0.45), 0.08, 0, 0, -d / 2 + 0.04, D));
-      const pw = Math.min(0.6, (w - 0.16) / 2);
-      g.add(box(pw, 0.12, 0.38, -pw / 2 - 0.03, 0.54, -d / 2 + 0.3, mat("#ffffff")), box(pw, 0.12, 0.38, pw / 2 + 0.03, 0.54, -d / 2 + 0.3, mat("#ffffff")));
-      g.add(box(w + 0.02, 0.06, d * 0.58, 0, 0.53, d / 2 - d * 0.29 + 0.01, mat(shade(c === "#e8e2d6" ? "#c9b48a" : c, 0.95))));
-      break;
-    }
-    case "crib": {
-      g.add(box(w, 0.12, d, 0, 0.3, 0, M), box(w - 0.04, 0.1, d - 0.04, 0, 0.42, 0, mat("#ffffff")));
-      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => g.add(box(0.04, h, 0.04, a * (w / 2 - 0.02), 0, b * (d / 2 - 0.02), M)));
-      for (let i = 0; i < 12; i++) { const z = -d / 2 + 0.05 + i * (d - 0.1) / 11; g.add(box(0.015, h - 0.42, 0.015, -w / 2 + 0.02, 0.42, z, M), box(0.015, h - 0.42, 0.015, w / 2 - 0.02, 0.42, z, M)); }
-      g.add(box(0.04, 0.04, d, -w / 2 + 0.02, h - 0.04, 0, M), box(0.04, 0.04, d, w / 2 - 0.02, h - 0.04, 0, M));
-      break;
-    }
-    case "lamp": {
-      g.add(cyl(0.14, 0.15, 0.03, 0, 0, 0, leg), cyl(0.012, 0.012, h - 0.28, 0, 0.03, 0, leg, 8));
-      const shadeM = new T.MeshStandardMaterial({ color: c, emissive: "#ffcf8a", emissiveIntensity: 0.55, roughness: 0.9, side: T.DoubleSide });
-      lampMats.push(shadeM);
-      g.add(cyl(0.12, 0.2, 0.3, 0, h - 0.3, 0, shadeM, 28));
-      break;
-    }
-    case "plant": {
-      g.add(cyl(w * 0.3, w * 0.24, 0.38, 0, 0, 0, mat("#b8673f")));
-      const lm = mat(c, { roughness: 0.95 });
-      [[0, 0.9, 0, 0.3], [0.12, 1.1, 0.05, 0.24], [-0.1, 1.2, -0.06, 0.22], [0.02, h - 0.15, 0.02, 0.18]].forEach(([x, y, z, r]) => {
-        const s = new T.Mesh(new T.IcosahedronGeometry(Math.min(r, w * 0.6), 1), lm); s.position.set(x, Math.min(y, h - r), z); s.castShadow = true; g.add(s);
-      });
-      g.add(cyl(0.02, 0.025, Math.max(0.3, h * 0.55), 0, 0.35, 0, mat("#5a4632"), 6));
-      break;
-    }
-    case "rug": g.add(box(w, 0.012, d, 0, 0, 0, M, false)); g.add(box(w - 0.14, 0.013, d - 0.14, 0, 0, 0, L, false)); break;
-    case "rrug": { const m = cyl(w / 2, w / 2, 0.012, 0, 0, 0, M, 40); m.castShadow = false; m.scale.z = d / w; g.add(m); break; }
-    case "art": g.add(box(w, h, d, 0, 0, 0, mat("#2b2621")), box(w - 0.06, h - 0.06, 0.006, 0, 0.03, d / 2, mat(c, { roughness: 1 }), false)); break;
-    case "mirror": g.add(box(w, h, d, 0, 0, 0, D), box(w - 0.05, h - 0.05, 0.006, 0, 0.025, d / 2, new T.MeshStandardMaterial({ color: "#d3dde2", metalness: 0.25, roughness: 0.12 }), false)); break;
-    case "tv": g.add(box(w, h, d, 0, 0, 0, mat("#111111", { roughness: 0.3 })), box(w - 0.03, h - 0.03, 0.004, 0, 0.015, d / 2, mat("#1d2630", { roughness: 0.15, metalness: 0.3 }), false)); break;
-    case "counter": case "sink": case "stove": {
-      g.add(box(w, 0.1, d - 0.06, 0, 0, -0.03, mat("#3a3a38")));
-      g.add(box(w, h - 0.14, d - 0.02, 0, 0.1, -0.01, M));
-      g.add(box(w + 0.01, 0.04, d + 0.02, 0, h - 0.04, 0, mat(it.shape === "stove" ? "#2a2a2a" : "#d8d4cc", { roughness: 0.4 })));
-      if (it.shape === "sink") g.add(box(Math.min(0.5, w * 0.6), 0.012, Math.min(0.38, d * 0.6), 0, h - 0.005, 0.02, mat("#9aa3a8", { metalness: 0.6, roughness: 0.3 }), false));
-      if (it.shape === "stove") [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => g.add(cyl(0.08, 0.08, 0.012, a * w * 0.22, h, b * d * 0.2, mat("#111111"))));
-      break;
-    }
-    case "fridge": g.add(box(w, h, d, 0, 0, 0, mat(c, { roughness: 0.35, metalness: 0.2 })), box(w - 0.02, 0.006, 0.01, 0, h * 0.62, d / 2, D, false), box(0.025, 0.4, 0.04, -w / 2 + 0.06, h * 0.68, d / 2 + 0.02, mat("#b9bcbf", { metalness: 0.7 }))); break;
-    case "bath": g.add(box(w, h, d, 0, 0, 0, mat("#f6f6f4", { roughness: 0.3 })), box(w - 0.14, 0.02, d - 0.14, 0, h - 0.06, 0, mat("#dfe6ea", { roughness: 0.2 }), false)); break;
-    case "shower": {
-      g.add(box(w, 0.05, d, 0, 0, 0, mat("#f6f6f4", { roughness: 0.3 })));
-      const gl = new T.MeshStandardMaterial({ color: "#d6e8f0", transparent: true, opacity: 0.3, roughness: 0.05, depthWrite: false });
-      g.add(box(w, h - 0.05, 0.01, 0, 0.05, d / 2, gl, false), box(0.01, h - 0.05, d, w / 2, 0.05, 0, gl, false));
-      g.add(cyl(0.1, 0.1, 0.02, 0, h - 0.1, -d / 2 + 0.2, mat("#b9bcbf", { metalness: 0.8, roughness: 0.2 })));
-      break;
-    }
-    case "toilet": {
-      const wm2 = mat("#f6f6f4", { roughness: 0.25 });
-      g.add(box(w * 0.7, 0.38, d * 0.55, 0, 0, d * 0.05, wm2));
-      const bowl = cyl(w / 2, w * 0.42, 0.06, 0, 0.38, d * 0.12, wm2, 24); bowl.scale.z = 1.25; g.add(bowl);
-      g.add(box(w, 0.4, 0.18, 0, 0.4, -d / 2 + 0.09, wm2));
-      break;
-    }
-    default: g.add(box(w, h, d, 0, 0, 0, M));
-  }
-  return g;
 }
 
 // ---------------- selection highlight ----------------

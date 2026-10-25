@@ -592,3 +592,60 @@ body[data-mode="furnish"] .three-act { top: 108px; }
 .ed-see { margin-top: 10px; width: 100%; justify-content: center; }
 .catalog .inline-ed, .placed .inline-ed { display: block; }
 .placed li.pl.on { outline: 1px solid var(--ink); }
+
+/* Furnish: picture catalogue */
+.catalog { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.catalog li.cc { display: block; padding: 0; border: 0; }
+.catalog li.cc:hover { background: none; }
+.catalog .empty { grid-column: 1 / -1; }
+.catalog .inline-ed, .placed .inline-ed { grid-column: 1 / -1; list-style: none; }
+.cc-btn { position: relative; display: grid; width: 100%; padding: 0; text-align: left; background: #fff; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .15s, box-shadow .2s, transform .2s; }
+.cc-btn:hover { border-color: var(--ink); box-shadow: 0 10px 24px -16px rgba(0,0,0,.35); transform: translateY(-1px); }
+.cc-btn:active { transform: scale(.98); }
+.cc-img { display: block; aspect-ratio: 4 / 3; background: #f2eee7; }
+.cc-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cc-t { display: grid; padding: 8px 10px 10px; gap: 1px; }
+.cc-t b { font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+.cc-t small { font-size: 11px; color: var(--muted); }
+.cc-add { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; box-shadow: 0 4px 10px -4px rgba(0,0,0,.4); }
+.cc-add svg { width: 14px; height: 14px; }
+.pl-pic { width: 52px; height: 39px; max-width: none; object-fit: cover; border-radius: 6px; background: #f2eee7; flex: none; }
+.ed-pic { width: 100%; max-width: 240px; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: #f2eee7; display: block; margin: 0 auto 12px; }
+@media (max-width: 900px) { .catalog { grid-template-columns: repeat(2, 1fr); } }
+
+/* 3D on phones: one tidy scrolling toolbar, a gesture guide the first time */
+@media (max-width: 900px) {
+  #three-tb { left: 8px !important; right: 8px; max-width: none; flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; gap: 4px; padding: 4px; }
+  #three-tb::-webkit-scrollbar { display: none; }
+  #three-tb .tb-group { flex-wrap: nowrap !important; flex: none; }
+  #three-tb .tb-group + .tb-group { border-left: 1px solid var(--line) !important; padding-left: 4px !important; }
+  #three-tb button { padding: 9px 11px !important; font-size: 12.5px !important; white-space: nowrap; min-height: 38px; }
+  .three-act .seg button, .t-turn { min-height: 38px; }
+  .nav-pad { grid-template-columns: repeat(3, 40px) !important; }
+  .nav-pad button { width: 40px !important; height: 38px !important; font-size: 16px; }
+  .three-host canvas { touch-action: none; }
+}
+.coach { position: absolute; inset: 0; z-index: 6; display: grid; place-content: center; gap: 14px; pointer-events: none; background: rgba(20,22,21,.42); color: #fff; font-size: 15px; opacity: 0; transition: opacity .35s; }
+.coach.show { opacity: 1; }
+.coach div { display: flex; align-items: center; gap: 12px; }
+.coach b { font-weight: 600; margin-right: 4px; }
+.coach span { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; position: relative; flex: none; }
+.coach .g1 { animation: coach-drag 1.6s ease-in-out infinite; }
+.coach .g2::before, .coach .g2::after { content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #fff; top: 10px; animation: coach-pinch 1.6s ease-in-out infinite; }
+.coach .g2::before { left: 4px; } .coach .g2::after { right: 4px; animation-direction: reverse; }
+.coach .g3::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: #fff; animation: coach-tap 1.6s ease-in-out infinite; }
+@keyframes coach-drag { 0%, 100% { transform: translateX(-8px); } 50% { transform: translateX(8px); } }
+@keyframes coach-pinch { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes coach-tap { 0%, 100% { transform: scale(.6); opacity: .6; } 50% { transform: scale(1); opacity: 1; } }
+
+/* style cards with a real room in that style */
+.style-opt { padding: 0 0 9px; overflow: hidden; border-radius: 8px; }
+.style-opt .st-pic { display: block; aspect-ratio: 3 / 2; background: #ece6dc; overflow: hidden; }
+.style-opt .st-pic img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s; }
+.style-opt:hover .st-pic img { transform: scale(1.04); }
+.style-opt .sw { height: 6px; margin: 0 0 8px; }
+.style-opt:not(:has(.st-pic)) .sw { height: auto; aspect-ratio: 3 / 2; margin: 0 0 8px; }
+.style-opt strong, .style-opt small { padding: 0 9px; }
+.drop-tpl { margin-top: 18px; background: none; border: 0; color: rgba(255,255,255,.92); font-size: 13px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(255,255,255,.4); cursor: pointer; padding: 6px; }
+.drop-tpl span { opacity: .7; text-decoration: none; display: inline-block; margin-right: 4px; }
+.drop-tpl:hover { color: #fff; text-decoration-color: #fff; }

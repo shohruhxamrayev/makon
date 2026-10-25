@@ -169,7 +169,7 @@ function chooseStart() {
   const close = () => { wrap.classList.remove("show"); document.removeEventListener("keydown", onKey, true); setTimeout(() => wrap.remove(), 200); if (prev && prev.focus) prev.focus({ preventScroll: true }); };
   const onKey = e => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
   const grid = el("div", { class: "ch-grid" }, TEMPLATES.map(t => el("button", { type: "button", class: "ch-card", onclick: async () => { close(); await fromTemplate(t.id); } },
-    el("span", { class: "ch-img" }, el("img", { src: templateImage(t.id), alt: "", loading: "lazy" })),
+    el("span", { class: "ch-img" }, el("img", { src: "img/templates/sm/" + t.id + ".jpg", alt: "", loading: "lazy", decoding: "async" })),
     el("b", { text: t.name }),
     el("small", { text: (STYLES[t.style] || {}).name + " · " + tplArea(t).toFixed(1) + " m²" }))));
   const box = el("div", { class: "chooser", role: "dialog", "aria-modal": "true", "aria-label": "New room" },

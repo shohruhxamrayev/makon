@@ -97,6 +97,13 @@ export const STYLES = {
   }
 };
 
+// a real room in each style (template renders and Signature photographs)
+export const STYLE_PIC = {
+  warm: "img/templates/sm/warm-living.jpg", nordic: "img/templates/sm/nordic-bedroom.jpg", japandi: "img/templates/sm/japandi-studio.jpg",
+  sage: "img/templates/sm/sage-kids.jpg", midnight: "img/templates/sm/midnight-lounge.jpg", industrial: "img/templates/sm/industrial-office.jpg",
+  mediterranean: "img/templates/sm/mediterranean-bath.jpg", midcentury: "img/templates/sm/midcentury-dining.jpg", minimal: "img/templates/sm/minimal-kitchen.jpg",
+  ivory: "img/signature/sm/ivory-residence-1.jpg", stone: "img/signature/sm/concrete-oak-house-1.jpg", noir: "img/templates/sm/obsidian-lounge.jpg"
+};
 export const FLOORS = {
   oak: { name: "Natural oak", base: "#c49a6c", var: 18, plank: [0.18, 1.2] },
   ash: { name: "Pale ash", base: "#ddc9a8", var: 12, plank: [0.2, 1.4] },
@@ -168,6 +175,8 @@ export const CATALOG = [
 ];
 export const CATS = ["All", ...new Set(CATALOG.map(c => c.cat))];
 export const catalogItem = id => CATALOG.find(c => c.id === id);
+// a studio photo of every piece, rendered from the same 3D model you place in the room
+export const furnPic = id => "img/furniture/" + id + ".jpg";
 
 // which item types are "large" for walkway checks
 export const LARGE = new Set(["sofa", "sectional", "bed", "wardrobe", "cabinet", "shelf", "table", "desk", "counter", "fridge", "bath", "sink", "stove"]);
