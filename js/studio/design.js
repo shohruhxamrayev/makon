@@ -1,4 +1,5 @@
 // Makon Studio — Design mode: photo, style, render (AI or on-device), versions, refine, palette
+import { openShare } from "./share.js";
 import { $, $$, el, esc, toast, confirmBox, modal, uid, fileToDataURL, scaleImage, loadImage, thumbOf, download, isTouch } from "./util.js";
 import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName, STYLE_PIC, STYLE_GROUPS, D_MOOD, D_FURN, D_BUDGET, D_LIGHT, D_IDEAS } from "./data.js";
 import { renderMood, extractPalette } from "./engine.js";
@@ -123,6 +124,11 @@ export function init(c) {
     if (src.startsWith("data:")) download(name + (v ? "-v" + (p().design.versions.indexOf(v) + 1) : "-original") + ".jpg", src);
     else loadImage(src).then(i => download(name + ".jpg", scaleImage(i, 4000, 0.92)));
   });
+  const share = () => {
+    const v = cur(); if (!v) { toast("Generate a redesign first, then share it."); return; }
+    openShare({ before: p().sample ? SAMPLE_BEFORE : p().photo, after: v.img, styleName: (STYLES[v.style] || {}).name, roomName: roomName(p().roomType) });
+  };
+  $("#v-share").addEventListener("click", share); $("#share-btn").addEventListener("click", share);
   $("#v-full").addEventListener("click", () => toggleFull());
   document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#cmp").classList.contains("fs")) toggleFull(false); });
 
@@ -267,6 +273,7 @@ function renderControls() {
     warn.hidden = !why; warn.textContent = why;
   }
   renderSum();
+  $("#share-btn").hidden = !cur() || busy; $("#v-share").hidden = !cur();
   $("#refine-box").hidden = !cur();
   $("#palette-box").hidden = !cur();
 }

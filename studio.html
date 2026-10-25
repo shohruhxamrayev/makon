@@ -44,6 +44,7 @@
       <symbol id="i-out" viewBox="0 0 24 24"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/></symbol>
       <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"/></symbol>
       <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 001 1h12a1 1 0 001-1v-7"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></symbol>
       <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
@@ -129,6 +130,7 @@
                 </div>
                 <span class="vtag" id="vtag"></span>
                 <div class="vbtns">
+                  <button class="icon-btn light" type="button" id="v-share" title="Share before / after" aria-label="Share before and after"><svg><use href="#i-share"/></svg></button>
                   <button class="icon-btn light" type="button" id="v-download" title="Download image" aria-label="Download image"><svg><use href="#i-download"/></svg></button>
                   <button class="icon-btn light" type="button" id="v-full" title="Full screen" aria-label="Full screen"><svg><use href="#i-expand"/></svg></button>
                   <button class="icon-btn light" type="button" id="v-replace" title="Replace photo" aria-label="Replace photo"><svg><use href="#i-camera"/></svg></button>
@@ -285,6 +287,7 @@
             <p class="req-sum" id="req-sum"></p>
             <p class="ai-warn" id="ai-warn" hidden></p>
             <button class="btn btn-primary btn-block" type="button" id="generate">Generate redesign</button>
+            <button class="btn btn-share btn-block" type="button" id="share-btn" hidden><svg><use href="#i-share"/></svg>Share this redesign</button>
 
             <div class="sub" id="refine-box" hidden>
               <h3>Refine in plain words</h3>
