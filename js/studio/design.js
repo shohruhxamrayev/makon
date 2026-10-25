@@ -408,7 +408,7 @@ function buildPrompt(extra) {
     keep.length ? "Do not change the " + keep.join(", ") + "." : "",
     lit[2] + (d.lit === "evening" ? "" : " Light comes from the " + LIGHT_NAMES[d.light] + "."),
     extra || "",
-    req ? "Most important: " + req + "." : "",
+    req ? "If anything above conflicts with the main request, the main request wins. Most important: " + req + "." : "",
     "Professional architectural interior photography, realistic proportions and materials, sharp detail, no text, no people, no watermark."
   ].filter(Boolean).join(" ");
 }
