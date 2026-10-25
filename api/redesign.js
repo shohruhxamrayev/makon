@@ -21,7 +21,9 @@
 //   ref    — optional inspiration picture (data URL): its look is copied onto the room
 //   strict — the person typed their own request: follow the prompt more closely
 
-const CF_MODEL = "@cf/black-forest-labs/flux-2-klein-4b";
+// Cloudflare model: FLUX.2 Klein 4B by default (≈ 90 free renders a day). For much better edits set
+// MAKON_CF_MODEL = @cf/black-forest-labs/flux-2-klein-9b  (≈ 6 free a day, then about $0.017 each on Workers Paid).
+const CF_MODEL = (process.env.MAKON_CF_MODEL || "@cf/black-forest-labs/flux-2-klein-4b").trim();
 
 // ---------- per-person daily limit ----------
 const mem = new Map(); // fallback store: key -> count (per server instance)
@@ -69,7 +71,7 @@ function config() {
   }
   return {
     provider, okey, cfId, cfTok,
-    model: provider === "openai" ? (process.env.MAKON_IMAGE_MODEL || "gpt-image-1.5") : provider === "cloudflare" ? "flux-2-klein-4b (free)" : null,
+    model: provider === "openai" ? (process.env.MAKON_IMAGE_MODEL || "gpt-image-1.5") : provider === "cloudflare" ? CF_MODEL.split("/").pop() : null,
     code: process.env.MAKON_ACCESS_CODE || "",
     configError: provider ? null : errors.length ? errors.join(" ") + " Fix it in Vercel → Settings → Environment Variables, then redeploy." : null
   };
@@ -183,7 +185,7 @@ async function viaCloudflare(c, buf, mime, ext, prompt, aspect, refImg, strict) 
     const msg = ((j.errors || [])[0] || {}).message || "";
     const friendly = r.status === 401 || r.status === 403 || /auth/i.test(msg) ? "Cloudflare rejected the token. The site owner needs to check CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (Workers AI permission) in Vercel."
       : r.status === 429 || /neuron|limit|quota|capacity/i.test(msg) ? "Today's free AI renders are used up. They reset at 05:00 Tashkent time (00:00 UTC)."
-      : "The image service returned an error (" + r.status + ").";
+      : "The image service returned an error (" + r.status + (msg ? ": " + String(msg).replace(/[A-Za-z0-9_\-]{32,}/g, "…").slice(0, 160) : "") + ").";
     return reply(502, { error: friendly });
   }
   const b64 = (j.result && (j.result.image || (j.result.images || [])[0])) || j.image;

@@ -681,3 +681,5 @@ body[data-mode="furnish"] .three-act { top: 108px; }
 .field.req > span { display: grid; gap: 3px; }
 .field.req > span small { text-transform: none; letter-spacing: 0; font-family: var(--sans, Inter, sans-serif); font-weight: 400; }
 .ideas .chips button.on { background: var(--ok-soft, #e3efe8); border-color: var(--ok, #2f6b4f); color: var(--ok, #2f6b4f); }
+.ai-warn { font-size: 12.5px; line-height: 1.45; margin: 0 0 10px; padding: 10px 12px; background: #fbf0dc; color: #7a4f0e; border-left: 3px solid #d08a1e; }
+.ai-err { display: block; margin-top: 6px; color: var(--err); }

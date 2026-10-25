@@ -234,6 +234,7 @@ function renderControls() {
     ai.innerHTML = '<span class="dot"></span>AI renders connected' + (ctx.ai.model ? " · " + esc(ctx.ai.model) : "") + (ctx.ai.owner ? '<small><b>Owner</b> · no daily limit for you.</small>' : "") + (ctx.ai.limit && ctx.ai.remaining != null ? '<small><b>' + ctx.ai.remaining + ' of ' + ctx.ai.limit + '</b> AI renders left for you today' + (ctx.ai.remaining === 0 ? ' — more tomorrow from 05:00 Tashkent time. Mood previews still work.' : '.') + '</small>' : "");
     // the owner's code box stays out of sight for visitors: open the Studio once with ?owner to see it
     let ownerUI = /[?&]owner\b/.test(location.search); try { ownerUI = ownerUI || !!localStorage.getItem(CODE_KEY); } catch (e) {}
+    if (ctx.ai.owner && ctx.ai.lastError) ai.append(el("small", { class: "ai-err", text: "Last AI error: " + ctx.ai.lastError }));
     if (!ctx.ai.owner && ownerUI) ai.append(el("button", { type: "button", class: "link-btn owner-link", text: "Site owner? Enter your code", onclick: async () => {
       const v = await modal({ title: "Owner code", body: "Type the MAKON_OWNER_CODE you set in Vercel. This browser will then have no daily limit.", fields: [{ label: "Owner code", type: "password", required: true, maxlength: 100 }], ok: "Save" });
       if (!v) return;
@@ -256,7 +257,15 @@ function renderControls() {
   }
   const g = $("#generate");
   g.disabled = busy || !p.photo;
-  g.textContent = busy ? "Working…" : !p.photo ? "Add a photo to start" : (d.versions.length ? "Generate another version" : "Generate redesign");
+  const aiOn = engineChoice() === "ai";
+  g.textContent = busy ? "Working…" : !p.photo ? "Add a photo to start" : aiOn ? (d.versions.length ? "Generate another redesign" : "Generate AI redesign") : "Make a colour preview";
+  const warn = $("#ai-warn");
+  if (warn) {
+    const why = !ctx.ai.checked ? "" : !ctx.ai.enabled ? "AI redesign isn't available right now, so Makon can only make a colour preview: it shifts the colours and light of your photo but can't follow your words, change furniture or use an inspiration photo."
+      : !aiLeft() ? "You've used today's free AI redesigns. Until tomorrow Makon can only make colour previews, which can't follow your words."
+      : d.engine === "local" ? "You picked Colour preview: it only shifts colours and light. Switch to AI redesign to follow your words." : "";
+    warn.hidden = !why; warn.textContent = why;
+  }
   renderSum();
   $("#refine-box").hidden = !cur();
   $("#palette-box").hidden = !cur();
@@ -465,20 +474,23 @@ async function generate() {
       try {
         const img = await callAI(p.photo, buildPrompt(), false, { ref: d.ref || null, strict: !!(d.notes || "").trim() });
         if (ctx.p.id !== projectId) { toast("The AI render finished for a room you've left."); return; }
-        await addVersion({ img, style: d.style, engine: "ai", label: "AI render", intensity: d.intensity, light: d.light, adj: { b: 1, c: 1, s: 1, w: 0 }, prompt: buildPrompt(), baseSelf: true });
+        ctx.ai.lastError = null;
+        await addVersion({ img, style: d.style, engine: "ai", label: "AI redesign", intensity: d.intensity, light: d.light, adj: { b: 1, c: 1, s: 1, w: 0 }, prompt: buildPrompt(), baseSelf: true });
         toast("AI render ready.");
         return;
       } catch (e) {
-        clearInterval(timer);
-        toast(e.message + " Made an on-device mood preview instead.", "error");
-        engine = "local";
+        clearInterval(timer); setBusy(false);
+        ctx.ai.lastError = e.message; renderControls();
+        const again = await confirmBox("The AI redesign didn't work", e.message + " Nothing was changed — press Try again in a moment.", "Try again", false);
+        if (again) return generate();
+        return;
       }
     }
     setBusy(true, "Creating mood preview…", "Re-grading colour and light on your device");
     const base = p.sample ? SAMPLE_AFTER : p.photo;
     const img = await renderMood(base, style, { intensity: d.intensity, light: d.light, keep: d.keep });
     if (ctx.p.id !== projectId) return;
-    await addVersion({ img, style: d.style, engine: "local", label: p.sample ? "Example render + mood" : "Mood preview", intensity: d.intensity, light: d.light, adj: { b: 1, c: 1, s: 1, w: 0 }, keep: d.keep.slice() });
+    await addVersion({ img, style: d.style, engine: "local", label: p.sample ? "Example render + colour" : "Colour preview", intensity: d.intensity, light: d.light, adj: { b: 1, c: 1, s: 1, w: 0 }, keep: d.keep.slice() });
     toast(style.name + " preview ready" + (ctx.ai.enabled ? "." : " — drag the slider to compare."));
   } catch (e) {
     console.error(e);
