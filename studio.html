@@ -249,14 +249,32 @@
           <!-- DESIGN -->
           <div class="ip" id="in-design">
             <span class="step"><b>1</b> / 05 · Design</span>
-            <h2>Design direction</h2>
+            <h2>Design your room</h2>
             <div class="ai-state" id="ai-state"></div>
+            <label class="field req"><span>What do you want? <small>In your own words — Makon follows this first</small></span>
+              <textarea class="input" id="notes" rows="3" maxlength="600" placeholder="e.g. A cosy bedroom with a wooden headboard wall, warm lamps, lots of plants and a soft beige rug"></textarea></label>
+            <div class="ideas"><div class="ideas-h"><span>Ideas — tap to add</span><button type="button" class="surprise" id="surprise">✦ Surprise me</button></div><div class="chips small" id="ideas"></div></div>
             <label class="field"><span>Room type</span><select class="input" id="room-type"></select></label>
-            <div class="field"><span>Style</span><div class="styles" id="styles"></div></div>
-            <label class="field"><span>Change strength <output id="int-out">75%</output></span><input type="range" id="intensity" min="10" max="100" step="5" value="75"></label>
-            <div class="field"><span>Daylight comes from</span><div class="compass" id="compass" role="radiogroup" aria-label="Daylight direction"></div></div>
-            <div class="field"><span>Keep exactly as is</span><div class="chips" id="keep"></div></div>
-            <label class="field"><span>Anything else? <small>(used by AI renders)</small></span><textarea class="input" id="notes" rows="2" maxlength="600" placeholder="e.g. keep the sideboard, add a reading corner, no rugs"></textarea></label>
+            <div class="field"><span>Style <small id="style-count"></small></span>
+              <div class="chips small style-groups" id="style-groups" role="group" aria-label="Style groups"></div>
+              <div class="styles" id="styles"></div>
+            </div>
+            <div class="field"><span>Colour mood</span><div class="chips small opt" id="o-mood"></div></div>
+            <div class="field"><span>Furniture</span><div class="chips small opt" id="o-furn"></div></div>
+            <div class="field"><span>Budget feel</span><div class="chips small opt" id="o-budget"></div></div>
+            <div class="field"><span>Light</span><div class="chips small opt" id="o-light"></div></div>
+            <div class="field"><span>Inspiration photo <small>(optional — “make it look like this”)</small></span>
+              <div class="ref-box" id="ref-box">
+                <input type="file" id="ref-file" accept="image/*" hidden>
+                <div class="ref-empty" id="ref-empty"><button type="button" class="btn btn-ghost btn-small" id="ref-pick">Upload a picture</button><button type="button" class="btn btn-ghost btn-small" id="ref-style">Use the style's example</button></div>
+                <div class="ref-on" id="ref-on" hidden><img id="ref-img" alt="Inspiration"><span><b>Copying this look</b><small>Colours, materials and furniture style — your room stays the same shape.</small></span><button type="button" class="icon-btn" id="ref-x" aria-label="Remove inspiration photo">✕</button></div>
+              </div>
+            </div>
+            <details class="more-opts"><summary>More options</summary>
+              <label class="field"><span>Change strength <output id="int-out">75%</output></span><input type="range" id="intensity" min="10" max="100" step="5" value="75"></label>
+              <div class="field"><span>Daylight comes from</span><div class="compass" id="compass" role="radiogroup" aria-label="Daylight direction"></div></div>
+              <div class="field"><span>Keep exactly as is</span><div class="chips" id="keep"></div></div>
+            </details>
             <div class="field"><span>Render with</span>
               <div class="seg wide" id="engine" role="group" aria-label="Render engine">
                 <button type="button" data-e="ai" aria-pressed="false">AI render</button>
@@ -264,6 +282,7 @@
               </div>
               <small class="hint" id="engine-hint"></small>
             </div>
+            <p class="req-sum" id="req-sum"></p>
             <button class="btn btn-primary btn-block" type="button" id="generate">Generate redesign</button>
 
             <div class="sub" id="refine-box" hidden>

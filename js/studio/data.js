@@ -94,9 +94,96 @@ export const STYLES = {
     t: { lift: 12, contrast: 1.06, sat: 0.7, warm: -0.05 }, wall: "#f6f6f3", floor: "ash",
     mats: [["Walls", "Gallery white"], ["Floor", "Wide white-oak boards"], ["Sofa", "Off-white, block form"], ["Tables", "Black stone"], ["Textiles", "None — bare and calm"], ["Accents", "One large artwork"]],
     prompt: "minimalist gallery interior: pure white walls, wide white oak floor, block off-white sofa, black stone table, a single large artwork, nothing else, crisp daylight"
+  },
+  luxe: {
+    name: "Modern Luxury", note: "Marble, brass, velvet", palette: ["#efebe4", "#d8cfc2", "#9c8a74", "#b08d57", "#2c2a28"],
+    t: { lift: 4, contrast: 1.04, sat: 0.85, warm: 0.15 }, wall: "#ebe6de", floor: "stone",
+    mats: [["Walls", "Greige plaster, wall panelling"], ["Floor", "Large-format marble"], ["Sofa", "Velvet, mushroom"], ["Tables", "Marble and brass"], ["Textiles", "Silk curtains, wool rug"], ["Accents", "Brushed brass lighting"]],
+    prompt: "modern luxury interior: greige plaster walls with subtle wall panelling, large-format light marble floor, curved velvet sofa in mushroom, marble coffee table with brushed brass details, sculptural brass pendant light, floor-to-ceiling silk curtains, layered warm lighting, five-star hotel feel"
+  },
+  wabisabi: {
+    name: "Wabi-Sabi", note: "Lime plaster, raw wood", palette: ["#e6dfd3", "#c9bba5", "#9b8b74", "#6d604f", "#b7ab95"],
+    t: { lift: 0, contrast: 0.92, sat: 0.72, warm: 0.25 }, wall: "#e2d9cb", floor: "concrete",
+    mats: [["Walls", "Hand-troweled lime plaster"], ["Floor", "Polished concrete"], ["Sofa", "Slubby linen, low"], ["Tables", "Raw reclaimed timber"], ["Textiles", "Undyed linen, jute"], ["Accents", "Handmade imperfect ceramics"]],
+    prompt: "wabi-sabi interior: hand-troweled textured lime plaster walls, polished concrete floor, low slubby linen sofa, raw reclaimed timber table, undyed linen and jute, handmade imperfect ceramics, dried branches, soft muted earthy light"
+  },
+  coastal: {
+    name: "Coastal Breeze", note: "White, sand, sea blue", palette: ["#f7f5f0", "#e6dccb", "#a9c2cc", "#5f8696", "#c9a77c"],
+    t: { lift: 10, contrast: 0.96, sat: 0.88, warm: -0.05 }, wall: "#f6f4ee", floor: "ash",
+    mats: [["Walls", "Crisp white, tongue-and-groove"], ["Floor", "Whitewashed oak"], ["Sofa", "Slipcovered white linen"], ["Tables", "Driftwood, rattan"], ["Textiles", "Striped blue cotton, jute"], ["Accents", "Sea-glass blue ceramics"]],
+    prompt: "coastal interior: crisp white walls, whitewashed oak floor, slipcovered white linen sofa, rattan and driftwood furniture, blue and white striped cushions, jute rug, sea-glass blue ceramics, breezy sheer curtains, bright beach-house daylight"
+  },
+  artdeco: {
+    name: "Art Deco Glam", note: "Emerald, brass, lacquer", palette: ["#1f3d36", "#2f5d50", "#b08d57", "#e9e1d3", "#141414"],
+    t: { lift: -6, contrast: 1.12, sat: 1.05, warm: 0.2 }, wall: "#28473f", floor: "walnut",
+    mats: [["Walls", "Deep emerald, fluted panels"], ["Floor", "Herringbone walnut"], ["Sofa", "Emerald velvet, channel tufted"], ["Tables", "Black lacquer, marble"], ["Textiles", "Velvet, geometric rug"], ["Accents", "Brass, fan motifs, globe lights"]],
+    prompt: "Art Deco glamour interior: deep emerald walls with fluted panels, herringbone walnut floor, channel-tufted emerald velvet sofa, black lacquer and marble tables, polished brass details, fan and geometric motifs, globe pendant lights, dramatic and elegant"
+  },
+  parisian: {
+    name: "Parisian Classic", note: "Mouldings, herringbone", palette: ["#f4f1ea", "#e3dbcd", "#c2ab8a", "#8c7356", "#2d2a26"],
+    t: { lift: 6, contrast: 1.0, sat: 0.85, warm: 0.15 }, wall: "#f2eee6", floor: "oak",
+    mats: [["Walls", "White with classic panel mouldings"], ["Floor", "Herringbone oak parquet"], ["Sofa", "Cream bouclé"], ["Tables", "Marble bistro, antique wood"], ["Textiles", "Linen, Persian rug"], ["Accents", "Gilded mirror, marble fireplace"]],
+    prompt: "Parisian apartment interior: white walls with ornate classic panel mouldings, herringbone oak parquet, marble fireplace with a large gilded mirror, cream bouclé sofa, vintage Persian rug, antique wood pieces, tall windows, elegant and airy"
+  },
+  farmhouse: {
+    name: "Modern Farmhouse", note: "Shiplap, wood, iron", palette: ["#f2efe8", "#ddd2c0", "#a8835d", "#5b4a3a", "#2b2b2b"],
+    t: { lift: 4, contrast: 1.0, sat: 0.9, warm: 0.3 }, wall: "#efebe2", floor: "oak",
+    mats: [["Walls", "White shiplap"], ["Floor", "Wide rustic oak"], ["Sofa", "Cream slipcover, leather chair"], ["Tables", "Reclaimed wood, black iron"], ["Textiles", "Plaid wool, linen"], ["Accents", "Black iron lights, baskets"]],
+    prompt: "modern farmhouse interior: white shiplap walls, wide rustic oak floor, exposed wooden ceiling beams, cream slipcovered sofa and cognac leather armchair, reclaimed wood table with black iron legs, woven baskets, black iron pendant lights, cosy and welcoming"
+  },
+  uzbek: {
+    name: "Uzbek Modern", note: "Ganch, suzani, Rishtan", palette: ["#efe6d6", "#c9a77c", "#1f6f8b", "#a23b2a", "#3d5a40"],
+    t: { lift: 2, contrast: 1.02, sat: 1.08, warm: 0.35 }, wall: "#ede3d2", floor: "terracotta",
+    mats: [["Walls", "Warm plaster, carved ganch accents"], ["Floor", "Terracotta, kilim rugs"], ["Sofa", "Low sofa with adras (ikat) cushions"], ["Tables", "Carved walnut, low table"], ["Textiles", "Suzani embroidery, adras silk"], ["Accents", "Rishtan turquoise ceramics, brass"]],
+    prompt: "modern Uzbek interior: warm plaster walls with elegant carved white ganch details and a pointed arch niche, carved walnut wood, a low modern sofa with colourful adras ikat silk cushions, a suzani embroidered textile on the wall, Rishtan turquoise and cobalt ceramics, kilim rug, brass lanterns, warm and refined, contemporary not old-fashioned"
+  },
+  moroccan: {
+    name: "Moroccan Riad", note: "Zellige, arches, lanterns", palette: ["#efe4d4", "#d9b48f", "#3f7d7a", "#b5573b", "#2f2a25"],
+    t: { lift: 0, contrast: 1.04, sat: 1.05, warm: 0.4 }, wall: "#eadccb", floor: "tile",
+    mats: [["Walls", "Tadelakt plaster, arches"], ["Floor", "Zellige and cement tiles"], ["Sofa", "Low banquette, wool cushions"], ["Tables", "Hammered brass tray table"], ["Textiles", "Berber rugs, wool throws"], ["Accents", "Pierced brass lanterns"]],
+    prompt: "Moroccan riad interior: smooth tadelakt plaster walls with arched openings, green zellige tile details, patterned cement tile floor, low banquette with wool cushions, Berber rugs, hammered brass tray table, pierced brass lanterns casting patterns, warm and exotic"
+  },
+  contemporary: {
+    name: "Bold Contemporary", note: "Colour blocks, sculpture", palette: ["#f1eee9", "#e3b23c", "#d1495b", "#2e86ab", "#1b1b1e"],
+    t: { lift: 4, contrast: 1.08, sat: 1.2, warm: 0.05 }, wall: "#f0ede8", floor: "concrete",
+    mats: [["Walls", "White with one colour-block wall"], ["Floor", "Light polished concrete"], ["Sofa", "Sculptural, bold colour"], ["Tables", "Glossy, geometric"], ["Textiles", "Graphic rug"], ["Accents", "Pop art, sculptural lamps"]],
+    prompt: "bold contemporary interior: white walls with one colour-blocked accent wall, light polished concrete floor, sculptural curved sofa in a bold colour, glossy geometric side tables, graphic rug, statement sculptural lamp, large pop artwork, playful and confident"
+  },
+  tropical: {
+    name: "Tropical Modern", note: "Teak, cane, big plants", palette: ["#f3efe6", "#d6c3a0", "#8a6a45", "#3f6b3a", "#1f3a26"],
+    t: { lift: 4, contrast: 1.0, sat: 1.05, warm: 0.2 }, wall: "#f1ece2", floor: "teak",
+    mats: [["Walls", "Warm white, cane panels"], ["Floor", "Teak"], ["Sofa", "Natural linen, teak frame"], ["Tables", "Teak, rattan"], ["Textiles", "Palm-print cushions, linen"], ["Accents", "Large banana and palm plants"]],
+    prompt: "tropical modern interior: warm white walls, teak floor and furniture, cane and rattan details, natural linen sofa, large banana leaf and palm plants in big pots, palm-print cushions, ceiling fan, lush green and relaxed resort feel"
+  },
+  hotel: {
+    name: "Boutique Hotel", note: "Panelled wall, layered light", palette: ["#e8e1d6", "#bfa98a", "#6f5843", "#2f2c29", "#c6a15b"],
+    t: { lift: -2, contrast: 1.06, sat: 0.9, warm: 0.3 }, wall: "#e6ddd0", floor: "walnut",
+    mats: [["Walls", "Full upholstered or wood panel wall"], ["Floor", "Dark walnut, plush rug"], ["Sofa", "Tailored, deep seats"], ["Tables", "Smoked glass, bronze"], ["Textiles", "Hotel bedding, velvet"], ["Accents", "Wall sconces, LED coves"]],
+    prompt: "boutique hotel interior: a full feature wall of upholstered or walnut panels, dark walnut floor with a plush rug, tailored furniture with deep seats, smoked glass and bronze side tables, wall sconces and hidden LED cove lighting, crisp hotel bedding, sophisticated and calm"
+  },
+  neon: {
+    name: "Gaming & Neon", note: "Dark, RGB light, tech", palette: ["#14151a", "#24262e", "#6c3df4", "#00d1ff", "#ff2e88"],
+    t: { lift: -12, contrast: 1.15, sat: 1.25, warm: -0.3 }, wall: "#1c1d24", floor: "concrete",
+    mats: [["Walls", "Charcoal with acoustic panels"], ["Floor", "Dark concrete, black rug"], ["Sofa", "Gaming chair, black leather"], ["Tables", "L-shaped desk, black"], ["Textiles", "Black, graphic"], ["Accents", "Purple and cyan LED strips"]],
+    prompt: "gaming room interior: charcoal walls with hexagon acoustic panels, purple and cyan RGB LED light strips, L-shaped black desk with multiple monitors, ergonomic gaming chair, floating shelves with collectibles, dark rug, cinematic neon glow"
+  },
+  pastel: {
+    name: "Playful Pastel", note: "Soft colours, round shapes", palette: ["#fbf3ee", "#f4c7c3", "#bfd8d2", "#f9e2a6", "#9fb4d9"],
+    t: { lift: 10, contrast: 0.95, sat: 1.0, warm: 0.15 }, wall: "#f8eee8", floor: "oak",
+    mats: [["Walls", "Blush pink with an arch mural"], ["Floor", "Light oak, round rug"], ["Sofa", "Rounded, pastel bouclé"], ["Tables", "Curvy, lacquered pastel"], ["Textiles", "Soft cotton, scalloped edges"], ["Accents", "Mushroom lamps, wavy mirror"]],
+    prompt: "playful pastel interior: blush pink walls with a painted arch mural, light oak floor, rounded pastel bouclé furniture, curvy lacquered tables, scalloped details, wavy mirror, mushroom lamps, round fluffy rug, cheerful and soft"
   }
 };
 
+// how the style list is grouped in the Studio
+export const STYLE_GROUPS = [
+  ["popular", "Popular", ["warm", "japandi", "luxe", "nordic", "ivory", "noir", "uzbek", "hotel"]],
+  ["light", "Light & calm", ["nordic", "ivory", "minimal", "coastal", "japandi", "wabisabi", "parisian"]],
+  ["warm", "Warm & natural", ["warm", "sage", "wabisabi", "farmhouse", "tropical", "boho", "mediterranean", "stone"]],
+  ["dark", "Dark & dramatic", ["noir", "midnight", "artdeco", "hotel", "industrial", "neon"]],
+  ["colour", "Colourful", ["boho", "contemporary", "pastel", "moroccan", "uzbek", "artdeco", "midcentury"]],
+  ["classic", "Classic", ["parisian", "midcentury", "luxe", "farmhouse", "artdeco"]]
+];
 // a real room in each style (template renders and Signature photographs)
 export const STYLE_PIC = {
   warm: "img/templates/sm/warm-living.jpg", nordic: "img/templates/sm/nordic-bedroom.jpg", japandi: "img/templates/sm/japandi-studio.jpg",
@@ -189,3 +276,45 @@ export const SHOPS = [
 ];
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "UZS", "RUB", "KZT", "TRY", "AED", "INR", "CAD", "AUD", "JPY"];
+
+// ---------- Design options: each has a label people see and words the AI gets ----------
+export const D_MOOD = [
+  ["style", "Style colours", ""],
+  ["warm", "Warm neutrals", "a warm neutral colour palette of cream, sand, caramel and oak"],
+  ["light", "Light & airy", "a light and airy palette of soft whites, pale wood and lots of light"],
+  ["dark", "Dark & moody", "a dark and moody palette with charcoal walls, deep wood and warm accent lighting"],
+  ["green", "Earthy greens", "an earthy palette of sage and olive greens with natural wood and clay"],
+  ["bold", "Bold colour", "confident bold colours with one strong statement colour"],
+  ["mono", "Black & white", "a crisp monochrome palette of black, white and grey with one wood accent"],
+  ["blush", "Soft blush", "a soft palette of blush pink, cream, terracotta and brass"],
+  ["blue", "Calm blues", "a calm palette of navy, dusty blue, white and natural oak"]
+];
+export const D_FURN = [
+  ["new", "New furniture", "Replace the furniture with new pieces that fit this style, arranged well for the room."],
+  ["keep", "Keep my furniture", "Keep the same furniture pieces in the same places; restyle only colours, fabrics, materials and decor."],
+  ["empty", "Furnish it fully", "The room may be empty or unfinished: furnish and decorate it completely, as a finished show home."]
+];
+export const D_BUDGET = [
+  ["mid", "Mid-range", ""],
+  ["budget", "Budget-friendly", "Use affordable, realistic furniture you could buy at IKEA, simple and practical."],
+  ["lux", "Luxury", "Use high-end designer furniture, premium natural materials and expert styling."]
+];
+export const D_LIGHT = [
+  ["day", "Daylight", "Bright natural daylight."],
+  ["golden", "Golden hour", "Warm golden-hour sunlight streaming in, long soft shadows."],
+  ["evening", "Evening lamps", "Evening: lamps, wall lights and hidden LED strips switched on, cosy warm glow, dark windows."],
+  ["clean", "Bright & clean", "Bright, even, clean light like a magazine photo shoot."]
+];
+// one-tap ideas, by room type — tapping adds the words to the request
+export const D_IDEAS = {
+  all: ["lots of green plants", "a statement pendant light", "an accent wall", "built-in shelving", "floor-to-ceiling curtains", "hidden LED lighting", "a large artwork", "wooden ceiling slats", "a cosy reading corner", "a big soft rug"],
+  living: ["an L-shaped sofa facing the TV", "a TV media wall with fireplace", "a gallery wall", "two armchairs by the window", "a marble coffee table"],
+  bedroom: ["an upholstered headboard wall", "pendant lights by the bed", "hotel-style bedding", "a wardrobe wall with mirrors", "a dressing table"],
+  kitchen: ["a kitchen island with bar stools", "a marble backsplash", "open wooden shelves", "matte black taps and handles", "wood-front cabinets"],
+  dining: ["a round dining table", "a statement chandelier", "banquette seating", "a sideboard with art above"],
+  office: ["a built-in desk with shelves", "an ergonomic chair", "acoustic wall panels", "a green plant wall"],
+  kids: ["a bunk bed", "a play corner with a teepee", "a chalkboard wall", "lots of toy storage", "a reading nook"],
+  bathroom: ["a walk-in glass shower", "a freestanding bathtub", "terrazzo tiles", "a backlit mirror", "a wooden vanity"],
+  studio: ["a shelving room divider", "a sofa bed", "a compact dining nook", "clever hidden storage"],
+  hallway: ["a bench with hooks", "a full-length mirror", "a runner rug", "a console with a lamp"]
+};

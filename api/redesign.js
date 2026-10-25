@@ -17,7 +17,9 @@
 //                         across all servers (without it the limit is kept in each server's memory: good, not perfect)
 //
 // GET  /api/redesign  → { enabled, provider, model, needsCode, maxInput, configError }
-// POST /api/redesign  { image: "data:image/jpeg;base64,…", prompt, orientation, aspect } → { image } or { error }
+// POST /api/redesign  { image: "data:image/jpeg;base64,…", prompt, orientation, aspect, ref?, strict? } → { image } or { error }
+//   ref    — optional inspiration picture (data URL): its look is copied onto the room
+//   strict — the person typed their own request: follow the prompt more closely
 
 const CF_MODEL = "@cf/black-forest-labs/flux-2-klein-4b";
 
@@ -95,18 +97,26 @@ module.exports = async function handler(req, res) {
 
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (e) { body = null; } }
-  const { image, prompt, orientation, aspect } = body || {};
+  const { image, prompt, orientation, aspect, ref, strict } = body || {};
   const m = typeof image === "string" && /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(image);
   if (!m) return res.status(400).json({ error: "Send the photo as a JPEG, PNG or WebP data URL." });
   if (typeof prompt !== "string" || !prompt.trim() || prompt.length > 6000) return res.status(400).json({ error: "Prompt is missing or too long." });
   const buf = Buffer.from(m[2], "base64");
   if (buf.length > 4 * 1024 * 1024) return res.status(413).json({ error: "Photo is too large — keep it under 4 MB." });
   const ext = m[1].split("/")[1].replace("jpeg", "jpg");
+  let refImg = null;
+  if (ref != null) {
+    const rm = typeof ref === "string" && /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(ref);
+    if (!rm) return res.status(400).json({ error: "The inspiration picture must be a JPEG, PNG or WebP." });
+    const rb = Buffer.from(rm[2], "base64");
+    if (rb.length > 3 * 1024 * 1024) return res.status(413).json({ error: "The inspiration picture is too large." });
+    refImg = { buf: rb, mime: rm[1], ext: rm[1].split("/")[1].replace("jpeg", "jpg") };
+  }
 
   try {
     const out = c.provider === "openai"
-      ? await viaOpenAI(c, buf, m[1], ext, prompt, orientation)
-      : await viaCloudflare(c, buf, m[1], ext, prompt, aspect);
+      ? await viaOpenAI(c, buf, m[1], ext, prompt, orientation, refImg)
+      : await viaCloudflare(c, buf, m[1], ext, prompt, aspect, refImg, !!strict);
     if (out.status === 200 && limit) out.body.remaining = Math.max(0, limit - (await bump(key)));
     return res.status(out.status).json(out.body);
   } catch (e) {
@@ -116,10 +126,13 @@ module.exports = async function handler(req, res) {
 
 const reply = (status, body) => ({ status, body });
 
-async function viaOpenAI(c, buf, mime, ext, prompt, orientation) {
+async function viaOpenAI(c, buf, mime, ext, prompt, orientation, refImg) {
   const form = new FormData();
   form.append("model", c.model);
-  form.append("image", new Blob([buf], { type: mime }), "room." + ext);
+  if (refImg) {
+    form.append("image[]", new Blob([buf], { type: mime }), "room." + ext);
+    form.append("image[]", new Blob([refImg.buf], { type: refImg.mime }), "inspiration." + refImg.ext);
+  } else form.append("image", new Blob([buf], { type: mime }), "room." + ext);
   form.append("prompt", prompt);
   form.append("size", orientation === "portrait" ? "1024x1536" : orientation === "square" ? "1024x1024" : "1536x1024");
   form.append("quality", process.env.MAKON_IMAGE_QUALITY || "medium");
@@ -143,19 +156,23 @@ async function viaOpenAI(c, buf, mime, ext, prompt, orientation) {
   return reply(200, { image: "data:image/jpeg;base64," + b64, model: c.model });
 }
 
-async function viaCloudflare(c, buf, mime, ext, prompt, aspect) {
+async function viaCloudflare(c, buf, mime, ext, prompt, aspect, refImg, strict) {
   // output size: keep the photo's shape, long side 1024, multiples of 16
   let ar = Number(aspect); if (!(ar > 0.33 && ar < 3)) ar = 1.5;
   const W = ar >= 1 ? 1024 : Math.round(1024 * ar / 16) * 16;
   const H = ar >= 1 ? Math.round(1024 / ar / 16) * 16 : 1024;
-  const form = new FormData();
-  form.append("prompt", "Edit image 0. " + prompt);
-  form.append("input_image_0", new Blob([buf], { type: mime }), "room." + ext);
-  form.append("width", String(W));
-  form.append("height", String(H));
-  const r = await fetch("https://api.cloudflare.com/client/v4/accounts/" + c.cfId + "/ai/run/" + CF_MODEL, {
-    method: "POST", headers: { Authorization: "Bearer " + c.cfTok }, body: form
-  });
+  const send = guidance => {
+    const form = new FormData();
+    form.append("prompt", (refImg ? "" : "Edit image 0. ") + prompt);
+    form.append("input_image_0", new Blob([buf], { type: mime }), "room." + ext);
+    if (refImg) form.append("input_image_1", new Blob([refImg.buf], { type: refImg.mime }), "inspiration." + refImg.ext);
+    form.append("width", String(W));
+    form.append("height", String(H));
+    if (guidance) form.append("guidance", String(guidance));   // higher = follows the words more closely
+    return fetch("https://api.cloudflare.com/client/v4/accounts/" + c.cfId + "/ai/run/" + CF_MODEL, { method: "POST", headers: { Authorization: "Bearer " + c.cfTok }, body: form });
+  };
+  let r = await send(strict ? 4 : 0);
+  if (r.status === 400 && strict) r = await send(0);   // if this model version doesn't take guidance, try plain
   const type = r.headers.get("content-type") || "";
   if (r.ok && type.startsWith("image/")) {
     const out = Buffer.from(await r.arrayBuffer()).toString("base64");

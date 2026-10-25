@@ -1,6 +1,6 @@
 // Makon Studio — Design mode: photo, style, render (AI or on-device), versions, refine, palette
 import { $, $$, el, esc, toast, confirmBox, modal, uid, fileToDataURL, scaleImage, loadImage, thumbOf, download, isTouch } from "./util.js";
-import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName, STYLE_PIC } from "./data.js";
+import { STYLES, ROOM_TYPES, KEEP, keepName, LIGHT, LIGHT_NAMES, roomName, STYLE_PIC, STYLE_GROUPS, D_MOOD, D_FURN, D_BUDGET, D_LIGHT, D_IDEAS } from "./data.js";
 import { renderMood, extractPalette } from "./engine.js";
 
 const SAMPLE_BEFORE = "img/room-before.jpg", SAMPLE_AFTER = "img/room-after.jpg";
@@ -26,9 +26,33 @@ export function init(c) {
   // ---- static controls ----
   const rt = $("#room-type");
   ROOM_TYPES.forEach(([k, n]) => rt.append(el("option", { value: k, text: n })));
-  rt.addEventListener("change", () => { p().roomType = rt.value; ctx.save(); });
+  rt.addEventListener("change", () => { p().roomType = rt.value; ctx.save(); renderIdeas(); renderSum(); });
+
+  // ---- options: colour mood, furniture, budget, light ----
+  [["#o-mood", D_MOOD, "mood"], ["#o-furn", D_FURN, "furn"], ["#o-budget", D_BUDGET, "budget"], ["#o-light", D_LIGHT, "lit"]].forEach(([sel, list, key]) => {
+    const box = $(sel);
+    list.forEach(([k, n]) => box.append(el("button", { type: "button", "data-k": k, "aria-pressed": "false", text: n, onclick: () => { p().design[key] = k; ctx.save(); renderControls(); } })));
+  });
+  // ---- ideas & surprise ----
+  $("#surprise").addEventListener("click", surprise);
+  // ---- inspiration photo ----
+  $("#ref-pick").addEventListener("click", () => $("#ref-file").click());
+  $("#ref-file").addEventListener("change", async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    try { const img = await loadImage(URL.createObjectURL(f)); p().design.ref = scaleImage(img, 768, 0.86); ctx.save(); renderControls(); toast("Inspiration added — Makon will copy its look onto your room."); }
+    catch (er) { toast("Couldn't read that picture. Try a JPG or PNG.", "error"); }
+  });
+  $("#ref-style").addEventListener("click", async () => {
+    const k = p().design.style; if (!STYLE_PIC[k]) { toast("This style has no example photo yet — upload your own picture."); return; }
+    try { const img = await loadImage(STYLE_PIC[k]); p().design.ref = scaleImage(img, 768, 0.86); ctx.save(); renderControls(); toast(STYLES[k].name + " example added as inspiration."); }
+    catch (er) { toast("Couldn't load the example photo.", "error"); }
+  });
+  $("#ref-x").addEventListener("click", () => { p().design.ref = null; ctx.save(); renderControls(); });
 
   const st = $("#styles");
+  const sg = $("#style-groups");
+  [["all", "All"], ...STYLE_GROUPS.map(g => [g[0], g[1]])].forEach(([k, n]) => sg.append(el("button", { type: "button", "data-g": k, "aria-pressed": String(k === styleGroup), text: n, onclick: () => { styleGroup = k; renderControls(); } })));
+  $("#style-count").textContent = "· " + Object.keys(STYLES).length + " styles";
   Object.entries(STYLES).forEach(([k, s]) => {
     st.append(el("button", { type: "button", class: "style-opt", "data-k": k, "aria-pressed": "false", onclick: () => { p().design.style = k; p().finish = { wall: null, floor: null }; ctx.save(); renderControls(); ctx.bus.emit("style"); } },
       STYLE_PIC[k] ? el("span", { class: "st-pic" }, el("img", { src: STYLE_PIC[k], alt: "", loading: "lazy", decoding: "async" })) : null,
@@ -50,7 +74,7 @@ export function init(c) {
     ctx.save(); renderControls();
   } })));
 
-  $("#notes").addEventListener("input", e => { p().design.notes = e.target.value; ctx.save(); });
+  $("#notes").addEventListener("input", e => { p().design.notes = e.target.value; ctx.save(); renderSum(); markIdeas(); });
 
   $$("#engine button").forEach(b => b.addEventListener("click", () => {
     if (b.dataset.e === "ai" && !ctx.ai.enabled) { toast("AI renders aren't connected on this site yet — see the note above."); return; }
@@ -116,6 +140,45 @@ export function init(c) {
 }
 
 const cur = () => { const d = ctx.p.design; return d.versions.find(v => v.id === d.current) || null; };
+let styleGroup = "popular";
+const optOf = (list, k) => list.find(x => x[0] === k) || list[0];
+
+function renderIdeas() {
+  const box = $("#ideas"); if (!box || !ctx.p) return;
+  const list = [...(D_IDEAS[ctx.p.roomType] || []), ...D_IDEAS.all.slice(0, 6)];
+  box.innerHTML = "";
+  list.forEach(t => box.append(el("button", { type: "button", "data-t": t, text: "+ " + t, onclick: () => addIdea(t) })));
+  markIdeas();
+}
+function markIdeas() {
+  const n = ((ctx.p && ctx.p.design.notes) || "").toLowerCase();
+  $$("#ideas button").forEach(b => { const on = n.includes(b.dataset.t.toLowerCase()); b.classList.toggle("on", on); b.textContent = (on ? "✓ " : "+ ") + b.dataset.t; });
+}
+function addIdea(t) {
+  const n = $("#notes"), cur0 = n.value.trim();
+  if (cur0.toLowerCase().includes(t.toLowerCase())) return;
+  n.value = cur0 ? cur0.replace(/[.,;\s]*$/, "") + ", " + t : t.charAt(0).toUpperCase() + t.slice(1);
+  ctx.p.design.notes = n.value; ctx.save(); renderSum(); markIdeas();
+}
+function surprise() {
+  const d = ctx.p.design, pick = a => a[Math.floor(Math.random() * a.length)];
+  const keys = Object.keys(STYLES).filter(k => k !== d.style);
+  d.style = pick(keys); ctx.p.finish = { wall: null, floor: null };
+  d.mood = Math.random() < 0.5 ? "style" : pick(D_MOOD)[0];
+  d.lit = pick(D_LIGHT)[0];
+  const ideas = [...(D_IDEAS[ctx.p.roomType] || []), ...D_IDEAS.all], a = pick(ideas); let b = pick(ideas); if (b === a) b = pick(ideas);
+  d.notes = (a.charAt(0).toUpperCase() + a.slice(1)) + (b !== a ? ", " + b : "");
+  styleGroup = "all";
+  ctx.save(); renderControls(); ctx.bus.emit("style");
+  const sel = document.querySelector('#styles .style-opt[aria-pressed="true"]'); if (sel) sel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  toast("Surprise: " + STYLES[d.style].name + " · " + optOf(D_LIGHT, d.lit)[1].toLowerCase() + " — press Generate.");
+}
+function renderSum() {
+  const p = ctx.p, d = p && p.design, box = $("#req-sum"); if (!box || !d) return;
+  const bits = [STYLES[d.style] && STYLES[d.style].name, d.mood && d.mood !== "style" ? optOf(D_MOOD, d.mood)[1] : "", optOf(D_FURN, d.furn)[1], d.budget && d.budget !== "mid" ? optOf(D_BUDGET, d.budget)[1] : "", optOf(D_LIGHT, d.lit)[1], d.ref ? "inspiration photo" : ""].filter(Boolean);
+  const req = (d.notes || "").trim();
+  box.innerHTML = '<b>Makon will make:</b> ' + esc(bits.join(" · ")) + (req ? '<br><b>Your request first:</b> “' + esc(req.length > 140 ? req.slice(0, 140) + "…" : req) + '”' : "") + (req && engineChoice() !== "ai" ? '<br><small>Your own words need an AI render — the instant preview only changes colour and light.</small>' : "");
+}
 const aiLeft = () => !(ctx.ai.limit && ctx.ai.remaining === 0);
 const engineChoice = () => { const e = ctx.p.design.engine; return ctx.ai.enabled && e !== "local" && aiLeft() ? "ai" : "local"; };
 
@@ -147,11 +210,17 @@ function renderControls() {
   const p = ctx.p; if (!p) return;
   const d = p.design;
   $("#room-type").value = p.roomType;
-  $$("#styles .style-opt").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === d.style)));
+  $$("#styles .style-opt").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.k === d.style)); const g = STYLE_GROUPS.find(x => x[0] === styleGroup); b.hidden = !!g && !g[2].includes(b.dataset.k) && b.dataset.k !== d.style; });
+  $$("#style-groups button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.g === styleGroup)));
+  [["#o-mood", "mood", "style"], ["#o-furn", "furn", "new"], ["#o-budget", "budget", "mid"], ["#o-light", "lit", "day"]].forEach(([sel, key, def]) => $$(sel + " button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === (d[key] || def)))));
+  $("#ref-empty").hidden = !!d.ref; $("#ref-on").hidden = !d.ref; if (d.ref) $("#ref-img").src = d.ref;
+  $("#ref-style").hidden = !STYLE_PIC[d.style];
+  if (!$("#ideas").childElementCount || $("#ideas").dataset.rt !== p.roomType) { renderIdeas(); $("#ideas").dataset.rt = p.roomType; }
   $("#intensity").value = Math.round(d.intensity * 100); $("#int-out").textContent = Math.round(d.intensity * 100) + "%";
   $$("#compass button").forEach(b => b.setAttribute("aria-checked", String(+b.dataset.d === d.light)));
   $$("#keep button").forEach(b => b.setAttribute("aria-pressed", String(d.keep.includes(b.dataset.k))));
   if (document.activeElement !== $("#notes")) $("#notes").value = d.notes || "";
+  markIdeas();
 
   const eng = engineChoice();
   $$("#engine button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.e === eng)); if (b.dataset.e === "ai") b.classList.toggle("off", !ctx.ai.enabled); });
@@ -188,6 +257,7 @@ function renderControls() {
   const g = $("#generate");
   g.disabled = busy || !p.photo;
   g.textContent = busy ? "Working…" : !p.photo ? "Add a photo to start" : (d.versions.length ? "Generate another version" : "Generate redesign");
+  renderSum();
   $("#refine-box").hidden = !cur();
   $("#palette-box").hidden = !cur();
 }
@@ -310,25 +380,35 @@ function setBusy(on, title = "", sub = "") {
   renderControls();
 }
 
+// FLUX follows a clear description best: the person's own request first, then the style, the options and what must not move.
 function buildPrompt(extra) {
-  const p = ctx.p, d = p.design, s = STYLES[d.style];
-  const keep = d.keep.map(keepName);
+  const p = ctx.p, d = p.design, s = STYLES[d.style] || STYLES.warm, room = roomName(p.roomType).toLowerCase();
+  const req = (d.notes || "").trim().replace(/\s+/g, " ");
+  const keep = d.keep.map(keepName).map(x => x.toLowerCase());
+  const furn = optOf(D_FURN, d.furn || (d.keep.includes("layout") ? "keep" : "new"));
+  const mood = optOf(D_MOOD, d.mood || "style"), budget = optOf(D_BUDGET, d.budget || "mid"), lit = optOf(D_LIGHT, d.lit || "day");
+  const k = d.intensity;
+  const amount = k < 0.4 ? "A subtle refresh: keep most things, change colours, textiles and decor." : k < 0.75 ? "A clear makeover of furniture, colours and decor." : "A complete transformation into a finished, magazine-worthy interior.";
   return [
-    "Redesign the interior of this " + roomName(p.roomType).toLowerCase() + " photo as a photorealistic interior design render.",
-    "Style: " + s.prompt + ".",
-    "Keep the exact same camera angle, perspective, room geometry, wall positions, ceiling height, window and door positions and sizes.",
-    keep.length ? "Do not change: " + keep.join(", ").toLowerCase() + "." : "",
-    "Daylight enters from the " + LIGHT_NAMES[d.light] + "; keep the light direction consistent.",
-    "Strength of change: " + Math.round(d.intensity * 100) + "% (low = subtle refresh, high = full makeover).",
-    d.notes ? "Client notes: " + d.notes.trim() + "." : "",
+    req ? "MAIN REQUEST — follow it exactly: " + req + "." : "",
+    (d.ref ? "Image 0 is the client's " + room + ". Redesign image 0" : "Redesign this " + room + " photo") + " as a photorealistic interior design photograph in " + s.name + " style: " + s.prompt + ".",
+    mood[2] ? "Use " + mood[2] + " (this replaces the style's own colours)." : "",
+    furn[2], budget[2], amount,
+    d.ref ? "Image 1 is only an inspiration picture: copy its colours, materials, furniture style and mood onto image 0, but do not copy its room, layout or camera." : "",
+    "Keep exactly the same camera position, angle and lens, the same walls, ceiling height, windows and doors in the same places and sizes.",
+    keep.length ? "Do not change the " + keep.join(", ") + "." : "",
+    lit[2] + (d.lit === "evening" ? "" : " Light comes from the " + LIGHT_NAMES[d.light] + "."),
     extra || "",
-    "Realistic materials and scale, no text, no people, no watermark."
+    req ? "Most important: " + req + "." : "",
+    "Professional architectural interior photography, realistic proportions and materials, sharp detail, no text, no people, no watermark."
   ].filter(Boolean).join(" ");
 }
 
-async function callAI(image, prompt, retried) {
+async function callAI(image, prompt, retried, opts = {}) {
   const ar = await aspect(image);
   const body = { image: scaleImage(await loadImage(image), ctx.ai.maxInput || 1280, 0.88), prompt, aspect: +ar.toFixed(3), orientation: ar > 1.15 ? "landscape" : ar < 0.87 ? "portrait" : "square" };
+  if (opts.ref) body.ref = scaleImage(await loadImage(opts.ref), ctx.ai.maxInput || 1024, 0.86);
+  if (opts.strict) body.strict = true;
   let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
   const c = new AbortController(); const t = setTimeout(() => c.abort(), 150000);
   try {
@@ -341,7 +421,7 @@ async function callAI(image, prompt, retried) {
       if (!v) throw new Error("No access code entered.");
       try { localStorage.setItem(CODE_KEY, v[0].trim()); } catch (e) {}
       renderControls();
-      return callAI(image, prompt, true);
+      return callAI(image, prompt, true, opts);
     }
     if (j.remaining != null) { ctx.ai.remaining = j.remaining; renderControls(); }
     if (!r.ok || !j.image) throw new Error(j.error || "The AI service returned an error (" + r.status + ").");
@@ -383,7 +463,7 @@ async function generate() {
       setBusy(true, "Rendering with AI…", "Usually 20–60 seconds. You can keep using the other tools.");
       timer = setInterval(() => { $("#busy-s").textContent = Math.round((Date.now() - t0) / 1000) + " s · usually 20–60 seconds"; }, 1000);
       try {
-        const img = await callAI(p.photo, buildPrompt());
+        const img = await callAI(p.photo, buildPrompt(), false, { ref: d.ref || null, strict: !!(d.notes || "").trim() });
         if (ctx.p.id !== projectId) { toast("The AI render finished for a room you've left."); return; }
         await addVersion({ img, style: d.style, engine: "ai", label: "AI render", intensity: d.intensity, light: d.light, adj: { b: 1, c: 1, s: 1, w: 0 }, prompt: buildPrompt(), baseSelf: true });
         toast("AI render ready.");
@@ -420,7 +500,7 @@ async function refine(text) {
   if (engineChoice() === "ai") {
     setBusy(true, "Refining with AI…", "Usually 20–60 seconds");
     try {
-      const img = await callAI(v.img, "This is an interior design render. Apply this change and keep everything else identical — same camera, room, furniture positions and lighting: " + text + ". Photorealistic, no text.");
+      const img = await callAI(v.img, "MAIN REQUEST — follow it exactly: " + text + ". This is an interior design photo: make only that change and keep everything else identical — same camera, room, furniture, positions and lighting. Most important: " + text + ". Photorealistic, no text.", false, { strict: true });
       if (ctx.p.id !== projectId) return;
       await addVersion({ img, style: v.style, engine: "ai", label: "AI refine: " + text.slice(0, 40), intensity: v.intensity, light: v.light, adj: { b: 1, c: 1, s: 1, w: 0 }, parent: v.id, baseSelf: true, refine: text });
       $("#refine").value = ""; toast("Refined.");
