@@ -38,13 +38,14 @@ async function run() {
   if (!queue.size || !(await ensure())) return;
   const jobs = [...queue]; queue.clear();
   for (const [k, it] of jobs) {
-    try { cache.set(k, shoot(it)); } catch (e) { cache.set(k, null); }
+    try { cache.set(k, await shoot(it)); } catch (e) { cache.set(k, null); }
   }
   onReady && onReady();
 }
 
-function shoot(it) {
+async function shoot(it) {
   const g = kit.buildItem(Object.assign({}, it, { x: 0, y: 0, rot: 0 }), styleOf());
+  await g.userData.ready;
   scene.add(g);
   const w = Math.max(it.w, 0.05), d = Math.max(it.d, 0.05);
   const sc = Math.min(PPM, MAX / Math.max(w, d));

@@ -61,7 +61,7 @@ const floorKey = () => ctx.p.finish.floor || style().floor;
 async function load() {
   if (T) return true;
   if (!loading) loading = Promise.all([import("../../vendor/three.module.min.js"), import("../../vendor/OrbitControls.js"), import("../../vendor/RoundedBoxGeometry.js"), import("../../vendor/RoomEnvironment.js"), import("./models.js")])
-    .then(([a, b, rb, re, mo]) => { T = a; OrbitControls = b.OrbitControls; RoomEnv = re.RoomEnvironment; kit = mo.createKit(a, rb.RoundedBoxGeometry); });
+    .then(([a, b, rb, re, mo]) => { T = a; OrbitControls = b.OrbitControls; RoomEnv = re.RoomEnvironment; kit = mo.createKit(a, rb.RoundedBoxGeometry, { onChange: () => { if (root) highlight(); frame(); } }); });
   try { await loading; return true; } catch (e) { console.error(e); loading = null; return false; }
 }
 
