@@ -1,0 +1,609 @@
+{
+ "Sofa_01": {
+  "name": "Sofa 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   1571.4675784111023,
+   658.0145359039307,
+   796.515051391907
+  ]
+ },
+ "sofa_02": {
+  "name": "Sofa 02",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   1807.1673512458801,
+   817.7513778209686,
+   709.4888985157013
+  ]
+ },
+ "sofa_03": {
+  "name": "Sofa 03",
+  "authors": [
+   "Fran Calvente"
+  ],
+  "dims": [
+   2731.17733001709,
+   925.0842034816742,
+   1118.2640366605483
+  ]
+ },
+ "ArmChair_01": {
+  "name": "Arm Chair 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   848.4309017658234,
+   765.7602727413177,
+   1065.087635157397
+  ]
+ },
+ "modern_arm_chair_01": {
+  "name": "Modern Arm Chair 01",
+  "authors": [
+   "Vibrant Nordic"
+  ],
+  "dims": [
+   820.3444182872772,
+   986.5616858005524,
+   1022.8520567470696
+  ]
+ },
+ "mid_century_lounge_chair": {
+  "name": "Mid Century Lounge Chair",
+  "authors": [
+   "Kuutti Siitonen"
+  ],
+  "dims": [
+   1008.6143612861633,
+   1190.310776233673,
+   1169.0847246776136
+  ]
+ },
+ "GreenChair_01": {
+  "name": "Green Chair 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   673.0944514274597,
+   664.3875539302826,
+   1058.5118799936026
+  ]
+ },
+ "Ottoman_01": {
+  "name": "Ottoman 01",
+  "authors": [
+   "Caspian Fortune"
+  ],
+  "dims": [
+   884.5577836036682,
+   621.1484670639038,
+   624.3239195573551
+  ]
+ },
+ "dining_chair_02": {
+  "name": "Dining Chair 02",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   433.5707724094391,
+   576.4201134443283,
+   973.3776897192001
+  ]
+ },
+ "bar_chair_round_01": {
+  "name": "Bar Chair Round 01",
+  "authors": [
+   "Dairon Sanchez"
+  ],
+  "dims": [
+   483.1501990556717,
+   485.99570989608765,
+   750.5484623070515
+  ]
+ },
+ "gallinera_chair": {
+  "name": "Gallinera Chair",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   580.7991623878479,
+   603.8820147514343,
+   1033.689022064209
+  ]
+ },
+ "WoodenChair_01": {
+  "name": "Wooden Chair 01",
+  "authors": [
+   "Jake Mobley"
+  ],
+  "dims": [
+   688.1728172302246,
+   658.4618389606476,
+   2273.514856118709
+  ]
+ },
+ "painted_wooden_bench": {
+  "name": "Painted Wooden Bench",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   1164.9435758590698,
+   496.5430945158005,
+   889.2914750613272
+  ]
+ },
+ "modern_coffee_table_01": {
+  "name": "Modern Coffee Table 01",
+  "authors": [
+   "Amin"
+  ],
+  "dims": [
+   1201.8300294876099,
+   600.0000834465027,
+   389.99998569488525
+  ]
+ },
+ "modern_coffee_table_02": {
+  "name": "Modern Coffee Table 02",
+  "authors": [
+   "Amin"
+  ],
+  "dims": [
+   1199.1113424301147,
+   1199.6567845344543,
+   369.2496716976166
+  ]
+ },
+ "coffee_table_round_01": {
+  "name": "Coffee Table Round 01",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   1301.3009428977966,
+   1301.3015985488892,
+   491.0094439983368
+  ]
+ },
+ "CoffeeTable_01": {
+  "name": "Coffee Table 01",
+  "authors": [
+   "Fernando Quinn"
+  ],
+  "dims": [
+   1540.0111079216003,
+   972.847044467926,
+   523.237330140546
+  ]
+ },
+ "side_table_01": {
+  "name": "Side Table 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   550.0000715255737,
+   450.00001788139343,
+   550.6622816901654
+  ]
+ },
+ "side_table_tall_01": {
+  "name": "Side Table Tall 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   383.98271799087524,
+   383.98271799087524,
+   761.1514969321433
+  ]
+ },
+ "small_wooden_table_01": {
+  "name": "Small Wooden Table 01",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   916.1878228187561,
+   439.96262550354004,
+   533.0857671797276
+  ]
+ },
+ "dining_table": {
+  "name": "Dining Table",
+  "authors": [
+   "Aron Łyczek"
+  ],
+  "dims": [
+   2255.895972251892,
+   1390.2360200881958,
+   876.989221200347
+  ]
+ },
+ "WoodenTable_02": {
+  "name": "Wooden Table 02",
+  "authors": [
+   "Fran Calvente"
+  ],
+  "dims": [
+   300.67646503448486,
+   300.67646503448486,
+   417.6570537537643
+  ]
+ },
+ "round_wooden_table_01": {
+  "name": "Round Wooden Table 01",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   1399.3489742279053,
+   1399.3489146232605,
+   1005.0213932991028
+  ]
+ },
+ "round_wooden_table_02": {
+  "name": "Round Wooden Table 02",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   796.1780428886414,
+   796.1780428886414,
+   746.0266395536621
+  ]
+ },
+ "gallinera_table": {
+  "name": "Gallinera Table",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   830.0825357437134,
+   518.291711807251,
+   487.785704433918
+  ]
+ },
+ "ClassicConsole_01": {
+  "name": "Classic Console 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   1543.0203676223755,
+   589.2754197120667,
+   949.0714100943478
+  ]
+ },
+ "modern_wooden_cabinet": {
+  "name": "Modern Wooden Cabinet",
+  "authors": [
+   "Patrik Pangerl"
+  ],
+  "dims": [
+   2440.0004148483276,
+   520.0000107288361,
+   680.1425069570541
+  ]
+ },
+ "drawer_cabinet": {
+  "name": "Drawer Cabinet",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   1141.0778760910034,
+   488.08445036411285,
+   1881.253957748413
+  ]
+ },
+ "vintage_wooden_drawer_01": {
+  "name": "Vintage Wooden Drawer 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   1715.1139974594116,
+   1006.912887096405,
+   1090.839296579361
+  ]
+ },
+ "wooden_display_shelves_01": {
+  "name": "Wooden Display Shelves 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   1077.760934829712,
+   371.50970101356506,
+   1556.1838150024414
+  ]
+ },
+ "steel_frame_shelves_03": {
+  "name": "Steel Frame Shelves 03",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   2351.0769605636597,
+   721.2460935115814,
+   2311.832904815674
+  ]
+ },
+ "ClassicNightstand_01": {
+  "name": "Classic Nightstand 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   567.7522718906403,
+   424.192875623703,
+   699.9649838462041
+  ]
+ },
+ "ornate_mirror_01": {
+  "name": "Ornate Mirror 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   486.4957332611084,
+   25.958335027098656,
+   744.1554069519043
+  ]
+ },
+ "modern_ceiling_lamp_01": {
+  "name": "Modern Ceiling Lamp 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   431.6493272781372,
+   431.6607564687729,
+   951.5514969825745
+  ]
+ },
+ "hanging_industrial_lamp": {
+  "name": "Hanging Industrial Lamp",
+  "authors": [
+   "Kuutti Siitonen"
+  ],
+  "dims": [
+   549.6065020561218,
+   549.606442451477,
+   1355.3501134738326
+  ]
+ },
+ "Chandelier_01": {
+  "name": "Chandelier 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   746.4556992053986,
+   815.5497610569,
+   798.2709443223541
+  ]
+ },
+ "Chandelier_03": {
+  "name": "Chandelier 03",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   780.4270684719086,
+   785.4602336883545,
+   1040.6459806239354
+  ]
+ },
+ "lantern_chandelier_01": {
+  "name": "Lantern Chandelier 01",
+  "authors": [
+   "Kirill Sannikov"
+  ],
+  "dims": [
+   579.170286655426,
+   574.6368169784546,
+   877.587977796793
+  ]
+ },
+ "desk_lamp_arm_01": {
+  "name": "Desk Lamp Arm 01",
+  "authors": [
+   "Yann Kervran",
+   "Kuutti Siitonen"
+  ],
+  "dims": [
+   617.3093914985657,
+   408.02252292633057,
+   879.0190517902374
+  ]
+ },
+ "industrial_wall_sconce": {
+  "name": "Industrial Wall Sconce",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   150.348000228405,
+   251.5759002417326,
+   341.7818397283554
+  ]
+ },
+ "brass_diya_lantern": {
+  "name": "Brass Diya Lantern",
+  "authors": [
+   "Bhargav Kubal"
+  ],
+  "dims": [
+   123.00453707575798,
+   123.00454080104828,
+   380.8239474892616
+  ]
+ },
+ "Lantern_01": {
+  "name": "Lantern 01",
+  "authors": [
+   "Rajil Jose Macatangay"
+  ],
+  "dims": [
+   122.08568677306175,
+   97.18310832977295,
+   294.2466139793396
+  ]
+ },
+ "ceramic_vase_01": {
+  "name": "Ceramic Vase 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   204.87193763256073,
+   206.37669414281845,
+   401.379804010503
+  ]
+ },
+ "ceramic_vase_02": {
+  "name": "Ceramic Vase 02",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   219.83815729618073,
+   221.4527726173401,
+   309.2874630820006
+  ]
+ },
+ "brass_vase_01": {
+  "name": "Brass Vase 01",
+  "authors": [
+   "Rico Cilliers"
+  ],
+  "dims": [
+   227.3191586136818,
+   227.31918096542358,
+   692.4719526432455
+  ]
+ },
+ "antique_ceramic_vase_01": {
+  "name": "Antique Ceramic Vase 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   255.02996146678925,
+   255.02994656562805,
+   439.553053722193
+  ]
+ },
+ "potted_plant_01": {
+  "name": "Potted Plant 01",
+  "authors": [
+   "Rico Cilliers"
+  ],
+  "dims": [
+   588.9185070991516,
+   636.6117596626282,
+   1350.7787585258484
+  ]
+ },
+ "potted_plant_02": {
+  "name": "Potted Plant 02",
+  "authors": [
+   "Rico Cilliers"
+  ],
+  "dims": [
+   701.1570334434509,
+   657.3865860700607,
+   841.1787391305552
+  ]
+ },
+ "potted_plant_04": {
+  "name": "Potted Plant 04",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   170.27407884597778,
+   185.9453096985817,
+   267.5964875961654
+  ]
+ },
+ "pachira_aquatica_01": {
+  "name": "Pachira Aquatica 01",
+  "authors": [
+   "Rob Tuytel",
+   "Rico Cilliers"
+  ],
+  "dims": [
+   6869.021415710449,
+   997.0420598983765,
+   1904.0735084563494
+  ]
+ },
+ "wall_clock": {
+  "name": "Wall Clock",
+  "authors": [
+   "PierreB3D"
+  ],
+  "dims": [
+   320.4909861087799,
+   47.2230945505423,
+   320.4909861087799
+  ]
+ },
+ "hanging_picture_frame_01": {
+  "name": "Hanging Picture Frame 01",
+  "authors": [
+   "James Ray Cock"
+  ],
+  "dims": [
+   593.999981880188,
+   15.749315607536118,
+   840.999960899353
+  ]
+ },
+ "throw_pillows_01": {
+  "name": "Throw Pillows 01",
+  "authors": [
+   "Serhii Khromov"
+  ],
+  "dims": [
+   1021.5678811073303,
+   627.4925470352173,
+   450.1592831220478
+  ]
+ },
+ "wicker_basket_01": {
+  "name": "Wicker Basket 01",
+  "authors": [
+   "Kuutti Siitonen"
+  ],
+  "dims": [
+   383.2242637872696,
+   295.01520097255707,
+   117.42293369024992
+  ]
+ },
+ "metal_office_desk": {
+  "name": "Metal Office Desk",
+  "authors": [
+   "Ulan Cabanilla"
+  ],
+  "dims": [
+   2000.0003576278687,
+   947.2135305404663,
+   787.5000089406967
+  ]
+ }
+}
