@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>For makers — Makon</title>
-  <meta name="description" content="Makon connects local furniture makers and craftsmen with people designing their homes. Starting with workshops in Samarkand — join early.">
+  <title>Makers &amp; designers — Makon</title>
+  <meta name="description" content="Furniture makers, craftsmen and interior designers on Makon — see their work, try their pieces in your room and contact them directly. Makers: add your workshop for free.">
   <meta name="theme-color" content="#f0eadf">
   <meta property="og:title" content="Makon for makers — your craft in thousands of homes">
   <meta property="og:image" content="https://makon-khaki.vercel.app/img/og.jpg">
@@ -19,13 +19,14 @@
   <link rel="stylesheet" href="css/gallery.css">
 </head>
 <body class="tplpage gal decor makers">
-  <a class="skip-link" href="#how">Skip to content</a>
+  <a class="skip-link" href="#mk-grid">Skip to content</a>
   <header class="lhead" id="lhead">
     <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-ink.svg" alt="Makon" width="118" height="34"></a>
     <nav class="lnav" aria-label="Main">
       <a class="lnav-a" href="index.html">Home</a>
       <a class="lnav-a" href="templates.html">Templates</a>
       <a class="lnav-a" href="decor.html">Decor</a>
+      <a class="lnav-a on" href="makers.html" aria-current="page">Makers</a>
       <a class="lnav-a" href="index.html#faq">FAQ</a>
       <a class="lnav-a signin-link" href="signin.html">Sign in</a>
       <a class="lcta" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
@@ -33,56 +34,61 @@
     </nav>
   </header>
   <div class="lmnav" id="lmnav" hidden>
-    <a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="index.html#faq">FAQ</a><a class="signin-link" href="signin.html">Sign in</a>
+    <a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">Makers</a><a href="index.html#faq">FAQ</a><a class="signin-link" href="signin.html">Sign in</a>
     <a class="lcta big" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
   </div>
 
   <main>
     <section class="g-wrap g-hero mk-hero">
-      <span class="g-eyebrow">Makon · For makers · Ustalar uchun</span>
-      <h1 class="g-h1">Your craft,<br><span class="ital">in thousands of homes.</span></h1>
-      <p class="g-lead">People use Makon to design their rooms. Soon they will order the furniture and decor straight from local masters — carpenters, upholsterers, embroiderers, ceramicists and metalworkers. We're starting with a small group of workshops in Samarkand.</p>
-      <p class="mk-uz">Makon — odamlar xonasini loyihalaydigan platforma. Tez orada ular mebel va bezaklarni to‘g‘ridan-to‘g‘ri mahalliy ustalardan buyurtma qiladi. Biz Samarqanddagi bir nechta ustaxona bilan boshlaymiz.</p>
-      <div class="mk-cta"><a class="d-try mk-btn" href="https://ig.me/m/makon.build" target="_blank" rel="noopener">Join the pilot — write to us ↗</a><span>Instagram DM · @makon.build</span></div>
+      <span class="g-eyebrow">Makon · Makers &amp; designers · Ustalar va dizaynerlar</span>
+      <h1 class="g-h1">Made by people,<br><span class="ital">not by factories.</span></h1>
+      <p class="g-lead">Furniture workshops, craftsmen and interior designers show their work here. Look through their pieces and projects, then contact them directly — no middleman.</p>
+      <div class="mk-cta"><a class="d-try mk-btn" href="join.html">Add your workshop or studio — free ↗</a><span>Takes 5 minutes · 5 daqiqa</span></div>
     </section>
 
-    <section class="g-wrap mk-why" aria-labelledby="why-h">
-      <h2 id="why-h" class="mk-h2">Why join early <small>Nega hozirdan qo‘shilish kerak</small></h2>
-      <div class="mk-cards">
-        <article><b>01</b><h3>Seen inside real rooms</h3><p>Buyers place your piece in their own room in 3D and see that it fits — before they ever call you.</p><p class="uz">Xaridor buyumingizni o‘z xonasida 3D’da ko‘radi.</p></article>
-        <article><b>02</b><h3>Orders with exact sizes</h3><p>Every request comes with the room's measurements and a picture of where the piece will stand. Fewer mistakes, fewer returns.</p><p class="uz">Har bir buyurtma aniq o‘lchamlar bilan keladi.</p></article>
-        <article><b>03</b><h3>Your name on your work</h3><p>A page for your workshop: your city, your story, your photos. Buyers choose a master, not a factory.</p><p class="uz">Ustaxonangiz nomi va hikoyasi bilan.</p></article>
-        <article><b>04</b><h3>Free during the pilot</h3><p>Joining the first group costs nothing. We photograph and model a few of your pieces with you.</p><p class="uz">Sinov davrida qo‘shilish bepul.</p></article>
+    <section class="g-wrap mk-dir" aria-labelledby="dir-h">
+      <div class="mk-dir-bar">
+        <h2 class="mk-h2" id="dir-h">On Makon now</h2>
+        <div class="chips d-filters" id="mk-filters" role="group" aria-label="Show">
+          <button type="button" data-k="all" aria-pressed="true">All</button>
+          <button type="button" data-k="producer" aria-pressed="false">Furniture makers</button>
+          <button type="button" data-k="designer" aria-pressed="false">Interior designers</button>
+        </div>
+      </div>
+      <div class="mk-grid" id="mk-grid" aria-live="polite"><p class="mk-load">Loading…</p></div>
+    </section>
+
+    <section class="mk-joinband" aria-labelledby="jb-h">
+      <div class="g-wrap mk-jb">
+        <div>
+          <span class="g-eyebrow light">For makers and designers · Ustalar va dizaynerlar uchun</span>
+          <h2 id="jb-h">Your work, in front of people<br><span class="ital">who are designing their homes.</span></h2>
+          <p>Make a page for your workshop or studio: your story, your city, photos of your pieces or projects with sizes and prices, and how to reach you. We check every page before it goes live, so buyers can trust what they see.</p>
+          <p class="uz">Ustaxona yoki studiyangiz uchun sahifa yarating: hikoyangiz, shahringiz, buyumlaringiz yoki loyihalaringiz surati, o‘lcham va narxlari, bog‘lanish yo‘llari. Har bir sahifani e’lon qilishdan oldin tekshiramiz.</p>
+          <a class="d-try mk-btn light" href="join.html">Create my page ↗</a>
+        </div>
+        <ol class="mk-steps dark">
+          <li><b>Fill in your page</b><span>Name, city, what you make, how to contact you.</span><span class="uz">Ism, shahar, nima yasaysiz, aloqa.</span></li>
+          <li><b>Add your work</b><span>Up to 12 photos with title, size, material and price.</span><span class="uz">12 tagacha surat: nomi, o‘lchami, materiali, narxi.</span></li>
+          <li><b>We review it</b><span>Usually within a day. Then buyers can find you.</span><span class="uz">Odatda bir kun ichida, so‘ng xaridorlar sizni topadi.</span></li>
+        </ol>
       </div>
     </section>
 
     <section class="g-wrap mk-who" aria-labelledby="who-h">
-      <h2 id="who-h" class="mk-h2">Who we're looking for <small>Kimlarni izlayapmiz</small></h2>
-      <div class="mk-tags"><span>Carpenters · Duradgorlar</span><span>Wood carvers · O‘ymakorlar</span><span>Upholsterers · Yumshoq mebel ustalari</span><span>Suzani embroiderers · Kashtachilar</span><span>Ceramicists · Kulollar</span><span>Metal &amp; brass · Misgarlar</span><span>Weavers · To‘quvchilar</span><span>Lighting makers · Chiroq ustalari</span></div>
+      <h2 id="who-h" class="mk-h2">Who it's for <small>Kimlar uchun</small></h2>
+      <div class="mk-tags"><span>Furniture factories &amp; workshops · Mebel ishlab chiqaruvchilar</span><span>Carpenters · Duradgorlar</span><span>Wood carvers · O‘ymakorlar</span><span>Upholsterers · Yumshoq mebel ustalari</span><span>Suzani embroiderers · Kashtachilar</span><span>Ceramicists · Kulollar</span><span>Metalworkers · Misgarlar</span><span>Interior designers · Interyer dizaynerlari</span><span>Architects · Arxitektorlar</span></div>
     </section>
-
-    <section class="g-wrap mk-how" id="how" aria-labelledby="how-h">
-      <h2 id="how-h" class="mk-h2">How it works <small>Qanday ishlaydi</small></h2>
-      <ol class="mk-steps">
-        <li><b>Tell us about your workshop</b><span>A message with your city, what you make and a few photos.</span><span class="uz">Ustaxonangiz haqida yozing: shahar, nima yasaysiz, bir nechta surat.</span></li>
-        <li><b>We add 3–5 of your pieces</b><span>We photograph and model them in 3D with real sizes and prices you set.</span><span class="uz">3–5 ta buyumingizni 3D’da, haqiqiy o‘lcham va narx bilan qo‘shamiz.</span></li>
-        <li><b>Buyers try them and order</b><span>People design their room, place your piece in it and send you the order.</span><span class="uz">Xaridorlar buyumni xonasida sinab ko‘rib, buyurtma beradi.</span></li>
-      </ol>
-      <div class="mk-msg"><span class="g-eyebrow">Message to send · Yuboriladigan xabar</span>
-        <p>“Salom! Men <i>[ism]</i>, <i>[shahar]</i>dagi ustaxonadanman. Biz <i>[nima yasaysiz]</i> yasaymiz. Makon pilotiga qo‘shilmoqchiman.”</p>
-        <a class="d-try mk-btn" href="https://ig.me/m/makon.build" target="_blank" rel="noopener">Open Instagram DM ↗</a></div>
-    </section>
-
     <section class="g-end">
       <div class="g-wrap">
-        <div class="g-end-row"><h2>Samarkand first.<br>Then every region.</h2><a class="g-arrow" href="https://ig.me/m/makon.build" target="_blank" rel="noopener" aria-label="Write to Makon">↗</a></div>
+        <div class="g-end-row"><h2>Show your work<br>where homes are made.</h2><a class="g-arrow" href="join.html" aria-label="Create my page">↗</a></div>
         <div class="g-end-links"><a href="decor.html">See the decor catalogue</a><a href="index.html">How Makon works</a><a href="https://www.instagram.com/makon.build/" target="_blank" rel="noopener me">Instagram @makon.build</a></div>
-        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">For makers</a><a href="signin.html">Sign in</a></nav></div>
+        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">Makers</a><a href="signin.html">Sign in</a></nav></div>
       </div>
     </section>
   </main>
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
-  <script type="module">import { initHeader } from "./js/gallery-common.js"; initHeader();</script>
+  <script type="module" src="js/makers-page.js"></script>
 </body>
 </html>

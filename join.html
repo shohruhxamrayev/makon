@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Create your maker page — Makon</title>
+  <meta name="description" content="Furniture makers, craftsmen and interior designers: create a free page on Makon with your work, sizes, prices and contacts.">
+  <meta name="theme-color" content="#f0eadf">
+  <meta property="og:title" content="Makon for makers — your craft in thousands of homes">
+  <meta property="og:image" content="https://makon-khaki.vercel.app/img/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="tplpage gal decor makers">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="lhead" id="lhead">
+    <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-ink.svg" alt="Makon" width="118" height="34"></a>
+    <nav class="lnav" aria-label="Main">
+      <a class="lnav-a" href="index.html">Home</a>
+      <a class="lnav-a" href="templates.html">Templates</a>
+      <a class="lnav-a" href="decor.html">Decor</a>
+      <a class="lnav-a on" href="makers.html" aria-current="page">Makers</a>
+      <a class="lnav-a" href="index.html#faq">FAQ</a>
+      <a class="lnav-a signin-link" href="signin.html">Sign in</a>
+      <a class="lcta" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+      <button class="lmenu" id="lmenu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="lmnav"><i></i><i></i></button>
+    </nav>
+  </header>
+  <div class="lmnav" id="lmnav" hidden>
+    <a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">Makers</a><a href="index.html#faq">FAQ</a><a class="signin-link" href="signin.html">Sign in</a>
+    <a class="lcta big" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+  </div>
+
+  <main id="main">
+    <section class="g-wrap jn" aria-labelledby="jn-h">
+      <span class="g-eyebrow" id="jn-eyebrow">Makon · Create your page · Sahifa yaratish</span>
+      <h1 class="g-h1 jn-h" id="jn-h">Show your work<br><span class="ital">on Makon.</span></h1>
+      <p class="g-lead" id="jn-lead">Free. Fill it in once — we review every page before it goes live (usually within a day). <span class="uz">Bepul. Sahifa tekshiruvdan so‘ng e’lon qilinadi.</span></p>
+      <div class="jn-off" id="jn-off" hidden></div>
+      <form class="jn-form" id="jn-form" novalidate>
+        <div class="jn-fs" role="group">
+          <h2 class="jn-lg"><b>1</b> About you <small>Siz haqingizda</small></h2>
+          <div class="jn-kind" role="radiogroup" aria-label="I am">
+            <label><input type="radio" name="kind" value="producer" checked><span><b>Furniture maker</b><small>Workshop, factory or craftsman · Mebel ustasi / ishlab chiqaruvchi</small></span></label>
+            <label><input type="radio" name="kind" value="designer"><span><b>Interior designer</b><small>Designer, studio or architect · Interyer dizayneri</small></span></label>
+          </div>
+          <div class="jn-row">
+            <label>Workshop or studio name <small>Nomi</small><input name="name" required maxlength="70" autocomplete="organization" placeholder="e.g. Samarqand Yog‘och Ustaxonasi"></label>
+            <label>City <small>Shahar</small><input name="city" maxlength="50" autocomplete="address-level2" placeholder="Samarkand"></label>
+          </div>
+          <label>One line about what you do <small>Qisqacha</small><input name="tagline" maxlength="120" placeholder="Hand-carved walnut furniture since 1998"></label>
+          <label>Your story <small>Hikoyangiz</small><textarea name="about" maxlength="1200" rows="4" placeholder="Who you are, what you make, materials you love, how long orders take…"></textarea></label>
+          <div class="jn-logo"><span class="jn-logo-pic" id="jn-logo-pic">+</span><label class="jn-file">Logo or your photo (optional) <small>Logotip</small><input type="file" accept="image/*" id="jn-logo"></label></div>
+        </div>
+        <div class="jn-fs" role="group">
+          <h2 class="jn-lg"><b>2</b> How buyers reach you <small>Aloqa</small></h2>
+          <p class="jn-note">Shown on your public page. Add at least one. <span class="uz">Sahifangizda ko‘rinadi, kamida bittasini kiriting.</span></p>
+          <div class="jn-row">
+            <label>Telegram <input name="telegram" maxlength="60" placeholder="@username"></label>
+            <label>Instagram <input name="instagram" maxlength="80" placeholder="@workshop"></label>
+          </div>
+          <div class="jn-row">
+            <label>Phone <small>Telefon</small><input name="phone" type="tel" maxlength="20" autocomplete="tel" placeholder="+998 90 123 45 67"></label>
+            <label>Website <small>Sayt</small><input name="website" maxlength="200" placeholder="example.uz"></label>
+          </div>
+        </div>
+        <div class="jn-fs" role="group">
+          <h2 class="jn-lg"><b>3</b> <span id="jn-works-l">Your pieces</span> <small id="jn-works-uz">Buyumlaringiz</small></h2>
+          <p class="jn-note">Up to 12. Good daylight photos sell. Big photos are shrunk on your phone before sending. <span class="uz">12 tagacha surat.</span></p>
+          <div class="jn-works" id="jn-works"></div>
+          <button type="button" class="jn-add" id="jn-add">+ Add a <span id="jn-add-w">piece</span></button>
+        </div>
+        <label class="jn-agree"><input type="checkbox" name="agree" required><span>I own these photos (or have permission to use them) and the information is true. <span class="uz">Suratlar meniki va ma’lumotlar to‘g‘ri.</span></span></label>
+        <div class="jn-send"><button type="submit" class="d-try mk-btn" id="jn-submit">Send for review ↗</button><p class="jn-st" id="jn-st" role="status"></p></div>
+      </form>
+      <div class="jn-done" id="jn-done" hidden></div>
+    </section>
+    <section class="g-end">
+      <div class="g-wrap">
+        <div class="g-end-row"><h2>Show your work<br>where homes are made.</h2><a class="g-arrow" href="join.html" aria-label="Create my page">↗</a></div>
+        <div class="g-end-links"><a href="decor.html">See the decor catalogue</a><a href="index.html">How Makon works</a><a href="https://www.instagram.com/makon.build/" target="_blank" rel="noopener me">Instagram @makon.build</a></div>
+        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">Makers</a><a href="signin.html">Sign in</a></nav></div>
+      </div>
+    </section>
+  </main>
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+  <script type="module" src="js/join-page.js"></script>
+</body>
+</html>
