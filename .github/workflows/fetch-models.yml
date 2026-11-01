@@ -1,0 +1,28 @@
+name: Fetch 3D models
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["tools/ph-list.txt", "tools/fetch-ph.mjs", ".github/workflows/fetch-models.yml"]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node tools/fetch-ph.mjs
+      - name: Optimise (1k WebP textures, meshopt)
+        run: |
+          for d in tmp/ph/*/; do id=$(basename "$d");
+            npx -y @gltf-transform/cli@4.1.1 optimize "$d/$id.gltf" "models/ph/$id.glb" --texture-compress webp --texture-size 1024 --compress meshopt --simplify false || echo "optimise failed $id";
+          done
+          ls -la models/ph
+      - name: Commit
+        run: |
+          git config user.name "Shohruh Xamrayev"; git config user.email "shohruhxamrayev37@gmail.com"
+          git add models/ph
+          git diff --cached --quiet || git commit -m "Add CC0 Poly Haven furniture models [skip ci]"
+          git push
