@@ -87,7 +87,12 @@ export function createReal(T, onChange) {
       model.updateMatrixWorld(true);
       const bb = new T.Box3().setFromObject(model), sz = bb.getSize(new T.Vector3()), c = bb.getCenter(new T.Vector3());
       const fit = new T.Group(); fit.add(model); model.position.set(-c.x, -bb.min.y, -c.z);
-      if (it.w > 0 && it.d > 0 && it.h > 0) fit.scale.set(it.w / Math.max(sz.x, 1e-3), it.h / Math.max(sz.y, 1e-3), it.d / Math.max(sz.z, 1e-3));
+      if (it.w > 0 && it.d > 0 && it.h > 0) {
+        const k = [it.w / Math.max(sz.x, 1e-3), it.h / Math.max(sz.y, 1e-3), it.d / Math.max(sz.z, 1e-3)];
+        // stretched far out of its real proportions, a scanned piece looks wrong: keep our own model, built to that size
+        if (Math.max(...k) / Math.min(...k) > 1.45) return g;
+        fit.scale.set(k[0], k[1], k[2]);
+      }
       // a colour the person picked tints the main material; the catalogue colour leaves the scan as it is
       const tint = it.color && defColor && it.color.toLowerCase() !== defColor.toLowerCase();
       let main = null, best = 0;

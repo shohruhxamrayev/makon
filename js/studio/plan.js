@@ -6,7 +6,7 @@ import { setup as spriteSetup, spriteFor } from "./sprites.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const GRID = 0.05;
-const WALL_SNAP_SHAPES = new Set(["sofa", "sectional", "bed", "cabinet", "shelf", "wardrobe", "counter", "sink", "stove", "fridge", "bath", "toilet", "desk", "art", "tv", "mirror", "box", "crib"]);
+const WALL_SNAP_SHAPES = new Set(["sofa", "sectional", "bed", "cabinet", "shelf", "wardrobe", "counter", "sink", "stove", "fridge", "bath", "toilet", "desk", "art", "tv", "mirror", "box", "crib", "washer", "vitrine", "tvwall", "bunk", "suzani", "plates", "carvedpanel", "clock", "sconce", "hood", "aircon", "curtain", "sandiq", "coatrack", "shower"]);
 const TUCK = new Set(["chair", "stool"]), TUCK_UNDER = new Set(["table", "rtable", "desk", "counter"]);
 const GAP_EXEMPT = new Set(["coffee", "coffeer", "side", "nightstand", "pouf", "bench"]);
 
@@ -502,6 +502,160 @@ function addItem(catId, at) {
   commit();
   return it;
 }
+// ---------- smart placement: every piece goes where it belongs in a real room ----------
+// plan: front of a piece = (-sin r, cos r), its right = (cos r, sin r)
+const FRONT = r => { const a = (r || 0) * Math.PI / 180; return [-Math.sin(a), Math.cos(a)]; };
+const RIGHT = r => { const a = (r || 0) * Math.PI / 180; return [Math.cos(a), Math.sin(a)]; };
+const at = (o, f, rt, df, dr) => [o.x + f[0] * df + rt[0] * dr, o.y + f[1] * df + rt[1] * dr];
+const SURF = {                          // what each small piece stands on, in order of preference
+  tablelamp: ["nightstand", "side", "nesting", "console", "sideboard", "dresser", "drawers", "tvunit", "desk", "vanitytable"],
+  desklamp: ["desk", "steeldesk", "gamingdesk", "vanitytable", "console"],
+  vases: ["sideboard", "console", "tvunit", "dresser", "coffee", "coffeer", "marblecoffee", "carvedcoffee", "dining4", "dining6", "banquet", "rdining"],
+  bluevase: ["console", "sideboard", "tvunit", "dresser", "side", "nightstand", "coffee", "coffeer"],
+  succulent: ["desk", "side", "nightstand", "coffee", "coffeer", "marblecoffee", "console", "sideboard", "tvunit", "wallshelf"],
+  rishtan: [], suzani: [],
+};
+const CEILING = new Set(["pendant", "chandelier", "ringlight"]);
+const BESIDE = new Set(["floorlamp", "arclamp", "plant", "monstera", "olivetree", "brassvase", "lantern", "coatrack"]);
+const ABOVE = new Set(["art", "suzani", "plates", "carvedpanel", "clock", "wallmirror"]);
+const FOOD_TABLES = ["dining4", "dining6", "banquet", "rdining", "bistro", "island", "bartable"];
+const SEATS = ["sofa3", "sofa2", "corner", "sofabed", "chesterfield", "frenchsofa", "carvedsofa", "tapchan", "kurpacha"];
+const BEDS = ["double", "king", "single", "upbed", "bunk"];
+
+function smartSpot(it, free, lp, ctr) {
+  const p = P(), H = p.height || 2.6, items = p.items, by = types => types.map(t => items.filter(o => o.type === t)).flat();
+  const take = cand => { Object.assign(it, cand); return true; };
+  const tryAll = cands => { for (const c of cands) { const cand = Object.assign({}, it, c); cand.x = +cand.x.toFixed(3); cand.y = +cand.y.toFixed(3); if (free(cand)) return take({ x: cand.x, y: cand.y, rot: cand.rot != null ? cand.rot : it.rot, elev: cand.elev != null ? cand.elev : it.elev }); } return false; };
+  const onTop = o => items.filter(q => q.flat && q !== it && Math.hypot(q.x - o.x, q.y - o.y) < Math.max(o.w, o.d) / 2 && (q.elev || 0) > 0.2);
+  const t = it.type;
+
+  // 1. small things go ON furniture: table lamp on a bedside table, desk lamp on the desk, vases on a sideboard
+  if (SURF[t] && SURF[t].length) {
+    const hosts = by(SURF[t]).sort((a, b) => onTop(a).length - onTop(b).length);
+    for (const o of hosts) {
+      const f = FRONT(o.rot), rt = RIGHT(o.rot), room = o.w / 2 - it.w / 2 - 0.04;
+      const sides = room > 0.05 ? [room * 0.75, -room * 0.75, 0] : [0];
+      for (const s of sides) {
+        const [x, y] = at(o, f, rt, -Math.max(0, o.d / 2 - it.d / 2 - 0.06) * 0.6, s);
+        if (!onTop(o).some(q => Math.hypot(q.x - x, q.y - y) < (q.w + it.w) / 2)) return take({ x, y, rot: o.rot || 0, elev: +(o.elev || 0) + o.h });
+      }
+    }
+    // nothing to stand on: a small lamp/vase waits on the floor beside a wall instead of floating in the air
+    it.elev = 0;
+    return false;
+  }
+
+  // 2. ceiling lights hang from the ceiling: over the dining table or island, else the middle of the room
+  if (CEILING.has(it.shape)) {
+    const lit = items.filter(q => CEILING.has(q.shape));
+    const tables = by(FOOD_TABLES).filter(o => !lit.some(q => Math.hypot(q.x - o.x, q.y - o.y) < 0.4));
+    const spot = tables[0] ? [tables[0].x, tables[0].y] : ctr;
+    const over = !!tables[0];
+    const elev = Math.max(over ? 1.4 : 1.6, H - it.h);
+    return take({ x: round(spot[0], 0.01), y: round(spot[1], 0.01), rot: tables[0] ? tables[0].rot || 0 : 0, elev: +Math.min(elev, H - 0.2).toFixed(2) });
+  }
+
+  // 3. pictures, suzani, clocks, mirrors: centred above the sofa, the bed or the sideboard
+  if (ABOVE.has(it.shape) || ABOVE.has(t)) {
+    const hosts = [...by(SEATS), ...by(BEDS), ...by(["sideboard", "console", "dresser", "tvunit"])];
+    for (const o of hosts) {
+      const f = FRONT(o.rot), back = -(o.d / 2) - 0.0; const wl = nearWall([o.x + f[0] * back, o.y + f[1] * back]);
+      if (!wl) continue;
+      const elev = clamp(o.h + (BEDS.includes(o.type) ? 0.35 : 0.28), 0.9, H - it.h - 0.15);
+      const pos = wallPoint(wl, [o.x, o.y], it);
+      if (pos && tryAll([Object.assign(pos, { elev })])) return true;
+    }
+    return false;                        // fall back to any free wall
+  }
+
+  // 4. wall lights beside the bed head or the sofa
+  if (t === "sconce") {
+    for (const o of [...by(BEDS), ...by(SEATS)]) {
+      const rt = RIGHT(o.rot), wl = nearWall(at(o, FRONT(o.rot), rt, -o.d / 2, 0)); if (!wl) continue;
+      for (const s of [1, -1]) { const q = at(o, FRONT(o.rot), rt, 0, s * (o.w / 2 + 0.25)); const pos = wallPoint(wl, q, it); if (pos && tryAll([Object.assign(pos, { elev: BEDS.includes(o.type) ? 1.15 : 1.6 })])) return true; }
+    }
+    return false;
+  }
+
+  // 5. curtains frame a window
+  if (it.shape === "curtain") {
+    for (const o of p.openings.filter(o => o.type === "window")) {
+      const wl = findWall(o.wall); if (!wl) continue;
+      const c = lerp(wl.a, wl.b, o.t), w = Math.max(it.w, o.w + 0.6);
+      const pos = wallPoint(wl, c, Object.assign({}, it, { w }));
+      if (pos) return take(Object.assign(pos, { w: +w.toFixed(2), h: +Math.min(it.h, H - 0.08).toFixed(2), elev: 0 }));
+    }
+    return false;
+  }
+
+  // 6. TV faces the sofa (on the TV unit if there is one); the hood sits above the cooker; air conditioning up high
+  if (t === "tv" || t === "tvwall") {
+    const unit = by(["tvunit", "sideboard"])[0];
+    if (unit) { const wl = nearWall(at(unit, FRONT(unit.rot), RIGHT(unit.rot), -unit.d / 2, 0)); const pos = wl && wallPoint(wl, [unit.x, unit.y], it); if (pos && tryAll([Object.assign(pos, { elev: t === "tv" ? +(unit.h + 0.25).toFixed(2) : 0 })])) return true; }
+    const sofa = by(SEATS)[0];
+    if (sofa) { const f = FRONT(sofa.rot); for (let k = 1.5; k < 8; k += 0.25) { const q = [sofa.x + f[0] * k, sofa.y + f[1] * k]; const wl = nearWall(q, 0.3); if (wl) { const pos = wallPoint(wl, q, it); if (pos && tryAll([Object.assign(pos, { elev: t === "tv" ? 0.9 : 0 })])) return true; break; } } }
+    return false;
+  }
+  if (t === "hood") {
+    const ck = by(["cooker"])[0];
+    if (ck) { const wl = nearWall(at(ck, FRONT(ck.rot), RIGHT(ck.rot), -ck.d / 2, 0)); const pos = wl && wallPoint(wl, [ck.x, ck.y], it); if (pos) return take(Object.assign(pos, { elev: +Math.min(1.55, H - it.h).toFixed(2) })); }
+    return false;
+  }
+  if (t === "aircon") it.elev = +Math.max(1.9, H - it.h - 0.15).toFixed(2);
+
+  // 7. coffee table in front of the sofa; rug under the seating; bedside tables at the bed head; chairs around the table
+  if (["coffee", "coffeer", "marblecoffee", "carvedcoffee", "xontaxta", "nesting"].includes(t)) {
+    for (const o of by(SEATS)) { const f = FRONT(o.rot); if (tryAll([0.45, 0.6, 0.35].map(g => ({ x: o.x + f[0] * (o.d / 2 + g + it.d / 2), y: o.y + f[1] * (o.d / 2 + g + it.d / 2), rot: o.rot || 0 })))) return true; }
+  }
+  if (it.shape === "rug" || it.shape === "rrug") {
+    const s = by(SEATS)[0], b = by(BEDS)[0], tb = by(FOOD_TABLES.filter(x => x !== "island" && x !== "bartable"))[0];
+    if (s) { const f = FRONT(s.rot); return take({ x: +(s.x + f[0] * (s.d / 2 + 0.5)).toFixed(3), y: +(s.y + f[1] * (s.d / 2 + 0.5)).toFixed(3), rot: s.rot || 0 }); }
+    if (b) { const f = FRONT(b.rot); return take({ x: +(b.x + f[0] * b.d * 0.2).toFixed(3), y: +(b.y + f[1] * b.d * 0.2).toFixed(3), rot: b.rot || 0 }); }
+    if (tb) return take({ x: tb.x, y: tb.y, rot: tb.rot || 0 });
+    return take({ x: round(ctr[0], 0.05), y: round(ctr[1], 0.05), rot: 0 });
+  }
+  if (t === "nightstand") {
+    for (const o of by(BEDS)) { const f = FRONT(o.rot), rt = RIGHT(o.rot); if (tryAll([1, -1].map(s => { const q = at(o, f, rt, -o.d / 2 + it.d / 2 + 0.02, s * (o.w / 2 + it.w / 2 + 0.05)); return { x: q[0], y: q[1], rot: o.rot || 0 }; }))) return true; }
+  }
+  if (["dchair", "stool"].includes(t) || it.shape === "chair") {
+    for (const o of by(FOOD_TABLES)) {
+      const f = FRONT(o.rot), rt = RIGHT(o.rot), round_ = o.shape === "rtable", n = round_ ? 6 : Math.max(1, Math.floor(o.w / 0.6));
+      const slots = [];
+      if (round_) for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; const rr = o.w / 2 + it.d * 0.25; const x = o.x + Math.cos(a) * rr, y = o.y + Math.sin(a) * rr; slots.push({ x, y, rot: (Math.atan2(o.y - y, o.x - x) * 180 / Math.PI - 90 + 360) % 360 }); }
+      else for (const side of [1, -1]) for (let k = 0; k < n; k++) { const dr = -o.w / 2 + o.w / n * (k + 0.5); const q = at(o, f, rt, side * (o.d / 2 + it.d * 0.25), dr); slots.push({ x: q[0], y: q[1], rot: ((o.rot || 0) + (side > 0 ? 180 : 0)) % 360 }); }
+      for (const s of slots) if (!items.some(q => q.type === it.type || q.shape === "chair" ? Math.hypot(q.x - s.x, q.y - s.y) < 0.35 : false)) return take({ x: +s.x.toFixed(3), y: +s.y.toFixed(3), rot: Math.round(s.rot) });
+    }
+  }
+
+  // 8. floor lamps and plants stand beside the sofa or bed, or in a corner
+  if (BESIDE.has(t) || it.shape === "lamp" || (it.shape === "plant" && !it.flat)) {
+    for (const o of [...by(SEATS), ...by(["armchair", "lounge", "accent", "tubchair", "recliner"]), ...by(BEDS)]) {
+      const f = FRONT(o.rot), rt = RIGHT(o.rot);
+      if (tryAll([1, -1].map(s => { const q = at(o, f, rt, -o.d / 2 + it.d / 2 + 0.05, s * (o.w / 2 + it.w / 2 + 0.1)); return { x: q[0], y: q[1], rot: o.rot || 0 }; }))) return true;
+    }
+    if (lp.length) {
+      const L0 = lp[0], cands = L0.map(v => { const dx = ctr[0] - v[0], dy = ctr[1] - v[1], l = Math.hypot(dx, dy) || 1, k = 0.25 + Math.max(it.w, it.d) * 0.75; return { x: v[0] + dx / l * k, y: v[1] + dy / l * k, rot: 0 }; });
+      if (tryAll(cands)) return true;
+    }
+  }
+  return false;
+}
+// the wall nearest to a point (within reach), and a spot on that wall's room side for a wall piece
+function nearWall(q, reach = 0.6) {
+  let best = null;
+  P().walls.forEach(wl => { const pr = project(q, wl.a, wl.b); if (pr.d < reach && (!best || pr.d < best.d)) best = { wl, d: pr.d }; });
+  return best && best.wl;
+}
+function wallPoint(wl, q, it) {
+  const lp = loops(P().walls), L = wlen(wl); if (L < it.w + 0.05) return null;
+  const ux = (wl.b[0] - wl.a[0]) / L, uy = (wl.b[1] - wl.a[1]) / L;
+  let nx = -uy, ny = ux; const mid = lerp(wl.a, wl.b, 0.5);
+  if (lp.length && !lp.some(l => polyContains([mid[0] + nx * 0.2, mid[1] + ny * 0.2], l))) { nx = -nx; ny = -ny; }
+  const pr = project(q, wl.a, wl.b), along = clamp(pr.t * L, it.w / 2 + 0.02, L - it.w / 2 - 0.02);
+  const off = wl.t / 2 + it.d / 2 + (it.wall ? 0 : 0.01);
+  return { x: +(wl.a[0] + ux * along + nx * off).toFixed(3), y: +(wl.a[1] + uy * along + ny * off).toFixed(3), rot: Math.round(((Math.atan2(ny, nx) * 180 / Math.PI - 90) % 360 + 360) % 360 * 10) / 10 };
+}
+
 // find a free place for a new item: against a wall for wall-hugging pieces, else nearest free spot to the centre
 function findSpot(it) {
   const p = P(), lp = loops(p.walls), b = bounds(p);
@@ -511,13 +665,20 @@ function findSpot(it) {
     const A = corners(cand);
     if (!inside(A)) return false;
     if (!cand.wall && p.walls.some(w => polySegDist(A, w.a, w.b) < w.t / 2 - 0.005)) return false;
+    if (cand.wall && cand.shape !== "curtain" && p.openings.some(o => {        // wall pieces never cover a window or door
+      const wl = findWall(o.wall); if (!wl) return false;
+      const pr = project([cand.x, cand.y], wl.a, wl.b); if (pr.d > wl.t / 2 + cand.d + 0.05) return false;
+      const L = wlen(wl), gap = Math.abs(pr.t - o.t) * L, y0 = cand.elev || 0, y1 = y0 + cand.h;
+      return gap < (o.w + cand.w) / 2 && y1 > (o.sill || 0) && y0 < (o.sill || 0) + o.h;
+    })) return false;
     if (cand.flat) return true;
     if (p.items.some(o => !o.flat && !(o.wall && !cand.wall) && !(cand.wall && !o.wall) && satOverlap(A, corners(o)))) return false;
     if (!cand.wall && swings.some(sw => satOverlap(A, sw, 0.01))) return false;
     return true;
   };
   const ctr = lp.length ? polyCentroid(lp[0]) : b ? [b.x0 + b.w / 2, b.y0 + b.h / 2] : [2.4, 1.8];
-  if (lp.length && WALL_SNAP_SHAPES.has(it.shape)) {
+  if (lp.length && smartSpot(it, free, lp, ctr)) return;
+  if (lp.length && (WALL_SNAP_SHAPES.has(it.shape) || it.wall)) {
     const walls = p.walls.slice().sort((a, c) => wlen(c) - wlen(a));
     for (const wl of walls) {
       const L = wlen(wl); if (L < it.w + 0.1) continue;

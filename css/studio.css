@@ -553,7 +553,7 @@ body[data-mode="furnish"] #three-tb { top: 60px; }
 .sel-bar button:hover { background: rgba(255,255,255,.2); }
 .sel-bar svg { width: 15px; height: 15px; }
 #sb-del { color: #ffb4a8; }
-@media (max-width: 1180px) and (min-width: 901px) { .three-act { top: 64px; } }
+@media (max-width: 1500px) and (min-width: 901px) { .three-act { top: 64px; } }
 @media (max-width: 900px) {
   .three-act { top: auto; right: auto; left: 8px; bottom: 8px; }
   #three-hint { display: none; }

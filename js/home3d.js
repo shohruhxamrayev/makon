@@ -7,6 +7,7 @@ import { RoomEnvironment } from "../vendor/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "../vendor/RoundedBoxGeometry.js";
 import { TEMPLATES, buildPlan } from "./studio/templates.js";
 import { STYLES, FLOORS } from "./studio/data.js";
+import { createKit } from "./studio/models.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -89,6 +90,7 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
   const cyl = (rt, rb, h, x, y, z, m, seg = 32, open = false) => { const me = shadow(new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg, 1, open), m)); me.position.set(x, y + h / 2, z); return me; };
 
   let lampSpots = [], shadeMats = [];
+  const kit = createKit(T, RoundedBoxGeometry, { anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy()), onChange: () => { dirty = true; shadowsDirty = true; } });
   function buildItem(it, st) {
     const g = new T.Group(), w = it.w, d = it.d, h = it.h, c = it.color || "#cccccc", pal = st.palette || [];
     const leg = wood("#3a2f26");
@@ -252,7 +254,9 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
     // furniture — order: big floor pieces first, then smaller, then wall things (for the "grow into place" moment)
     const order = plan.items.slice().sort((a, b) => (a.flat ? -1 : 0) - (b.flat ? -1 : 0) || (b.w * b.d) - (a.w * a.d));
     order.forEach((it, i) => {
-      const g = buildItem(it, st);
+      const g = kit.buildItem(it, st);                       // the same real-size models as the Studio (photo-scanned where we have them)
+      (g.userData.lamps || []).forEach(([x, y, z, k = 1]) => lampSpots.push([g, x, y, z, k]));
+      shadeMats.push(...(g.userData.shades || []));
       const holder = new T.Group(); holder.position.set(it.x, it.elev || 0, it.y); holder.rotation.y = -(it.rot || 0) * Math.PI / 180;
       holder.add(g); root.add(holder);
       // flat footprint for the plan view

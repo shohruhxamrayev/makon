@@ -352,13 +352,13 @@ const ADD_PIECE = new URLSearchParams(location.search).get("add");   // read bef
   await openProject(start.id);
   setMode(ctx.mode);
   // "Try it in my room" from the decor page: place that piece in the current room (or a sample living room) and show it in 3D
-  const piece = ADD_PIECE && catalogItem(ADD_PIECE);
-  if (piece) {
-    if (!ctx.p.plan.walls.length) await fromTemplate("warm-living", true);
-    const it = ctx.planOps.addItem(piece.id);
+  const pieces = (ADD_PIECE || "").split(",").map(x => catalogItem(x.trim())).filter(Boolean).slice(0, 12);
+  if (pieces.length) {
+    if (!ctx.p.plan.walls.length) await fromTemplate(pieces.some(c => /Kitchen/.test(c.cat)) ? "minimal-kitchen" : pieces.some(c => /Bed/.test(c.cat)) ? "nordic-bedroom" : "warm-living", true);
+    pieces.forEach(c => ctx.planOps.addItem(c.id));
     setMode("3d");
     history.replaceState(null, "", "studio.html");
-    toast(piece.name + " added" + (it ? " — drag it where you like, or open Furnish to see it in the list." : "."));
+    toast(pieces.length === 1 ? pieces[0].name + " added where it belongs — drag it anywhere you like." : pieces.length + " pieces added, each where it belongs — drag any of them to move it.");
   }
   document.body.classList.add("ready");
   checkAI();

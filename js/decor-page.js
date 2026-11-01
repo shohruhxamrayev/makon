@@ -1,6 +1,7 @@
 // Makon — Furniture & decor: real photos of every kind of piece, our 3D model beside it, and "try it in my room"
 import { CATALOG, furnPic, SHOPS } from "./studio/data.js";
 import { PHOTOS, LOOKS, photoUrl, photoFor } from "./photos.js";
+import { board } from "./looks.js";
 import { $, $$, esc, initHeader } from "./gallery-common.js";
 
 initHeader();
@@ -26,7 +27,10 @@ function wirePics(root) {
     if (img.complete && img.naturalWidth === 0) fail(); else img.addEventListener("error", fail, { once: true });
   });
 }
+function boardLink() { const n = board.all().length, a = document.getElementById("d-boardlink"); if (a) a.innerHTML = "♥ My board" + (n ? " <sup>" + n + "</sup>" : ""); }
 document.addEventListener("click", e => {
+  const h = e.target.closest(".d-heart");
+  if (h) { e.preventDefault(); const on = board.toggle(h.dataset.id); h.setAttribute("aria-pressed", on); h.textContent = on ? "♥" : "♡"; h.classList.remove("pop"); void h.offsetWidth; h.classList.add("pop"); boardLink(); return; }
   const b = e.target.closest(".d-3d"); if (!b) return;
   e.preventDefault();
   const box = b.closest("[data-pic]"), on = !box.classList.contains("show3d");
@@ -57,14 +61,14 @@ function renderFilters() {
     const n = k === "All" ? CATALOG.length : CATALOG.filter(c => c.cat === k).length;
     return n ? `<button type="button" data-c="${k}" aria-pressed="${k === cat}">${k}<sup>${n}</sup></button>` : "";
   }).join("");
-  $$("#d-filters button").forEach(b => b.addEventListener("click", () => { cat = b.dataset.c; history.replaceState(null, "", cat === "All" ? location.pathname : "#" + cat); renderFilters(); renderGrid(); }));
+  $$("#d-filters button").forEach(b => b.addEventListener("click", () => { cat = b.dataset.c; history.replaceState(null, "", cat === "All" ? location.pathname : "#" + cat); renderFilters(); renderGrid(); boardLink(); }));
 }
 function renderGrid() {
   const list = CATALOG.filter(c => (cat === "All" || c.cat === cat) && (!q || (c.name + " " + c.cat + " " + (c.q || "") + " " + (c.desc || "")).toLowerCase().includes(q)))
     .sort((a, b) => (!!PHOTOS[b.id] - !!PHOTOS[a.id]) || (b.cat === "Lighting") - (a.cat === "Lighting") || (b.craft ? 1 : 0) - (a.craft ? 1 : 0));
   $("#d-grid").innerHTML = list.length ? list.map(c => `
     <article class="d-card">
-      <div class="d-img" data-pic>${pic(c, 640)}${c.craft ? '<span class="d-badge">Handmade</span>' : ""}</div>
+      <div class="d-img" data-pic>${pic(c, 640)}${c.craft ? '<span class="d-badge">Handmade</span>' : ""}<button type="button" class="d-heart" data-id="${c.id}" aria-pressed="${board.has(c.id)}" aria-label="Save ${esc(c.name)} to my board">${board.has(c.id) ? "♥" : "♡"}</button></div>
       <div class="d-body">
         <span class="d-cat">${esc(c.cat)}</span>
         <h3>${esc(c.name)}</h3>
@@ -76,4 +80,4 @@ function renderGrid() {
   wirePics($("#d-grid"));
 }
 $("#d-search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); renderGrid(); });
-renderFilters(); renderGrid();
+renderFilters(); renderGrid(); boardLink();
