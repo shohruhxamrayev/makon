@@ -72,6 +72,15 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
         g.fillStyle = cols[k]; g.fillRect(x + wob, y, 64, 4);
         const dia = Math.abs(((y + x) % 128) - 64) / 64; g.fillStyle = cols[(k + 2) % cols.length]; g.fillRect(x + 16 + wob + dia * 16, y, 32 - dia * 32, 4);
       }
+    } else if (kind === "gilam") {
+      // a medallion carpet: deep red field, navy border, ivory guard stripes
+      g.fillStyle = col; g.fillRect(0, 0, S, S);
+      g.fillStyle = "#1f2a4a"; g.fillRect(0, 0, S, 46); g.fillRect(0, S - 46, S, 46); g.fillRect(0, 0, 46, S); g.fillRect(S - 46, 0, 46, S);
+      g.strokeStyle = "#efe2c4"; g.lineWidth = 5; g.strokeRect(52, 52, S - 104, S - 104); g.strokeRect(23, 23, S - 46, S - 46);
+      g.fillStyle = "#e0b45a"; for (let i = 0; i < 24; i++) { g.save(); g.translate(23 + i * (S - 46) / 23, 23); g.rotate(Math.PI / 4); g.fillRect(-6, -6, 12, 12); g.restore(); g.save(); g.translate(23 + i * (S - 46) / 23, S - 23); g.rotate(Math.PI / 4); g.fillRect(-6, -6, 12, 12); g.restore(); }
+      const c = S / 2; g.fillStyle = "#1f2a4a"; g.beginPath(); for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, r = k % 2 ? 90 : 140; g.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r); } g.closePath(); g.fill();
+      g.fillStyle = "#efe2c4"; g.beginPath(); g.arc(c, c, 48, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.beginPath(); g.arc(c, c, 26, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#e0b45a"; for (let i = 0; i < 70; i++) { const x = 70 + rnd() * (S - 140), y = 70 + rnd() * (S - 140); if (Math.hypot(x - c, y - c) > 150) { g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill(); } }
     } else if (kind === "rishtan") {
       g.fillStyle = "#f3efe6"; g.fillRect(0, 0, S, S);
       const c = S / 2; const ring = (r, w, cc) => { g.strokeStyle = cc; g.lineWidth = w; g.beginPath(); g.arc(c, c, r, 0, Math.PI * 2); g.stroke(); };
@@ -106,7 +115,7 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
     const lampShade = (rt, rb, hh, x, y, z, col) => { const m = shadeMat(col); shades.push(m); const s = cyl(rt, rb, hh, x, y, z, m, 40, true); g.add(s); return s; };
     switch (it.shape) {
       case "sofa": case "armchair": {
-        const F = fabric(c), low = type === "lounge", arm = it.shape === "sofa" ? 0.17 : low ? 0.09 : 0.15, legH = low ? 0.16 : 0.1;
+        const F = fabric(c), low = type === "lounge" || type === "accent", arm = it.shape === "sofa" ? 0.17 : low ? 0.09 : type === "recliner" ? 0.2 : 0.15, legH = low ? 0.16 : type === "recliner" ? 0.04 : 0.1;
         legs4(legH, 0.08, low ? wood("#6b4a33") : dark, low ? 0.022 : 0.02);
         g.add(rbox(w - 0.03, 0.2, d - 0.03, 0, legH, 0, F, 0.04));                                   // base
         g.add(rbox(w, h - legH, 0.2, 0, legH, -d / 2 + 0.1, F, 0.07));                                 // back frame
@@ -260,6 +269,26 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
       }
       case "plant": {
         const pot = clamp(w * 0.36, 0.1, 0.19);
+        if (type === "olivetree") {
+          g.add(cyl(pot, pot * 0.8, pot * 1.8, 0, 0, 0, std("#c8b9a2", { roughness: 0.9 }), 32));
+          const tr = cyl(0.025, 0.035, h * 0.55, 0, pot * 1.7, 0, wood("#6d5a45"), 8); tr.rotation.z = 0.06; g.add(tr);
+          let s2 = 31; const r2 = () => (s2 = (s2 * 16807) % 2147483647) / 2147483647;
+          const lm = std("#7d8a5c", { roughness: 0.7 }), lgeo = new T.SphereGeometry(1, 8, 6);
+          for (let k = 0; k < 140; k++) { const a = r2() * Math.PI * 2, rr = Math.sqrt(r2()) * w * 0.45, y = h * 0.55 + r2() * h * 0.42; const lf = new T.Mesh(lgeo, lm); lf.scale.set(0.045, 0.006, 0.014); lf.position.set(Math.cos(a) * rr, y, Math.sin(a) * rr); lf.rotation.set(r2(), a, r2()); lf.castShadow = true; g.add(lf); }
+          break;
+        }
+        if (type === "monstera") {
+          g.add(cyl(pot, pot * 0.8, pot * 1.7, 0, 0, 0, std("#2f3331", { roughness: 0.4 }), 32));
+          let s2 = 17; const r2 = () => (s2 = (s2 * 16807) % 2147483647) / 2147483647;
+          const lm = std("#2f5a2a", { roughness: 0.5, side: T.DoubleSide });
+          for (let k = 0; k < 11; k++) {
+            const a = k / 11 * Math.PI * 2 + r2() * 0.4, len = h * (0.45 + r2() * 0.35), lean = 0.35 + r2() * 0.5;
+            const stem = cyl(0.008, 0.01, len, 0, pot * 1.6, 0, std("#4c6b33"), 6); stem.rotation.set(Math.sin(a) * lean, 0, -Math.cos(a) * lean); g.add(stem);
+            const leaf = new T.Mesh(new T.CircleGeometry(0.17 + r2() * 0.06, 20), lm); const tip = new T.Vector3(0, len, 0).applyEuler(stem.rotation);
+            leaf.position.set(tip.x, pot * 1.6 + tip.y, tip.z); leaf.rotation.set(-Math.PI / 2 + 0.6, a, 0); leaf.castShadow = true; g.add(leaf);
+          }
+          break;
+        }
         g.add(cyl(pot, pot * 0.78, pot * 2, 0, 0, 0, std(pal[4] ? mix(pal[4], "#ffffff", 0.3) : "#e9e4da", { roughness: 0.3 }), 40), cyl(pot * 0.94, pot * 0.94, 0.01, 0, pot * 2 - 0.03, 0, std("#3b2c20", { roughness: 1 }), 32));
         let s = 5 + Math.round(h * 10); const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
         const L = [std("#3f5f2a", { roughness: 0.55 }), std("#4d6f30", { roughness: 0.55 }), std("#2f4d22", { roughness: 0.55 })];
@@ -271,7 +300,7 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
         for (let k = 0; k < 3; k++) { const st2 = cyl(0.007, 0.006, h * (0.6 + k * 0.12), (k - 1) * 0.03, pot * 1.9, 0, std("#5a4632"), 6); st2.rotation.z = (k - 1) * 0.12; g.add(st2); }
         break;
       }
-      case "rug": { const F = fabric(c); const r = rbox(w, 0.012, d, 0, 0, 0, F, 0.005); r.castShadow = false; g.add(r); const b = rbox(w - 0.16, 0.013, d - 0.16, 0, 0, 0, fabric(tone(c, 0.93)), 0.004); b.castShadow = false; g.add(b); break; }
+      case "rug": { if (type === "gilam") { const m = rbox(w, 0.014, d, 0, 0, 0, new T.MeshPhysicalMaterial({ map: patternTex("gilam", c), roughness: 0.95, sheen: 0.7 }), 0.005); m.castShadow = false; g.add(m); break; } const F = fabric(c); const r = rbox(w, 0.012, d, 0, 0, 0, F, 0.005); r.castShadow = false; g.add(r); const b = rbox(w - 0.16, 0.013, d - 0.16, 0, 0, 0, fabric(tone(c, 0.93)), 0.004); b.castShadow = false; g.add(b); break; }
       case "rrug": { const m = cyl(w / 2, w / 2, 0.012, 0, 0, 0, fabric(c), 72); m.scale.z = d / w; m.castShadow = false; g.add(m); const m2 = cyl(w / 2 - 0.1, w / 2 - 0.1, 0.013, 0, 0, 0, fabric(tone(c, 0.92)), 72); m2.scale.z = d / w; m2.castShadow = false; g.add(m2); break; }
       case "art": { g.add(box(w, h, d, 0, 0, 0, wood("#b38b5d")), box(w - 0.05, h - 0.05, 0.006, 0, 0.025, d / 2, std("#f4f1ea", { roughness: 0.9 }))); const a = new T.Mesh(new T.PlaneGeometry(w - 0.2, h - 0.2), new T.MeshStandardMaterial({ map: artTex(pal.length ? pal : ["#c4643a", "#d9cbb5", "#6b7a4e", "#2f3e46", "#f4efe6"], ((it.x || 0) * 7 + (it.y || 0) * 3) | 0), roughness: 0.85 })); a.position.set(0, h / 2, d / 2 + 0.005); g.add(a); break; }
       case "mirror": {
@@ -373,7 +402,7 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
           const geo2 = new T.PlaneGeometry(pw, h - 0.05, 48, 8), pos = geo2.attributes.position;
           for (let i = 0; i < pos.count; i++) { const x = pos.getX(i); pos.setZ(i, Math.sin((x / pw + 0.5) * Math.PI * 14) * 0.035); }
           geo2.computeVertexNormals();
-          const m = new T.Mesh(geo2, new T.MeshPhysicalMaterial({ color: c, roughness: 0.95, sheen: 0.6, side: T.DoubleSide, transparent: true, opacity: 0.93 }));
+          const m = new T.Mesh(geo2, type === "ikatcurtain" ? new T.MeshPhysicalMaterial({ map: patternTex("ikat", c), roughness: 0.9, sheen: 0.5, side: T.DoubleSide }) : new T.MeshPhysicalMaterial({ color: c, roughness: 0.95, sheen: 0.6, side: T.DoubleSide, transparent: true, opacity: 0.93 }));
           m.position.set(side * (w / 2 - pw / 2), (h - 0.05) / 2, 0.02); g.add(shadow(m));
         }
         break;
@@ -421,6 +450,145 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
       }
       case "cushion": {
         const m = rbox(w, h, d, 0, 0, 0, new T.MeshPhysicalMaterial({ map: patternTex("ikat", c), roughness: 0.9, sheen: 0.5 }), Math.min(h, w) * 0.45); g.add(m);
+        break;
+      }
+      // ---------- more of what people look for ----------
+      case "bunk": {
+        const M = wood(c), F = fabric("#f4f1ea");
+        for (const a of [-1, 1]) for (const b of [-1, 1]) g.add(rbox(0.06, h, 0.06, a * (w / 2 - 0.03), 0, b * (d / 2 - 0.03), M, 0.012));
+        for (const y of [0.25, 1.15]) { g.add(rbox(w - 0.04, 0.05, d - 0.04, 0, y, 0, M, 0.01), rbox(w - 0.1, 0.16, d - 0.12, 0, y + 0.05, 0, F, 0.05)); const pil = rbox(0.5, 0.1, 0.32, 0, y + 0.21, -d / 2 + 0.25, fabric("#ffffff"), 0.05); g.add(pil); g.add(rbox(w - 0.1, 0.05, d * 0.55, 0, y + 0.21, d * 0.18, fabric(pal[3] || "#c4643a"), 0.02)); }
+        for (const b of [-1, 1]) g.add(rbox(0.04, 0.22, d - 0.08, w / 2 - 0.03, 1.4, 0, M, 0.01)); g.add(rbox(w - 0.1, 0.22, 0.04, 0, 1.4, -d / 2 + 0.03, M, 0.01));
+        for (let i = 0; i < 5; i++) g.add(rbox(0.04, 0.03, 0.4, -w / 2 - 0.02, 0.3 + i * 0.28, d / 2 - 0.35, M, 0.01));
+        g.add(rbox(0.04, 1.6, 0.04, -w / 2 - 0.02, 0, d / 2 - 0.15, M, 0.01), rbox(0.04, 1.6, 0.04, -w / 2 - 0.02, 0, d / 2 - 0.55, M, 0.01));
+        break;
+      }
+      case "vitrine": {
+        const M = wood(c), glass = new T.MeshPhysicalMaterial({ color: "#e8eef0", transparent: true, opacity: 0.18, roughness: 0.05, metalness: 0.1, depthWrite: false });
+        g.add(rbox(w, 0.08, d, 0, 0, 0, M, 0.01), rbox(w, 0.06, d, 0, h - 0.06, 0, M, 0.01), box(0.03, h, d, -w / 2 + 0.015, 0, 0, M), box(0.03, h, d, w / 2 - 0.015, 0, 0, M), box(w, h, 0.02, 0, 0, -d / 2 + 0.01, wood(tone(c, 0.82))));
+        const n = 4, colsP = ["#f4f1ea", "#1f6f8b", "#c4643a", "#e8e0d0", "#b59a6a"];
+        for (let i = 1; i < n; i++) { const y = 0.08 + i * (h - 0.14) / n; g.add(box(w - 0.06, 0.015, d - 0.04, 0, y, 0, glass));
+          for (let k = 0; k < 5; k++) { const x = -w / 2 + 0.12 + k * (w - 0.24) / 4; if (k % 2) g.add(cyl(0.06, 0.05, 0.012, x, y + 0.015, 0, std(colsP[(i + k) % 5], { roughness: 0.2 }), 24)); else g.add(cyl(0.03, 0.04, 0.12 + (k % 3) * 0.04, x, y + 0.015, 0, std(colsP[(i + k) % 5], { roughness: 0.15 }), 18)); } }
+        for (const a of [-1, 1]) { const dr = new T.Mesh(new T.BoxGeometry(w / 2 - 0.03, h - 0.14, 0.01), glass); dr.position.set(a * w / 4, h / 2, d / 2 - 0.005); g.add(dr); g.add(box(0.012, 0.12, 0.02, a * 0.03, h * 0.5, d / 2 + 0.005, metal("#b59a6a"))); }
+        break;
+      }
+      case "tvwall": {
+        const M = wood(c), W2 = std(pal[0] || "#ece4d8", { roughness: 0.5 });
+        g.add(box(w, h, 0.03, 0, 0, -d / 2 + 0.015, W2));
+        const sl = Math.round(w / 0.06); for (let i = 0; i < sl; i++) if (i < sl * 0.25 || i > sl * 0.75) g.add(box(0.035, h, 0.025, -w / 2 + 0.03 + i * (w - 0.06) / (sl - 1), 0, -d / 2 + 0.04, M));
+        g.add(rbox(w * 0.6, 0.4, d - 0.06, 0, 0.12, 0.02, M, 0.01), box(w * 0.6 - 0.02, 0.12, 0.01, 0, 0, 0.02, std("#2b2621")));
+        for (let i = 0; i < 3; i++) g.add(box(w * 0.6 / 3 - 0.01, 0.36, 0.012, -w * 0.2 + i * w * 0.2, 0.14, d / 2 - 0.02, wood(tone(c, 1.08))));
+        g.add(rbox(1.23, 0.71, 0.05, 0, 1.0, -d / 2 + 0.06, std("#111", { roughness: 0.3 }), 0.01), box(1.21, 0.69, 0.003, 0, 1.01, -d / 2 + 0.086, std("#0b0f14", { roughness: 0.06, metalness: 0.35 })));
+        const led = shadeMat("#fff0d4"); shades.push(led); g.add(box(w * 0.48, 0.01, 0.01, 0, h - 0.06, -d / 2 + 0.05, led));
+        break;
+      }
+      case "coatrack": {
+        const M = wood(c); g.add(cyl(0.16, 0.18, 0.03, 0, 0, 0, M, 32), cyl(0.02, 0.022, h, 0, 0.02, 0, M, 12));
+        for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, hk = cyl(0.008, 0.008, 0.14, Math.cos(a) * 0.05, h - 0.18 - (k % 2) * 0.12, Math.sin(a) * 0.05, metal("#2b2b2b"), 6); hk.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9); g.add(hk); }
+        g.add(rbox(0.32, 0.5, 0.06, 0.12, h - 0.75, 0.08, fabric(pal[2] || "#8a6a4a"), 0.03));
+        break;
+      }
+      case "chandelier": {
+        const M = metal(c, 0.25), cry = new T.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.02, transmission: 0.6, thickness: 0.02, ior: 1.5, metalness: 0, transparent: true, opacity: 0.85 });
+        g.add(cyl(0.005, 0.005, 0.4, 0, h, 0, M, 6), cyl(0.06, 0.04, 0.05, 0, h - 0.05, 0, M, 20), cyl(0.015, 0.015, h * 0.6, 0, h * 0.35, 0, M, 10));
+        const glow = shadeMat("#fff2d6"); shades.push(glow);
+        for (const [ry, rr, n] of [[h * 0.35, w * 0.45, 8], [h * 0.6, w * 0.3, 6]]) {
+          const ring = new T.Mesh(new T.TorusGeometry(rr, 0.008, 8, 48), M); ring.rotation.x = Math.PI / 2; ring.position.y = ry; g.add(ring);
+          for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, x = Math.cos(a) * rr, z = Math.sin(a) * rr; g.add(cyl(0.018, 0.022, 0.04, x, ry, z, M, 12)); const b2 = new T.Mesh(new T.SphereGeometry(0.025, 10, 8), glow); b2.position.set(x, ry + 0.07, z); b2.scale.y = 1.6; g.add(b2); }
+          for (let k = 0; k < n * 3; k++) { const a = (k + 0.5) / (n * 3) * Math.PI * 2; const dr = new T.Mesh(new T.OctahedronGeometry(0.018, 0), cry); dr.scale.y = 1.8; dr.position.set(Math.cos(a) * rr, ry - 0.05 - (k % 3) * 0.03, Math.sin(a) * rr); g.add(dr); }
+        }
+        for (let k = 0; k < 12; k++) { const dr = new T.Mesh(new T.OctahedronGeometry(0.024, 0), cry); dr.scale.y = 2; dr.position.set(0, h * 0.12 - k * 0.012, 0); if (k === 0) g.add(dr); }
+        lamps.push([0, h * 0.45, 0, 1.2]);
+        break;
+      }
+      case "ringlight": {
+        const M = metal(c, 0.3), glow = shadeMat("#fff4e0"); shades.push(glow);
+        [[w / 2, 0.15], [w * 0.36, 0.0], [w * 0.22, -0.12]].forEach(([r, y], i) => { const t2 = new T.Mesh(new T.TorusGeometry(r, 0.012, 10, 72), M); t2.rotation.x = Math.PI / 2 + (i - 1) * 0.12; t2.position.y = h * 0.5 + y; g.add(t2); const lt = new T.Mesh(new T.TorusGeometry(r, 0.006, 6, 72), glow); lt.rotation.copy(t2.rotation); lt.position.set(0, t2.position.y - 0.012, 0); g.add(lt); });
+        g.add(cyl(0.003, 0.003, h * 0.4 + 0.3, 0, h * 0.65, 0, std("#222"), 5));
+        lamps.push([0, h * 0.4, 0, 1]);
+        break;
+      }
+      case "clock": {
+        const f = new T.Mesh(new T.CylinderGeometry(w / 2, w / 2, 0.035, 64), [wood("#3a2f26"), std("#f4efe6", { roughness: 0.5 }), wood("#3a2f26")]); f.rotation.x = Math.PI / 2; f.position.set(0, h / 2, 0); g.add(shadow(f));
+        for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; g.add(box(0.008, k % 3 ? 0.02 : 0.04, 0.004, Math.sin(a) * w * 0.4, h / 2 + Math.cos(a) * w * 0.4 - 0.01, 0.019, std("#1f1f1f"))); }
+        const hh = box(0.01, w * 0.22, 0.004, 0, h / 2, 0.022, std("#1f1f1f")); hh.rotation.z = -0.9; g.add(hh); const mh = box(0.006, w * 0.34, 0.004, 0, h / 2, 0.024, std("#1f1f1f")); mh.rotation.z = 2.4; g.add(mh);
+        break;
+      }
+      case "hood": {
+        const M = std(c, { roughness: 0.3, metalness: 0.6 });
+        g.add(rbox(w, 0.08, d, 0, 0, 0, M, 0.01)); const sh = new T.Mesh(new T.CylinderGeometry(0.16, w * 0.5, 0.25, 4, 1), M); sh.rotation.y = Math.PI / 4; sh.position.y = 0.205; sh.scale.z = d / w; g.add(shadow(sh));
+        g.add(box(0.3, h - 0.33, 0.25, 0, 0.33, -d / 2 + 0.15, M));
+        break;
+      }
+      case "washer": {
+        const W2 = std(c, { roughness: 0.3 });
+        g.add(rbox(w, h, d, 0, 0, 0, W2, 0.02), rbox(w - 0.04, 0.1, 0.01, 0, h - 0.13, d / 2, std("#dcdcd8", { roughness: 0.3 }), 0.01));
+        const door = new T.Mesh(new T.TorusGeometry(0.19, 0.03, 16, 48), metal("#bfc3c6", 0.25)); door.position.set(0, h * 0.42, d / 2 + 0.01); g.add(shadow(door));
+        const gl = new T.Mesh(new T.CircleGeometry(0.17, 40), new T.MeshPhysicalMaterial({ color: "#2a3640", roughness: 0.05, metalness: 0.3 })); gl.position.set(0, h * 0.42, d / 2 + 0.012); g.add(gl);
+        g.add(cyl(0.025, 0.025, 0.02, w * 0.3, h - 0.1, d / 2 - 0.0, std("#333"), 20)); g.children[g.children.length - 1].rotation.x = Math.PI / 2;
+        break;
+      }
+      case "aircon": {
+        const W2 = std(c, { roughness: 0.35 });
+        g.add(rbox(w, h, d, 0, 0, 0, W2, 0.06), box(w - 0.08, 0.02, 0.01, 0, 0.03, d / 2 - 0.005, std("#c9ccce")), box(w - 0.1, 0.008, 0.012, 0, 0.07, d / 2, std("#dfe2e3")));
+        const led = shadeMat("#9fe3ff"); shades.push(led); g.add(box(0.03, 0.01, 0.005, w * 0.38, h * 0.55, d / 2 + 0.002, led));
+        break;
+      }
+      case "freebath": {
+        const W2 = std("#f7f7f5", { roughness: 0.1 });
+        const pts = []; for (let j = 0; j <= 14; j++) { const t = j / 14; pts.push(new T.Vector2(0.48 + Math.sin(t * Math.PI * 0.5) * 0.06 - (t < 0.1 ? (0.1 - t) * 2 : 0), t * h)); }
+        const tub = new T.Mesh(new T.LatheGeometry(pts, 64), W2); tub.scale.set(w / 1.08, 1, d / 1.08); g.add(shadow(tub));
+        const inner = new T.Mesh(new T.CircleGeometry(0.5, 64), std("#e7ecee", { roughness: 0.08 })); inner.rotation.x = -Math.PI / 2; inner.position.y = h - 0.03; inner.scale.set(w / 1.12, d / 1.12, 1); g.add(inner);
+        const tp = cyl(0.015, 0.02, 0.95, -w / 2 - 0.12, 0, 0, metal(pal[3] ? "#b59a6a" : "#c9cbcc", 0.2), 14); g.add(tp); g.add(box(0.025, 0.025, 0.2, -w / 2 - 0.12, 0.93, 0.08, metal("#c9cbcc", 0.2)));
+        break;
+      }
+      case "teepee": {
+        const F = new T.MeshPhysicalMaterial({ color: c, roughness: 0.95, sheen: 0.5, side: T.DoubleSide });
+        const tent = new T.Mesh(new T.ConeGeometry(w / 2, h * 0.85, 5, 1, true, 0.35, Math.PI * 2 - 0.7), F); tent.position.y = h * 0.425; g.add(shadow(tent));
+        for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + 0.6, pole = cyl(0.012, 0.012, h * 1.02, 0, 0, 0, wood("#c4a074"), 6); pole.position.set(Math.cos(a) * w * 0.24, h * 0.5, Math.sin(a) * w * 0.24); pole.rotation.set(Math.sin(a) * 0.48, 0, -Math.cos(a) * 0.48); g.add(pole); }
+        g.add(cyl(w * 0.4, w * 0.4, 0.06, 0, 0, 0, fabric(pal[3] || "#e8c9a0"), 32));
+        break;
+      }
+      case "tapchan": {
+        const M = wood(c), legH = 0.42;
+        for (const a of [-1, 1]) for (const b of [-1, 1]) g.add(rbox(0.08, legH, 0.08, a * (w / 2 - 0.05), 0, b * (d / 2 - 0.05), M, 0.01));
+        g.add(rbox(w, 0.06, d, 0, legH, 0, M, 0.01));
+        // carved low rails on three sides
+        g.add(rbox(w, 0.06, 0.05, 0, legH + 0.32, -d / 2 + 0.025, M, 0.01)); for (const a of [-1, 1]) g.add(rbox(0.05, 0.06, d, a * (w / 2 - 0.025), legH + 0.32, 0, M, 0.01));
+        for (let i = 0; i < Math.round(w / 0.12); i++) g.add(cyl(0.012, 0.012, 0.28, -w / 2 + 0.08 + i * 0.12, legH + 0.05, -d / 2 + 0.025, M, 8));
+        for (const a of [-1, 1]) for (let i = 0; i < Math.round(d / 0.12); i++) g.add(cyl(0.012, 0.012, 0.28, a * (w / 2 - 0.025), legH + 0.05, -d / 2 + 0.08 + i * 0.12, M, 8));
+        // kurpacha mats, bolsters and a xontaxta with tea
+        g.add(rbox(w - 0.14, 0.07, d - 0.14, 0, legH + 0.06, 0, new T.MeshPhysicalMaterial({ map: patternTex("ikat", pal[3] || "#8e2c2c"), roughness: 0.9, sheen: 0.5 }), 0.03));
+        for (let i = 0; i < 3; i++) { const pl = rbox(0.5, 0.3, 0.14, -w / 3 + i * w / 3, legH + 0.13, -d / 2 + 0.14, new T.MeshPhysicalMaterial({ map: patternTex("ikat", i % 2 ? "#1f4f7a" : "#a23b2a"), roughness: 0.9, sheen: 0.5 }), 0.06); pl.rotation.x = -0.25; g.add(pl); }
+        g.add(rbox(0.8, 0.04, 0.55, 0, legH + 0.37, 0.12, M, 0.01)); for (const a of [-1, 1]) for (const b of [-1, 1]) g.add(cyl(0.02, 0.02, 0.24, a * 0.34, legH + 0.13, 0.12 + b * 0.22, M, 8));
+        g.add(cyl(0.07, 0.05, 0.1, -0.15, legH + 0.41, 0.12, std("#1f6f8b", { roughness: 0.2 }), 20), cyl(0.16, 0.12, 0.025, 0.15, legH + 0.41, 0.12, std("#f3efe6", { roughness: 0.2 }), 32));
+        break;
+      }
+      case "beshik": {
+        const M = wood(c);
+        for (const a of [-1, 1]) {
+          const end = new T.Mesh(new T.CylinderGeometry(d / 2, d / 2, 0.04, 32, 1, false, 0, Math.PI), M); end.rotation.set(0, 0, Math.PI / 2); end.rotation.y = Math.PI / 2; end.position.set(a * (w / 2 - 0.02), 0.32, 0); g.add(shadow(end));
+          const rocker = new T.Mesh(new T.TorusGeometry(d * 0.7, 0.025, 8, 24, Math.PI * 0.45), M); rocker.rotation.set(0, Math.PI / 2, Math.PI * 1.275); rocker.position.set(a * (w / 2 - 0.02), d * 0.7 - 0.02, 0); g.add(shadow(rocker));
+          g.add(rbox(0.05, h - 0.32, 0.05, a * (w / 2 - 0.02), 0.32, 0, M, 0.01));
+        }
+        g.add(rbox(w, 0.04, 0.05, 0, h - 0.04, 0, M, 0.01));
+        g.add(rbox(w - 0.08, 0.2, d * 0.75, 0, 0.3, 0, new T.MeshPhysicalMaterial({ map: patternTex("ikat", pal[3] || "#c4643a"), roughness: 0.9, sheen: 0.5 }), 0.06));
+        for (let i = 0; i < 6; i++) g.add(cyl(0.008, 0.008, 0.18, -w / 2 + 0.1 + i * (w - 0.2) / 5, 0.46, d * 0.36, M, 6));
+        break;
+      }
+      case "carvedpanel": {
+        const M = wood(c), hi = wood(tone(c, 1.18));
+        g.add(rbox(w, h, d, 0, 0, 0, M, 0.01));
+        const nx = Math.max(2, Math.round(w / 0.3)), ny = Math.max(3, Math.round(h / 0.3));
+        for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
+          const x = -w / 2 + (i + 0.5) * w / nx, y = (j + 0.5) * h / ny;
+          const star = new T.Mesh(new T.CylinderGeometry(Math.min(w / nx, h / ny) * 0.36, Math.min(w / nx, h / ny) * 0.36, 0.014, 8), hi); star.rotation.x = Math.PI / 2; star.position.set(x, y, d / 2 + 0.006); g.add(shadow(star));
+          const inner = new T.Mesh(new T.CylinderGeometry(Math.min(w / nx, h / ny) * 0.18, Math.min(w / nx, h / ny) * 0.18, 0.018, 4), M); inner.rotation.set(Math.PI / 2, 0, Math.PI / 4); inner.position.set(x, y, d / 2 + 0.01); g.add(inner);
+        }
+        break;
+      }
+      case "beanbag": {
+        const F = fabric(c), m = new T.Mesh(new T.SphereGeometry(w / 2, 40, 24), F); m.scale.set(1, h / w * 1.1, d / w); m.position.y = h * 0.5; g.add(shadow(m));
+        const top = new T.Mesh(new T.SphereGeometry(w * 0.32, 32, 16), F); top.scale.set(1, 0.45, 0.9); top.position.set(0, h * 0.82, -d * 0.12); g.add(shadow(top));
         break;
       }
       case "box": g.add(rbox(w, Math.max(h, 0.03), d, 0, 0, 0, wood(c), 0.005)); if (type === "wallshelf") { g.add(cyl(0.05, 0.04, 0.14, -w * 0.25, h, 0, std("#e9e4da", { roughness: 0.25 }), 20)); for (let i = 0; i < 5; i++) g.add(box(0.03, 0.2, 0.15, w * 0.1 + i * 0.035, h, 0, std(["#2f3e46", "#c4643a", "#e8e0d0", "#8a5a3a", "#3f5f2a"][i]))); } break;

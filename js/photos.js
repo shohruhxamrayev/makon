@@ -1,0 +1,62 @@
+// Makon — real photos of pieces like ours, shot in real homes (Unsplash License: free for commercial use).
+// Each catalogue id maps to an Unsplash photo id + a short caption. If a photo ever fails to load, pages fall back to our 3D render.
+export const PHOTOS = {
+  sofa3: ["1555041469-a586c61ea9bc", "Green fabric sofa"],
+  sofa2: ["1549187774-b4e9b0445b41", "Brown leather two-seater"],
+  corner: ["1759722665935-0967b4e0da93", "Grey sectional in a modern living room"],
+  sofabed: ["1698936061086-2bf99c7b9fc5", "Grey couch with cushions"],
+  armchair: ["1580480055273-228ff5388ef8", "Grey upholstered armchair"],
+  lounge: ["1601366533287-5ee4c763ae4e", "Brown leather lounge chair"],
+  accent: ["1586023492125-27b2c045efd7", "Yellow accent chair"],
+  recliner: ["1757969704802-4d0050f038d7", "Cosy armchair with a throw"],
+  dchair: ["1781262382772-a6f7047fa642", "Woven dining chairs"],
+  stool: ["1565538810643-b5bdb714032a", "Wooden bar stools"],
+  bench: ["1616486029423-aaa4789e8c9a", "Leather bench at the foot of a bed"],
+  coffee: ["1777513538143-8525eb3943f6", "Rustic wooden coffee table"],
+  coffeer: ["1758565811033-84d1365000c6", "Modern coffee table with books"],
+  marblecoffee: ["1779905697138-5a3453572b59", "Dark coffee table styled with a woven vase"],
+  side: ["1581428982868-e410dd047a90", "Wooden side table by a white sofa"],
+  dining4: ["1604578762246-41134e37f9cc", "Wooden table and chairs"],
+  dining6: ["1616486886892-ff366aa67ba4", "Black and white dining set"],
+  rdining: ["1780659760416-3b62b5f18e11", "Round dining table by large windows"],
+  bookcase: ["1594620302200-9a762244a156", "Wooden bookshelves by a window"],
+  wallshelf: ["1593430980369-68efc5a5eb34", "Books on a wooden shelf"],
+  double: ["1615874959474-d609969a20ed", "White bed with grey linen"],
+  king: ["1616594039964-ae9021a400a0", "Upholstered bed under a gold chandelier"],
+  upbed: ["1566665797739-1674de7a421a", "Blue upholstered headboard"],
+  floorlamp: ["1759647020559-2f91a4290ae4", "Tall floor lamp with a white shade"],
+  arclamp: ["1494438639946-1ebd1d20bf85", "Black floor lamp in a corner"],
+  tablelamp: ["1769255119650-f658d3dbc397", "Lamp with a wooden base, glowing softly"],
+  pendant: ["1542768581-0ddb91c116ef", "Brown pendant light"],
+  chandelier: ["1627306411131-358d6d0fd2cb", "Brass chandelier"],
+  rug: ["1774250100354-3067b5b748ad", "Floral rug with a central medallion"],
+  gilam: ["1660394585016-508f949df960", "Red hand-knotted rug with a diamond motif"],
+  plant: ["1615766254664-ccacf4203a94", "Tree in a ceramic pot"],
+  monstera: ["1618220179428-22790b461013", "Plant in a white pot"],
+  island: ["1771372125074-5c7c4332095f", "Kitchen island with bar stools"],
+  basecab: ["1600489000022-c2086d79f9d4", "White and wood kitchen cabinets"],
+  bartable: ["1632583824020-937ae9564495", "Kitchen bar with stools"],
+  bathtub: ["1620626011761-996317b8d101", "White bathtub beside a plant"],
+  freebath: ["1771372012124-f7696f374a5a", "Freestanding tub and double vanity"],
+  vanity: ["1603825491103-bd638b1873b0", "White basin under a mirror"],
+  doublevanity: ["1763485956310-55f3c0e822d5", "Stone tiles and a wooden vanity"],
+  desk: ["1623177623442-979c1e42c255", "Wooden desk in a home office"],
+  ochair: ["1518455027359-f3f8164ba6bd", "Leather office chair at a white desk"],
+  gamingdesk: ["1762983870490-63e5ba07105b", "Home office desk setup with plants"],
+  vases: ["1727354484577-d3adaca753fd", "Hand-painted blue vase"],
+};
+
+// Large "real rooms" for the lookbook: photo id, caption, the piece it shows
+export const LOOKS = [
+  ["1759722665629-29df6ee4f9a5", "Light grey sofa, soft daylight", "sofa3"],
+  ["1616594039964-ae9021a400a0", "A bedroom built around the bed", "king"],
+  ["1771372125074-5c7c4332095f", "A kitchen island for everyday breakfasts", "island"],
+  ["1627306411131-358d6d0fd2cb", "Brass that warms the whole room", "chandelier"],
+  ["1660394585016-508f949df960", "A hand-knotted rug as the centrepiece", "gilam"],
+  ["1771372012124-f7696f374a5a", "A bathroom that feels like a hotel", "freebath"],
+  ["1617806118233-18e1de247200", "Green and white for a calm dining room", "dining4"],
+  ["1623064803927-d820399b4e7f", "Clay, shaped by hand in Uzbekistan", "rishtan"],
+];
+
+export const photoUrl = (pid, w = 800) => "https://images.unsplash.com/photo-" + pid + "?w=" + w + "&q=78&auto=format&fit=crop";
+export const photoFor = (id, w) => PHOTOS[id] ? photoUrl(PHOTOS[id][0], w) : null;
