@@ -33,7 +33,7 @@ function who(req) {
   return (xf || req.headers["x-real-ip"] || (req.socket && req.socket.remoteAddress) || "unknown").toString().slice(0, 64);
 }
 async function redis(cmds) {
-  const url = process.env.UPSTASH_REDIS_REST_URL, tok = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL, tok = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!url || !tok) return null;
   try {
     const r = await fetch(url.replace(/\/$/, "") + "/pipeline", { method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: JSON.stringify(cmds) });

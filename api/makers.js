@@ -11,7 +11,7 @@
 const crypto = require("crypto");
 
 async function redis(cmds) {
-  const url = process.env.UPSTASH_REDIS_REST_URL, tok = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL, tok = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!url || !tok) throw Object.assign(new Error("Makers storage isn't connected yet."), { code: 503 });
   const r = await fetch(url.replace(/\/$/, "") + "/pipeline", { method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: JSON.stringify(cmds) });
   if (!r.ok) throw Object.assign(new Error("Storage error " + r.status), { code: 502 });
@@ -19,7 +19,7 @@ async function redis(cmds) {
   return out.map(x => { if (x.error) throw new Error(x.error); return x.result; });
 }
 const one = async cmd => (await redis([cmd]))[0];
-const hasStorage = () => !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+const hasStorage = () => !!((process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL) && (process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN));
 const isOwner = req => !!process.env.MAKON_OWNER_CODE && String(req.headers["x-makon-code"] || "") === process.env.MAKON_OWNER_CODE;
 const hash = s => crypto.createHash("sha256").update("makon-maker|" + s).digest("hex");
 const who = req => String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "x";
