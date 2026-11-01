@@ -165,3 +165,9 @@ body.home2.scrolled .top { background: rgba(14,17,16,.6); backdrop-filter: blur(
 .qz-pics img:nth-child(3) { right: 0; top: 0; transform: rotate(7deg); }
 .quizband:hover .qz-pics img:nth-child(1) { transform: rotate(-8deg) translateX(-10px); } .quizband:hover .qz-pics img:nth-child(3) { transform: rotate(10deg) translateX(10px); }
 @media (max-width: 900px) { .qz-in { grid-template-columns: minmax(0, 1fr); } .qz-pics { height: 62vw; } }
+.tap-card { color: #18201d; }
+.tap-card .btn-light { background: #18201d; color: #fbf8f2; }
+.tap-tabs button { color: inherit; border-color: rgba(251,248,242,.25); }
+.tap-tabs button[aria-pressed="true"] { background: var(--accent, #e2a964); color: #141a17; border-color: var(--accent, #e2a964); }
+.tap-head p { color: rgba(251,248,242,.65); }
+.quizband { background: #1c2420; border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
