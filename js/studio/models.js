@@ -47,6 +47,43 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
     const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.userData.keep = true; artCache.set(k, t); return t;
   }
 
+  // hand-drawn craft patterns: suzani medallions, adras ikat, Rishtan glaze, carved relief
+  const patCache = new Map();
+  function patternTex(kind, col = "#a23b2a") {
+    const key = kind + col; if (patCache.has(key)) return patCache.get(key);
+    const S = 512, cv = document.createElement("canvas"); cv.width = cv.height = S; const g = cv.getContext("2d");
+    let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    if (kind === "suzani") {
+      g.fillStyle = "#efe4cf"; g.fillRect(0, 0, S, S);
+      const med = (x, y, r, c1, c2) => {
+        g.fillStyle = c1; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        g.fillStyle = c2; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; g.beginPath(); g.ellipse(x + Math.cos(a) * r * .72, y + Math.sin(a) * r * .72, r * .2, r * .09, a, 0, Math.PI * 2); g.fill(); }
+        g.fillStyle = "#efe4cf"; g.beginPath(); g.arc(x, y, r * .42, 0, Math.PI * 2); g.fill();
+        g.fillStyle = c1; g.beginPath(); g.arc(x, y, r * .26, 0, Math.PI * 2); g.fill();
+      };
+      [[128, 128], [384, 128], [128, 384], [384, 384]].forEach(([x, y]) => med(x, y, 92, col, "#2f5a3a"));
+      med(256, 256, 70, "#d8892f", col);
+      g.strokeStyle = "#2f5a3a"; g.lineWidth = 6; for (let i = 0; i < 40; i++) { const x = rnd() * S, y = rnd() * S; g.beginPath(); g.arc(x, y, 6 + rnd() * 6, 0, Math.PI); g.stroke(); }
+      g.strokeStyle = col; g.lineWidth = 14; g.strokeRect(10, 10, S - 20, S - 20);
+    } else if (kind === "ikat") {
+      const cols = [col, "#f2d36b", "#1f4f7a", "#efe4cf", "#7a2a4a"];
+      for (let x = 0; x < S; x += 64) for (let y = 0; y < S; y += 4) {
+        const k = Math.floor(x / 64) % cols.length, wob = Math.sin(y / 30 + x) * 10 + (rnd() - .5) * 6;
+        g.fillStyle = cols[k]; g.fillRect(x + wob, y, 64, 4);
+        const dia = Math.abs(((y + x) % 128) - 64) / 64; g.fillStyle = cols[(k + 2) % cols.length]; g.fillRect(x + 16 + wob + dia * 16, y, 32 - dia * 32, 4);
+      }
+    } else if (kind === "rishtan") {
+      g.fillStyle = "#f3efe6"; g.fillRect(0, 0, S, S);
+      const c = S / 2; const ring = (r, w, cc) => { g.strokeStyle = cc; g.lineWidth = w; g.beginPath(); g.arc(c, c, r, 0, Math.PI * 2); g.stroke(); };
+      ring(240, 20, "#1f4f7a"); ring(200, 10, "#2aa3b8");
+      g.fillStyle = "#1f6f8b"; for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; g.beginPath(); g.ellipse(c + Math.cos(a) * 140, c + Math.sin(a) * 140, 46, 16, a, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = "#2aa3b8"; for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + .2; g.beginPath(); g.ellipse(c + Math.cos(a) * 70, c + Math.sin(a) * 70, 34, 12, a, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = "#1f4f7a"; g.beginPath(); g.arc(c, c, 36, 0, Math.PI * 2); g.fill();
+    }
+    const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = anisotropy; t.userData.keep = true; patCache.set(key, t); return t;
+  }
+  const patMat = (kind, col, o = {}) => { const k = "p" + kind + col; if (!cache.has(k)) cache.set(k, new T.MeshStandardMaterial({ map: patternTex(kind, col), roughness: 0.85, ...o })); return cache.get(k); };
+
   // ---------- geometry helpers (y = bottom) ----------
   const geo = new Map();
   const shadow = m => { m.castShadow = true; m.receiveShadow = true; return m; };
@@ -280,6 +317,110 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8 } = {}) {
         const b = cyl(0.18, 0.13, 0.4, 0, 0, 0.06, W, 40); b.scale.z = 1.3; g.add(b);
         const seat = new T.Mesh(new T.TorusGeometry(0.15, 0.025, 12, 40), W); seat.rotation.x = Math.PI / 2; seat.scale.y = 1.3; seat.position.set(0, 0.41, 0.06); g.add(shadow(seat));
         g.add(rbox(w, 0.38, 0.17, 0, 0.4, -d / 2 + 0.085, W, 0.03), rbox(0.05, 0.015, 0.03, 0, 0.78, -d / 2 + 0.085, metal("#c9cbcc"), 0.006));
+        break;
+      }
+      // ---------- lighting & decor ----------
+      case "pendant": {
+        const M = metal(c === "#e9dcc4" ? "#1f1f1f" : c, 0.4);
+        g.add(cyl(0.004, 0.004, 0.35, 0, h, 0, std("#222"), 6));
+        const dome = new T.Mesh(new T.SphereGeometry(w / 2, 48, 16, 0, Math.PI * 2, 0, Math.PI / 2), std("#e9dcc4", { roughness: 0.55, side: T.DoubleSide })); dome.position.y = h * 0.25; dome.scale.y = h / (w / 2) * 0.75; g.add(shadow(dome));
+        const glow = shadeMat("#fff4e0"); shades.push(glow); const bulb = new T.Mesh(new T.SphereGeometry(0.05, 16, 10), glow); bulb.position.y = h * 0.22; g.add(bulb);
+        g.add(cyl(0.03, 0.03, 0.06, 0, h * 0.25 + h * 0.75 - 0.03, 0, M, 16));
+        lamps.push([0, h * 0.15, 0, 1]);
+        break;
+      }
+      case "tablelamp": {
+        const base = new T.Mesh(new T.SphereGeometry(w * 0.33, 40, 24), std(pal[3] || "#c4643a", { roughness: 0.25 })); base.scale.y = 1.25; base.position.y = w * 0.33 * 1.25; g.add(shadow(base));
+        g.add(cyl(0.008, 0.008, h * 0.25, 0, w * 0.66 * 1.25 - 0.02, 0, metal("#b59a6a"), 8));
+        lampShade(w * 0.36, w * 0.5, h * 0.36, 0, h - h * 0.36, 0, c);
+        lamps.push([0, h - h * 0.2, 0, 0.7]);
+        break;
+      }
+      case "sconce": {
+        const M = metal(c, 0.3);
+        g.add(rbox(0.08, 0.14, 0.02, 0, h * 0.2, -d / 2 + 0.01, M, 0.008));
+        const arm = cyl(0.01, 0.01, d * 0.7, 0, 0, 0, M, 10); arm.rotation.x = Math.PI / 2; arm.position.set(0, h * 0.3, -d * 0.12); g.add(arm);
+        lampShade(w * 0.28, w * 0.42, h * 0.42, 0, h * 0.38, d * 0.18, "#f1e6d2");
+        lamps.push([0, h * 0.58, d * 0.18, 0.6]);
+        break;
+      }
+      case "lantern": {
+        const B = metal(c, 0.32), r = w / 2;
+        g.add(cyl(r * 0.7, r * 0.8, 0.04, 0, 0, 0, B, 8));
+        const body = new T.Mesh(new T.CylinderGeometry(r * 0.85, r * 0.7, h * 0.55, 8, 1, true), new T.MeshStandardMaterial({ color: c, metalness: 0.9, roughness: 0.35, side: T.DoubleSide, transparent: true, opacity: 0.92 }));
+        body.position.y = 0.04 + h * 0.275; g.add(shadow(body));
+        const dome = new T.Mesh(new T.SphereGeometry(r * 0.85, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2), B); dome.position.y = 0.04 + h * 0.55; dome.scale.y = 1.2; g.add(shadow(dome));
+        g.add(cyl(0.012, 0.03, h * 0.12, 0, 0.04 + h * 0.55 + r * 1.0, 0, B, 8));
+        for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; const st = box(0.012, h * 0.55, 0.012, Math.cos(a) * r * 0.78, 0.04, Math.sin(a) * r * 0.78, B); g.add(st); }
+        const glow = shadeMat("#ffd79a"); shades.push(glow); const core = new T.Mesh(new T.SphereGeometry(r * 0.4, 16, 12), glow); core.position.y = 0.04 + h * 0.28; g.add(core);
+        lamps.push([0, 0.04 + h * 0.3, 0, 0.6]);
+        break;
+      }
+      case "vases": {
+        const cols = [c, pal[2] || "#b98656", pal[3] || "#c4643a"];
+        [[-w * 0.3, 0.9, 0.07], [0, 1, 0.09], [w * 0.3, 0.55, 0.06]].forEach(([x, k, r], i) => {
+          const pts = []; for (let j = 0; j <= 12; j++) { const t = j / 12; pts.push(new T.Vector2(r * (0.55 + Math.sin(t * Math.PI) * 0.6) * (t > 0.85 ? 0.7 : 1), t * h * k)); }
+          const v = new T.Mesh(new T.LatheGeometry(pts, 32), std(cols[i], { roughness: 0.35 })); v.position.set(x, 0, 0); g.add(shadow(v));
+        });
+        const br = cyl(0.004, 0.004, h * 0.7, 0, h, 0, std("#5a4632"), 5); br.rotation.z = 0.2; g.add(br);
+        break;
+      }
+      case "curtain": {
+        // two gathered panels: a wavy cloth surface, slightly translucent
+        g.add(cyl(0.012, 0.012, w + 0.2, 0, h - 0.02, 0, metal("#2b2b2b", 0.4), 10)); g.children[0].rotation.z = Math.PI / 2; g.children[0].position.set(0, h - 0.02, 0);
+        const pw = w * 0.42;
+        for (const side of [-1, 1]) {
+          const geo2 = new T.PlaneGeometry(pw, h - 0.05, 48, 8), pos = geo2.attributes.position;
+          for (let i = 0; i < pos.count; i++) { const x = pos.getX(i); pos.setZ(i, Math.sin((x / pw + 0.5) * Math.PI * 14) * 0.035); }
+          geo2.computeVertexNormals();
+          const m = new T.Mesh(geo2, new T.MeshPhysicalMaterial({ color: c, roughness: 0.95, sheen: 0.6, side: T.DoubleSide, transparent: true, opacity: 0.93 }));
+          m.position.set(side * (w / 2 - pw / 2), (h - 0.05) / 2, 0.02); g.add(shadow(m));
+        }
+        break;
+      }
+      // ---------- handmade in Uzbekistan ----------
+      case "suzani": {
+        const m = new T.Mesh(new T.BoxGeometry(w, h, 0.01), patMat("suzani", c)); m.position.y = h / 2; g.add(shadow(m));
+        g.add(cyl(0.01, 0.01, w + 0.1, 0, h + 0.01, 0.01, wood("#6b4a33"), 8)); g.children[1].rotation.z = Math.PI / 2; g.children[1].position.set(0, h + 0.01, 0.01);
+        for (let i = 0; i < 14; i++) g.add(box(0.012, 0.06, 0.004, -w / 2 + 0.05 + i * (w - 0.1) / 13, -0.06, 0, std(c)));
+        break;
+      }
+      case "plates": {
+        [[-w * 0.33, 0, 0.17], [0, h * 0.05, 0.2], [w * 0.33, -0.02, 0.15]].forEach(([x, y, r]) => {
+          const pl = new T.Mesh(new T.CylinderGeometry(r, r * 0.8, 0.025, 48), [std("#f3efe6", { roughness: 0.2 }), patMat("rishtan", c, { roughness: 0.18 }), std("#f3efe6", { roughness: 0.2 })]);
+          pl.rotation.x = Math.PI / 2; pl.position.set(x, h / 2 + y, 0.015); g.add(shadow(pl));
+        });
+        break;
+      }
+      case "xontaxta": {
+        const M = wood(c);
+        g.add(rbox(w, 0.05, d, 0, h - 0.05, 0, M, 0.01));
+        // carved apron with a repeating relief and turned legs
+        for (const s2 of [-1, 1]) { g.add(box(w - 0.1, 0.08, 0.025, 0, h - 0.13, s2 * (d / 2 - 0.04), M)); g.add(box(0.025, 0.08, d - 0.1, s2 * (w / 2 - 0.04), h - 0.13, 0, M)); }
+        for (let i = 0; i < 9; i++) for (const s2 of [-1, 1]) g.add(rbox(0.05, 0.05, 0.012, -w / 2 + 0.12 + i * (w - 0.24) / 8, h - 0.115, s2 * (d / 2 - 0.025), wood(tone(c, 1.15)), 0.02));
+        for (const a of [-1, 1]) for (const b of [-1, 1]) { const lg = new T.Mesh(new T.LatheGeometry([0, .2, .35, .5, .7, .85, 1].map((t, j) => new T.Vector2(0.03 + (j % 2) * 0.012, t * (h - 0.05))), 20), M); lg.position.set(a * (w / 2 - 0.06), 0, b * (d / 2 - 0.06)); g.add(shadow(lg)); }
+        g.add(cyl(0.16, 0.12, 0.03, -w * 0.15, h, 0, std("#f3efe6", { roughness: 0.2 }), 32), cyl(0.05, 0.04, 0.09, w * 0.2, h, 0.05, std("#1f6f8b", { roughness: 0.2 }), 20));
+        break;
+      }
+      case "sandiq": {
+        const M = wood(c), brass = metal("#b5893f", 0.3);
+        g.add(rbox(w, h - 0.05, d, 0, 0.05, 0, M, 0.01), rbox(w + 0.02, 0.06, d + 0.02, 0, h - 0.06, 0, wood(tone(c, 0.9)), 0.01));
+        for (const a of [-1, 1]) for (const b of [-1, 1]) g.add(box(0.06, 0.05, 0.06, a * (w / 2 - 0.03), 0, b * (d / 2 - 0.03), M));
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) g.add(rbox(w / 4 - 0.05, (h - 0.2) / 2 - 0.04, 0.012, -w / 2 + w / 8 + i * w / 4, 0.1 + j * (h - 0.2) / 2, d / 2, wood(tone(c, 1.12)), 0.015));
+        for (const a of [-1, 1]) for (const yy of [0.05, h - 0.12]) g.add(box(0.07, 0.07, 0.008, a * (w / 2 - 0.035), yy, d / 2 + 0.006, brass));
+        g.add(rbox(0.08, 0.1, 0.015, 0, h - 0.2, d / 2 + 0.008, brass, 0.01));
+        break;
+      }
+      case "kurpacha": {
+        const n = Math.max(1, Math.round(w / 0.6)), cw = w / n;
+        for (let i = 0; i < n; i++) {
+          g.add(rbox(cw - 0.02, h, d, -w / 2 + cw * (i + 0.5), 0, 0, new T.MeshPhysicalMaterial({ map: patternTex("ikat", i % 2 ? (pal[3] || "#c4643a") : c), roughness: 0.9, sheen: 0.5 }), 0.04));
+          const pil = rbox(cw * 0.7, 0.32, 0.14, -w / 2 + cw * (i + 0.5), h, -d / 2 + 0.1, new T.MeshPhysicalMaterial({ map: patternTex("ikat", i % 2 ? c : "#1f4f7a"), roughness: 0.9, sheen: 0.5 }), 0.06); pil.rotation.x = -0.25; g.add(pil);
+        }
+        break;
+      }
+      case "cushion": {
+        const m = rbox(w, h, d, 0, 0, 0, new T.MeshPhysicalMaterial({ map: patternTex("ikat", c), roughness: 0.9, sheen: 0.5 }), Math.min(h, w) * 0.45); g.add(m);
         break;
       }
       case "box": g.add(rbox(w, Math.max(h, 0.03), d, 0, 0, 0, wood(c), 0.005)); if (type === "wallshelf") { g.add(cyl(0.05, 0.04, 0.14, -w * 0.25, h, 0, std("#e9e4da", { roughness: 0.25 }), 20)); for (let i = 0; i < 5; i++) g.add(box(0.03, 0.2, 0.15, w * 0.1 + i * 0.035, h, 0, std(["#2f3e46", "#c4643a", "#e8e0d0", "#8a5a3a", "#3f5f2a"][i]))); } break;

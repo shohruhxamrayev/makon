@@ -7,7 +7,7 @@ import * as Three from "./scene3d.js";
 import * as Furnish from "./furnish.js";
 import * as Build from "./build.js";
 import { TEMPLATES, templateById, templateImage, buildPlan } from "./templates.js";
-import { STYLES } from "./data.js";
+import { STYLES, catalogItem } from "./data.js";
 import { polyArea } from "./geom.js";
 
 const user = window.MakonAuth && (MakonAuth.current() || MakonAuth.demo());
@@ -310,6 +310,7 @@ async function checkAI() {
 }
 
 // ---------- boot ----------
+const ADD_PIECE = new URLSearchParams(location.search).get("add");   // read before anything rewrites the address
 (async function boot() {
   Design.init(ctx); Plan.init(ctx); Three.init(ctx); Furnish.init(ctx); Build.init(ctx);
   if (!(await persistent())) $("#side-note").textContent = "This browser is blocking storage, so rooms only last until you close the tab. Export to keep them.";
@@ -350,6 +351,15 @@ async function checkAI() {
   ctx.mode = MODES.includes(qm) ? qm : "design";
   await openProject(start.id);
   setMode(ctx.mode);
+  // "Try it in my room" from the decor page: place that piece in the current room (or a sample living room) and show it in 3D
+  const piece = ADD_PIECE && catalogItem(ADD_PIECE);
+  if (piece) {
+    if (!ctx.p.plan.walls.length) await fromTemplate("warm-living", true);
+    const it = ctx.planOps.addItem(piece.id);
+    setMode("3d");
+    history.replaceState(null, "", "studio.html");
+    toast(piece.name + " added" + (it ? " — drag it where you like, or open Furnish to see it in the list." : "."));
+  }
   document.body.classList.add("ready");
   checkAI();
   let seen = null; try { seen = localStorage.getItem(GUIDE); } catch (e) { seen = "1"; }

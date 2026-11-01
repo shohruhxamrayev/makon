@@ -258,9 +258,23 @@ export const CATALOG = [
   { id: "toilet", name: "Toilet", cat: "Bath", w: 0.38, d: 0.68, h: 0.78, shape: "toilet", color: "#f6f6f4", q: "toilet" },
   { id: "vanity", name: "Vanity basin", cat: "Bath", w: 0.8, d: 0.48, h: 0.85, shape: "sink", color: "#e8e2d6", q: "bathroom vanity unit" },
 
-  { id: "ochair", name: "Office chair", cat: "Office", w: 0.65, d: 0.65, h: 1.0, shape: "chair", color: "#2e2d2b", q: "ergonomic office chair" }
+  { id: "ochair", name: "Office chair", cat: "Office", w: 0.65, d: 0.65, h: 1.0, shape: "chair", color: "#2e2d2b", q: "ergonomic office chair" },
+
+  { id: "pendant", name: "Pendant light", cat: "Lighting", w: 0.45, d: 0.45, h: 0.35, shape: "pendant", color: "#e9dcc4", elev: 1.75, flat: true, q: "dome pendant light", desc: "Matte dome over a table or island", mat: "Powder-coated metal" },
+  { id: "tablelamp", name: "Table lamp", cat: "Lighting", w: 0.3, d: 0.3, h: 0.5, shape: "tablelamp", color: "#efe4d2", elev: 0.55, flat: true, q: "ceramic table lamp linen shade", desc: "Glazed ceramic base, linen shade", mat: "Ceramic, linen" },
+  { id: "sconce", name: "Wall light", cat: "Lighting", w: 0.18, d: 0.14, h: 0.28, shape: "sconce", color: "#b59a6a", elev: 1.7, wall: true, q: "brass wall sconce", desc: "Soft light beside a bed or mirror", mat: "Brushed brass, linen" },
+  { id: "vases", name: "Vase set", cat: "Decor", w: 0.4, d: 0.2, h: 0.45, shape: "vases", color: "#e4dccf", flat: true, q: "ceramic vase set", desc: "Three stoneware vases with a dried branch", mat: "Stoneware" },
+  { id: "curtain", name: "Linen curtains", cat: "Decor", w: 2.4, d: 0.12, h: 2.5, shape: "curtain", color: "#ede5d8", wall: true, q: "linen curtains floor to ceiling", desc: "Floor-to-ceiling, softly gathered", mat: "Washed linen" },
+
+  { id: "lantern", name: "Brass lantern", cat: "Handmade", w: 0.32, d: 0.32, h: 0.55, shape: "lantern", color: "#b5893f", q: "handmade brass lantern", desc: "Pierced brass that throws star patterns on the walls", mat: "Hand-cut brass", craft: true },
+  { id: "suzani", name: "Suzani wall hanging", cat: "Handmade", w: 1.5, d: 0.02, h: 1.1, shape: "suzani", color: "#a23b2a", elev: 1.0, wall: true, q: "suzani embroidery wall hanging", desc: "Hand-embroidered medallions in the Samarkand and Bukhara tradition", mat: "Silk embroidery on cotton", craft: true },
+  { id: "rishtan", name: "Rishtan plates", cat: "Handmade", w: 0.9, d: 0.03, h: 0.4, shape: "plates", color: "#1f6f8b", elev: 1.35, wall: true, q: "rishtan ceramic plates", desc: "Hand-painted plates in the famous turquoise ishkor glaze", mat: "Ceramic, ishkor glaze", craft: true },
+  { id: "xontaxta", name: "Carved xontaxta", cat: "Handmade", w: 1.0, d: 0.7, h: 0.38, shape: "xontaxta", color: "#6b4a33", q: "carved wooden low table", desc: "Low tea table with a carved apron and turned legs", mat: "Hand-carved walnut", craft: true },
+  { id: "sandiq", name: "Carved chest (sandiq)", cat: "Handmade", w: 0.9, d: 0.5, h: 0.55, shape: "sandiq", color: "#7a4f30", q: "carved wooden chest", desc: "Panelled walnut chest with brass corners", mat: "Walnut, brass", craft: true },
+  { id: "kurpacha", name: "Kurpacha seating", cat: "Handmade", w: 1.8, d: 0.6, h: 0.1, shape: "kurpacha", color: "#8e2c2c", q: "kurpacha floor cushions", desc: "Quilted floor cushions with adras bolsters", mat: "Cotton, adras silk", craft: true },
+  { id: "ikatpouf", name: "Adras cushion", cat: "Handmade", w: 0.5, d: 0.5, h: 0.18, shape: "cushion", color: "#c4643a", flat: true, q: "ikat adras cushion", desc: "Hand-dyed adras (ikat) from Margilan", mat: "Silk-cotton adras", craft: true }
 ];
-export const CATS = ["All", ...new Set(CATALOG.map(c => c.cat))];
+export const CATS = ["All", "Seating", "Tables", "Storage", "Beds", "Lighting", "Decor", "Handmade", "Kitchen", "Bath", "Office"].filter(k => k === "All" || CATALOG.some(c => c.cat === k));
 export const catalogItem = id => CATALOG.find(c => c.id === id);
 // a studio photo of every piece, rendered from the same 3D model you place in the room
 export const furnPic = id => "img/furniture/" + id + ".jpg";

@@ -82,8 +82,24 @@ body.home2.scrolled .top { background: rgba(14,17,16,.6); backdrop-filter: blur(
 .ig-snd[aria-pressed="true"] .on { display: inline; }
 @media (max-width: 900px) {
   .ig { grid-template-columns: 1fr; }
-  .ig-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 -20px; padding: 0 20px 6px; scrollbar-width: none; }
+  .ig-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 calc(-1 * var(--pad, 16px)); padding: 0 var(--pad, 16px) 6px; scrollbar-width: none; }
+  .ig { overflow-x: clip; }
   .ig-row::-webkit-scrollbar { display: none; }
   .ig-card { flex: 0 0 62vw; max-width: 280px; scroll-snap-align: center; }
   .ig-card:nth-child(even) { margin-top: 0; }
 }
+
+/* Furniture & decor on the home page */
+.dk { display: grid; grid-template-columns: minmax(260px, 1fr) 2.3fr; gap: clamp(28px, 4vw, 64px); align-items: center; }
+.dk-head h2 { font-size: clamp(34px, 4.2vw, 60px); margin: 14px 0 18px; }
+.dk-head p { color: var(--muted, #6f675c); max-width: 36ch; margin-bottom: 22px; }
+.dk-row { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; scrollbar-width: thin; }
+.dk-card { flex: 0 0 210px; scroll-snap-align: start; background: #fff; border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--ink, #18201d); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.06); transition: transform .3s, box-shadow .3s; }
+.dk-card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -26px rgba(0,0,0,.4); }
+.dk-img { position: relative; aspect-ratio: 4 / 3; background: #f2eee7; overflow: hidden; }
+.dk-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dk-img i { position: absolute; left: 8px; top: 8px; font: 600 10px/1 Inter, sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #e2a964; background: #141a17; padding: 6px 8px; border-radius: 99px; }
+.dk-card b { font: 600 14px Inter, sans-serif; padding: 12px 14px 2px; }
+.dk-card small { font-size: 12px; color: #8a8174; padding: 0 14px; }
+.dk-card em { font-style: normal; font-size: 12px; font-weight: 600; color: #b9783a; padding: 10px 14px 14px; }
+@media (max-width: 900px) { .dk { grid-template-columns: 1fr; overflow-x: clip; } .dk-row { margin: 0 calc(-1 * var(--pad, 16px)); padding: 0 var(--pad, 16px) 8px; } .dk-card { flex-basis: 62vw; max-width: 240px; } }

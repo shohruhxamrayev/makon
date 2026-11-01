@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Furniture & decor — Makon</title>
+  <meta name="description" content="Furniture, lamps and decor in real sizes — including handmade pieces from Uzbekistan: suzani, Rishtan ceramics, carved walnut and brass lanterns. Try any piece in your own room in 3D.">
+  <meta name="theme-color" content="#f0eadf">
+  <meta property="og:title" content="Makon — furniture & decor, handmade in Uzbekistan">
+  <meta property="og:image" content="https://makon-khaki.vercel.app/img/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="tplpage gal decor">
+  <a class="skip-link" href="#d-grid">Skip to content</a>
+  <header class="lhead" id="lhead">
+    <a class="brand" href="index.html" aria-label="Makon home"><img class="wordmark" src="img/wordmark-ink.svg" alt="Makon" width="118" height="34"></a>
+    <nav class="lnav" aria-label="Main">
+      <a class="lnav-a" href="index.html">Home</a>
+      <a class="lnav-a" href="templates.html">Templates</a>
+      <a class="lnav-a on" href="decor.html" aria-current="page">Decor</a>
+      <a class="lnav-a" href="index.html#faq">FAQ</a>
+      <a class="lnav-a signin-link" href="signin.html">Sign in</a>
+      <a class="lcta" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+      <button class="lmenu" id="lmenu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="lmnav"><i></i><i></i></button>
+    </nav>
+  </header>
+  <div class="lmnav" id="lmnav" hidden>
+    <a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="index.html#faq">FAQ</a><a class="signin-link" href="signin.html">Sign in</a>
+    <a class="lcta big" href="studio.html" data-auth-link><span class="cta-txt">Start designing</span></a>
+  </div>
+
+  <main>
+    <section class="g-wrap g-hero">
+      <span class="g-eyebrow">Makon · Furniture &amp; decor</span>
+      <h1 class="g-h1">Furniture &amp; decor<sup id="d-total"></sup></h1>
+      <p class="g-lead">Lamps, furniture and finishing touches in their real sizes. Put any piece into your own room in 3D before you buy it — and see whether it fits.</p>
+    </section>
+
+    <section class="d-craft" aria-labelledby="craft-h">
+      <div class="g-wrap">
+        <div class="d-craft-head">
+          <span class="g-eyebrow light">Handmade in Uzbekistan</span>
+          <h2 id="craft-h">Made by hand,<br><span class="ital">made to be lived with.</span></h2>
+          <p>Suzani from Samarkand and Bukhara, Rishtan ceramics, carved walnut, Margilan adras and hand-cut brass. Place them in your room and see how a traditional piece changes a modern space.</p>
+        </div>
+        <div class="d-craft-row" id="d-craft"></div>
+        <div class="d-soon"><b>Coming soon:</b> order pieces directly from master craftsmen, starting with workshops in Samarkand. <a href="makers.html">Are you a maker? Join Makon →</a></div>
+      </div>
+    </section>
+
+    <section class="g-wrap d-shop">
+      <div class="d-bar">
+        <div class="chips d-filters" id="d-filters" role="group" aria-label="Categories"></div>
+        <input class="d-search" id="d-search" type="search" placeholder="Search lamps, sofa, rug…" aria-label="Search furniture and decor">
+      </div>
+      <div class="d-grid" id="d-grid"></div>
+    </section>
+
+    <section class="g-end">
+      <div class="g-wrap">
+        <div class="g-end-row"><h2>See it in<br>your own room.</h2><a class="g-arrow" href="studio.html" data-auth-link aria-label="Start designing">↗</a></div>
+        <div class="g-end-links"><a href="studio.html" data-auth-link>Start with your own photo</a><a href="templates.html">Ready-made rooms</a><a href="makers.html">For makers</a><a href="https://www.instagram.com/makon.build/" target="_blank" rel="noopener me">Instagram @makon.build</a></div>
+        <div class="g-foot"><img src="img/wordmark-cream.svg" alt="Makon" width="118" height="34"><span>Design one room at a time.</span><nav><a href="index.html">Home</a><a href="templates.html">Templates</a><a href="decor.html">Decor</a><a href="makers.html">For makers</a><a href="signin.html">Sign in</a></nav></div>
+      </div>
+    </section>
+  </main>
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+  <script type="module" src="js/decor-page.js"></script>
+</body>
+</html>
