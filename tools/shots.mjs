@@ -8,7 +8,7 @@ const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=sw
 async function page(vp) {
   const ctx = await browser.newContext(vp === "phone" ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   await ctx.addInitScript(() => { try { localStorage.setItem("makon_guide", "1"); localStorage.setItem("makon_coach3d", "1"); } catch (e) {} });
-  return ctx.newPage();
+  const pg = await ctx.newPage(); pg.on("console", m => { if (m.type() === "error" || m.type() === "warning") console.log("console:", m.text().slice(0, 300)); }); pg.on("pageerror", e => console.log("pageerror:", e.message)); return pg;
 }
 const shot = async (p, name) => { await p.screenshot({ path: `${out}/${name}.jpg`, type: "jpeg", quality: 78 }); console.log("shot", name); };
 const safe = async (name, fn) => { try { await fn(); } catch (e) { console.log("FAIL", name, e.message); } };

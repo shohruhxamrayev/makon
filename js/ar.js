@@ -5,7 +5,7 @@ import { CATALOG } from "./studio/data.js";
 
 const MV = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js";
 const QR = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
-const BASE = new URL("../models/ph/", import.meta.url).href;
+const BASE = new URL("../models/ar/", import.meta.url).href;   // plain-geometry copies that every phone AR viewer can open
 const byId = Object.fromEntries(CATALOG.map(c => [c.id, c]));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const script = src => new Promise((ok, no) => { if (document.querySelector(`script[src="${src}"]`)) return ok(); const s = document.createElement("script"); s.src = src; if (src === MV) s.type = "module"; s.onload = ok; s.onerror = no; document.head.append(s); });
