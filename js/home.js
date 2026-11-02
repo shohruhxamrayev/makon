@@ -40,6 +40,12 @@ $$(".room-chips [data-room]").forEach(b => b.addEventListener("click", () => {
   $$(".room-chips [data-room]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   room && room.setRoom(b.dataset.room);
 }));
+// restyle the same room live: walls, floor, fabrics and wood take the chosen style
+$$(".style-chips [data-style]").forEach(b => b.addEventListener("click", () => {
+  const on = b.getAttribute("aria-pressed") !== "true";
+  $$(".style-chips [data-style]").forEach(x => x.setAttribute("aria-pressed", String(on && x === b)));
+  room && room.setStyle && room.setStyle(on ? b.dataset.style : null);
+}));
 const eve = $("#eve-btn");
 eve.addEventListener("click", () => { const on = eve.getAttribute("aria-pressed") !== "true"; eve.setAttribute("aria-pressed", String(on)); I.set(eve, on ? "☀ Day" : "☾ Evening"); room && room.setEvening(on); });
 

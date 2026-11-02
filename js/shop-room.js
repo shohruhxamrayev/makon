@@ -1,6 +1,7 @@
 // Makon — "Tap anything in the room" on the home page
 import { CATALOG, furnPic, SHOPS } from "./studio/data.js";
 import { ROOMS, photoSrc, board } from "./looks.js";
+import { hasAR, openAR } from "./ar.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -38,14 +39,16 @@ function init() {
         <div class="tap-act">
           <a class="btn-light label" href="studio.html?add=${encodeURIComponent(id)}">Put it in my room</a>
           <button type="button" class="tap-fav label" aria-pressed="${fav}">${fav ? "♥ Saved" : "♡ Save"}</button>
+          ${hasAR(id) ? `<button type="button" class="tap-ar label">📱 See it in your room</button>` : ""}
         </div>
         <div class="tap-more"><a href="studio.html?template=${encodeURIComponent(room.tpl)}">Open the whole look in 3D →</a>
           <details><summary>Shop similar</summary>${SHOPS.slice(0, 3).map(([n, f]) => `<a href="${f(c.q || c.name)}" target="_blank" rel="noopener noreferrer">${esc(n.replace("Google Shopping", "Google"))}</a>`).join("")}</details></div>
         <div class="tap-nav"><button type="button" data-d="-1" aria-label="Previous piece">←</button><span>${k + 1} / ${room.spots.length}</span><button type="button" data-d="1" aria-label="Next piece">→</button></div>
       </div>`;
     card.querySelector(".tap-fav").addEventListener("click", e => { const on = board.toggle(id); e.currentTarget.setAttribute("aria-pressed", on); e.currentTarget.textContent = on ? "♥ Saved" : "♡ Save"; });
+    const arb = card.querySelector(".tap-ar"); if (arb) arb.addEventListener("click", () => openAR(id));
     card.querySelectorAll(".tap-nav button").forEach(b => b.addEventListener("click", () => select((k + +b.dataset.d + room.spots.length) % room.spots.length)));
     if (!quiet && matchMedia("(max-width: 900px)").matches) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
-  show(0, 0);
+  show(Math.floor(Date.now() / 864e5) % ROOMS.length, 0);   // a different room each day
 }

@@ -171,3 +171,11 @@ body.home2.scrolled .top { background: rgba(14,17,16,.6); backdrop-filter: blur(
 .tap-tabs button[aria-pressed="true"] { background: var(--accent, #e2a964); color: #141a17; border-color: var(--accent, #e2a964); }
 .tap-head p { color: rgba(251,248,242,.65); }
 .quizband { background: #1c2420; border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
+.style-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; pointer-events: auto; }
+.style-chips .label { font-size: 10.5px; color: rgba(255,255,255,.7); margin-right: 4px; }
+.style-chips button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.22); background: rgba(14,17,16,.35); color: #fff; padding: 6px 10px 6px 7px; border-radius: 99px; font: 500 12px var(--sans); cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: background .2s, transform .2s; }
+.style-chips button i { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, var(--sw) 50%, var(--sw2) 50%); box-shadow: 0 0 0 1px rgba(255,255,255,.4); }
+.style-chips button:hover { transform: translateY(-1px); background: rgba(255,255,255,.14); }
+.style-chips button[aria-pressed="true"] { background: var(--accent, #e2a964); color: #141a17; border-color: var(--accent, #e2a964); }
+@media (max-width: 900px) { .style-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--pad)); } .style-chips button { flex: none; } }
+.tap-ar { border: 0; background: #f4efe6; color: #18201d; padding: 10px 14px; cursor: pointer; border-radius: 0; }

@@ -2,6 +2,7 @@
 import { CATALOG, furnPic, SHOPS } from "./studio/data.js";
 import { PHOTOS, LOOKS, photoUrl, photoFor } from "./photos.js";
 import { board } from "./looks.js";
+import { hasAR, openAR } from "./ar.js";
 import { $, $$, esc, initHeader } from "./gallery-common.js";
 
 initHeader();
@@ -29,6 +30,7 @@ function wirePics(root) {
 }
 function boardLink() { const n = board.all().length, a = document.getElementById("d-boardlink"); if (a) a.innerHTML = "♥ My board" + (n ? " <sup>" + n + "</sup>" : ""); }
 document.addEventListener("click", e => {
+  const ar = e.target.closest("[data-ar]"); if (ar) { openAR(ar.dataset.ar); return; }
   const h = e.target.closest(".d-heart");
   if (h) { e.preventDefault(); const on = board.toggle(h.dataset.id); h.setAttribute("aria-pressed", on); h.textContent = on ? "♥" : "♡"; h.classList.remove("pop"); void h.offsetWidth; h.classList.add("pop"); boardLink(); return; }
   const b = e.target.closest(".d-3d"); if (!b) return;
@@ -73,6 +75,7 @@ function renderGrid() {
         <span class="d-cat">${esc(c.cat)}</span>
         <h3>${esc(c.name)}</h3>
         <small>${size(c)}${c.mat ? " · " + esc(c.mat) : ""}</small>
+        ${hasAR(c.id) ? `<button type="button" class="d-ar" data-ar="${c.id}">📱 See it in your room <small>AR</small></button>` : ""}
         <div class="d-act"><a class="d-try" href="${tryUrl(c.id)}">Try in my room ↗</a>
           <details class="d-shopx"><summary>Shop similar</summary><div>${SHOPS.slice(0, 3).map(([n, f]) => `<a href="${f(c.q || c.name)}" target="_blank" rel="noopener noreferrer">${esc(n.replace("Google Shopping", "Google"))}</a>`).join("")}</div></details></div>
       </div>
@@ -81,3 +84,6 @@ function renderGrid() {
 }
 $("#d-search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); renderGrid(); });
 renderFilters(); renderGrid(); boardLink();
+
+// a QR code scanned on a phone lands here and opens the piece in AR
+try { const q = new URLSearchParams(location.search).get("ar"); if (q && hasAR(q)) openAR(q); } catch (e) {}

@@ -212,8 +212,15 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
 
   // ---------- room ----------
   let root = null, walls = [], items = [], bb = null, center = new T.Vector3(), span = 6, lamps = [], H = 2.6;
-  function build(id) {
-    const tpl = TEMPLATES.find(t => t.id === id) || TEMPLATES[0], st = STYLES[tpl.style] || STYLES.warm, plan = buildPlan(tpl);
+  let curRoom = roomId, curStyle = null;
+  function build(id, styleKey) {
+    curRoom = id; curStyle = styleKey || null;
+    const tpl = TEMPLATES.find(t => t.id === id) || TEMPLATES[0], st = STYLES[styleKey || tpl.style] || STYLES.warm, plan = buildPlan(tpl);
+    // a chosen style re-dresses the same room: fabrics, wood and rugs take the style's palette
+    if (styleKey && STYLES[styleKey]) {
+      const pal = st.palette, fab = new Set(["sofa", "armchair", "sectional", "bed", "pouf", "cushion", "kurpacha"]), woodS = new Set(["table", "rtable", "cabinet", "desk", "shelf", "dresser", "box"]);
+      plan.items = plan.items.map(it => fab.has(it.shape) ? Object.assign({}, it, { color: pal[1] }) : (it.shape === "rug" || it.shape === "rrug") ? Object.assign({}, it, { color: pal[0] }) : woodS.has(it.shape) ? Object.assign({}, it, { color: pal[2] }) : it);
+    }
     if (root) { scene.remove(root); root.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
     lamps.forEach(l => scene.remove(l)); lamps = []; lampSpots = []; shadeMats = []; walls = []; items = [];
     root = new T.Group(); scene.add(root); H = plan.height || 2.6;
@@ -411,7 +418,8 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
   build(roomId);
   Promise.race([renderer.compileAsync(scene, cam), new Promise(r => setTimeout(r, 4000))]).catch(() => {}).then(go);
   return {
-    setRoom(id) { build(id); renderer.compileAsync(scene, cam).catch(() => {}).then(() => { lastKey = ""; }); },
+    setRoom(id) { build(id, curStyle); renderer.compileAsync(scene, cam).catch(() => {}).then(() => { lastKey = ""; }); },
+    setStyle(key) { build(curRoom, key); renderer.compileAsync(scene, cam).catch(() => {}).then(() => { lastKey = ""; }); },
     setEvening(on) { forceEve = !!on; },
     progress: () => progress
   };
