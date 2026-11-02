@@ -4,7 +4,7 @@ const ids = [...new Set(fs.readFileSync("tools/ph-list.txt", "utf8").split(/\s+/
 const get = async u => { for (let i = 0; i < 4; i++) { const r = await fetch(u, { headers: { "User-Agent": "makon-model-fetch" } }); if (r.ok) return r; await new Promise(s => setTimeout(s, 1500)); } throw new Error("fetch failed " + u); };
 const meta = {};
 for (const id of ids) {
-  if (fs.existsSync(`models/ph/${id}.glb`)) continue;
+  if (fs.existsSync(`models/ph/${id}.glb`) && fs.existsSync(`models/ar/${id}.glb`)) continue;
   try {
     const f = await (await get(`https://api.polyhaven.com/files/${id}`)).json();
     const g = f.gltf && (f.gltf["1k"] || f.gltf["2k"]); if (!g) { console.log("no gltf", id); continue; }
