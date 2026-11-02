@@ -39,6 +39,7 @@ async function run() {
   const jobs = [...queue]; queue.clear();
   for (const [k, it] of jobs) {
     try { cache.set(k, await shoot(it)); } catch (e) { cache.set(k, null); }
+    await new Promise(r => setTimeout(r, 0));
   }
   onReady && onReady();
 }
@@ -54,6 +55,7 @@ async function shoot(it) {
   // straight down; the piece's front (+z in 3D) points down the page, like the plan
   cam.left = -w / 2; cam.right = w / 2; cam.top = d / 2; cam.bottom = -d / 2;
   cam.position.set(0, 20, 0); cam.up.set(0, 0, -1); cam.lookAt(0, 0, 0); cam.updateProjectionMatrix();
+  try { await r.compileAsync(scene, cam); } catch (e) {}
   r.render(scene, cam);
   const url = r.domElement.toDataURL("image/png");
   scene.remove(g);

@@ -5,11 +5,12 @@ import { createReal } from "./real.js";
 import { CATALOG } from "./data.js";
 const DEF_COLOR = Object.fromEntries(CATALOG.map(c => [c.id, c.color]));
 // real: swap in photo-scanned models where we have them; onChange(g) fires when one arrives (re-render then)
-export function createKit(T, RoundedBoxGeometry, { anisotropy = 8, real = true, onChange = null } = {}) {
-  const realKit = real ? createReal(T, onChange) : null;
+// lite: phones and slow computers — plain materials (fewer shaders to compile), no streamed scans
+export function createKit(T, RoundedBoxGeometry, { anisotropy = 8, real = true, onChange = null, prepare = null, lite = false } = {}) {
+  const realKit = real ? createReal(T, onChange, prepare) : null;
   const cache = new Map();
   const std = (c, o = {}) => { const k = "s" + c + JSON.stringify(o); if (!cache.has(k)) cache.set(k, new T.MeshStandardMaterial({ color: c, roughness: 0.6, ...o })); return cache.get(k); };
-  const fabric = c => { const k = "f" + c; if (!cache.has(k)) cache.set(k, new T.MeshPhysicalMaterial({ color: c, roughness: 0.92, sheen: 0.6, sheenRoughness: 0.7, sheenColor: new T.Color(c).offsetHSL(0, -0.05, 0.12) })); return cache.get(k); };
+  const fabric = c => { const k = "f" + c; if (!cache.has(k)) cache.set(k, lite ? new T.MeshStandardMaterial({ color: c, roughness: 0.9 }) : new T.MeshPhysicalMaterial({ color: c, roughness: 0.92, sheen: 0.6, sheenRoughness: 0.7, sheenColor: new T.Color(c).offsetHSL(0, -0.05, 0.12) })); return cache.get(k); };
   const wood = c => std(c, { roughness: 0.46 });
   const metal = (c = "#b9bcbf", r = 0.3) => std(c, { metalness: 1, roughness: r });
   const glassy = () => std("#dfe7eb", { metalness: 0.35, roughness: 0.06, envMapIntensity: 1.6 });
@@ -18,7 +19,9 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8, real = true, 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
   // ---------- textures ----------
+  const floorCache = new Map();
   function floorTex(FLOORS, key, S = 1024) {
+    const ck = key + "|" + S; if (floorCache.has(ck)) return floorCache.get(ck);
     const f = FLOORS[key] || FLOORS.oak, cv = document.createElement("canvas"); cv.width = cv.height = S;
     const g = cv.getContext("2d"), base = new T.Color(f.base);
     let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -40,7 +43,8 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8, real = true, 
       g.fillStyle = "#d9d1c3"; g.fillRect(0, 0, S, S);
       for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { g.fillStyle = col(f.var); g.fillRect(i * f.tile * M + 2, j * f.tile * M + 2, f.tile * M - 4, f.tile * M - 4); }
     } else for (let k = 0; k < 5000; k++) { g.fillStyle = "rgba(0,0,0," + (rnd() * 0.035) + ")"; g.fillRect(rnd() * S, rnd() * S, 2 + rnd() * 7, 2 + rnd() * 7); }
-    const t = new T.CanvasTexture(cv); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(0.5, 0.5); t.colorSpace = T.SRGBColorSpace; t.anisotropy = anisotropy; return t;
+    const t = new T.CanvasTexture(cv); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(0.5, 0.5); t.colorSpace = T.SRGBColorSpace; t.anisotropy = anisotropy; t.userData.keep = true;
+    floorCache.set(ck, t); return t;
   }
   const artCache = new Map();
   function artTex(pal, seed) {
@@ -747,5 +751,5 @@ export function createKit(T, RoundedBoxGeometry, { anisotropy = 8, real = true, 
     g.userData.ready = (realKit && realKit.attach(g, Object.assign({}, it, { type }), DEF_COLOR[type])) || Promise.resolve(g);
     return g;
   }
-  return { buildItem, hasReal: t => !!(realKit && realKit.has(t)), floorTex, artTex, std, fabric, wood, metal, rbox, box, cyl, shadeMat };
+  return { buildItem, hasReal: t => !!(realKit && realKit.has(t)), preload: types => realKit ? realKit.preload(types) : Promise.resolve(), floorTex, artTex, std, fabric, wood, metal, rbox, box, cyl, shadeMat };
 }

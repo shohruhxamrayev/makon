@@ -90,7 +90,7 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
   const cyl = (rt, rb, h, x, y, z, m, seg = 32, open = false) => { const me = shadow(new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg, 1, open), m)); me.position.set(x, y + h / 2, z); return me; };
 
   let lampSpots = [], shadeMats = [];
-  const kit = createKit(T, RoundedBoxGeometry, { anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy()), onChange: () => { dirty = true; shadowsDirty = true; } });
+  const kit = createKit(T, RoundedBoxGeometry, { real: !lowEnd, lite: lowEnd || touch, anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy()), onChange: () => { dirty = true; shadowsDirty = true; lastKey = ""; }, prepare: obj => renderer.compileAsync(obj, cam, scene) });
   function buildItem(it, st) {
     const g = new T.Group(), w = it.w, d = it.d, h = it.h, c = it.color || "#cccccc", pal = st.palette || [];
     const leg = wood("#3a2f26");
@@ -393,8 +393,8 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
   canvas.addEventListener("touchend", () => { tx = null; });
 
   let visible = true, raf = 0;
-  new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && !raf) loop(); }, { threshold: 0 }).observe(canvas);
-  function loop(t) { raf = 0; if (!visible || document.hidden) return; update(t || 0); raf = requestAnimationFrame(loop); }
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && !raf && ready) loop(); }, { threshold: 0 }).observe(canvas);
+  function loop(t) { raf = 0; if (!visible || document.hidden || !ready) return; update(t || 0); raf = requestAnimationFrame(loop); }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && visible && !raf) loop(); });
 
   function onScroll() {
@@ -404,9 +404,14 @@ export function start({ canvas, story, labels, onStep, roomId = "warm-living" })
   }
   window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
-  build(roomId); loop();
+  // compile every shader before the first frame (in parallel where the browser allows), so the page never stalls
+  let ready = false;
+  canvas.style.opacity = "0"; canvas.style.transition = "opacity .6s ease";
+  const go = () => { if (ready) return; ready = true; canvas.style.opacity = "1"; lastKey = ""; if (!raf) loop(); };
+  build(roomId);
+  Promise.race([renderer.compileAsync(scene, cam), new Promise(r => setTimeout(r, 4000))]).catch(() => {}).then(go);
   return {
-    setRoom(id) { build(id); },
+    setRoom(id) { build(id); renderer.compileAsync(scene, cam).catch(() => {}).then(() => { lastKey = ""; }); },
     setEvening(on) { forceEve = !!on; },
     progress: () => progress
   };

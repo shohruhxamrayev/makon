@@ -5,7 +5,7 @@ import { loops, polyArea, polyCentroid, bounds, wlen, lerp, vkey } from "./geom.
 
 let ctx, T = null, OrbitControls = null, loading = null, kit = null, RoomEnv = null;
 let renderer, scene, persp, ortho, cam, controls, root, sun, hemi, raycaster, floorPlane;
-let host, built = false, dirty = true, camMode = "persp", cutaway = true, shadows = true, running = false;
+let compiled = false, host, built = false, dirty = true, camMode = "persp", cutaway = true, shadows = true, running = false;
 let wallsMeta = [], itemGroups = new Map(), center = [2.4, 1.8], span = 6, bb = null;
 let drag = null, downAt = null, tapPick = null;
 let ground = null, glassMat = null, lampSpots = [], lampMats = [], moodLights = null, turning = false;
@@ -61,7 +61,7 @@ const floorKey = () => ctx.p.finish.floor || style().floor;
 async function load() {
   if (T) return true;
   if (!loading) loading = Promise.all([import("../../vendor/three.module.min.js"), import("../../vendor/OrbitControls.js"), import("../../vendor/RoundedBoxGeometry.js"), import("../../vendor/RoomEnvironment.js"), import("./models.js")])
-    .then(([a, b, rb, re, mo]) => { T = a; OrbitControls = b.OrbitControls; RoomEnv = re.RoomEnvironment; kit = mo.createKit(a, rb.RoundedBoxGeometry, { onChange: () => { if (root) highlight(); frame(); } }); });
+    .then(([a, b, rb, re, mo]) => { T = a; OrbitControls = b.OrbitControls; RoomEnv = re.RoomEnvironment; kit = mo.createKit(a, rb.RoundedBoxGeometry, { lite: matchMedia("(hover: none)").matches, onChange: () => { if (root) highlight(); frame(); }, prepare: obj => renderer && scene && cam ? renderer.compileAsync(obj, cam, scene) : Promise.resolve() }); });
   try { await loading; return true; } catch (e) { console.error(e); loading = null; return false; }
 }
 
@@ -74,6 +74,7 @@ async function show() {
   if (dirty) rebuild();
   if (camReset) { setCam(camMode, true); camReset = false; }
   resize();
+  if (!compiled) { compiled = true; host.classList.add("warming"); try { applyMood(); await Promise.race([renderer.compileAsync(scene, cam), new Promise(r => setTimeout(r, 6000))]); } catch (e) {} host.classList.remove("warming"); frame(); }
   if (!running) { running = true; loop(); }
 }
 
@@ -306,7 +307,7 @@ function rebuild() {
   dirty = false;
   if (root) { scene.remove(root); root.traverse(o => { if (o.geometry && !o.geometry.userData.keep) o.geometry.dispose(); if (o.material && o.material.map && !o.material.map.userData.keep) o.material.map.dispose(); }); }
   root = new T.Group(); scene.add(root);
-  wallsMeta = []; itemGroups = new Map(); lampSpots = []; lampMats = []; moodLights = null;
+  wallsMeta = []; itemGroups = new Map(); lampSpots = []; lampMats = [];
   const p = ctx.p.plan, H = p.height;
   const lp = loops(p.walls);
   const edges = new Set();
@@ -404,15 +405,17 @@ function applyMood() {
   if (glassMat) { glassMat.color.set(night ? "#16223a" : "#cfe3ef"); glassMat.opacity = night ? 0.75 : 0.28; }
   lampMats.forEach(m => { m.emissiveIntensity = night ? 2.2 : 0.12; });
   scene.environmentIntensity = night ? 0.06 : 0.38;
-  if (moodLights) { root.remove(moodLights); moodLights = null; }
-  if (night) {
+  // the evening lights always exist (dark by day): changing how many lights a scene has makes every shader
+  // recompile, which is what used to freeze the view for seconds when switching to evening
+  if (!moodLights) {
     moodLights = new T.Group();
-    const H = ctx.p.plan.height;
-    // a soft ceiling light so the room is never black, plus every floor lamp glowing
-    const fill = new T.PointLight("#ffd9a8", 6, span * 1.4, 1.6); fill.position.set(center[0], H - 0.15, center[1]); moodLights.add(fill);
-    lampSpots.slice(0, 6).forEach(([x, y, z]) => { const l = new T.PointLight("#ffc77a", 5, 5.5, 1.8); l.position.set(x, y, z); moodLights.add(l); });
-    root.add(moodLights);
+    moodLights.add(new T.PointLight("#ffd9a8", 0, 10, 1.6));
+    for (let i = 0; i < 6; i++) moodLights.add(new T.PointLight("#ffc77a", 0, 5.5, 1.8));
+    scene.add(moodLights);
   }
+  const H = ctx.p.plan.height, [fill, ...ls] = moodLights.children;
+  fill.position.set(center[0], H - 0.15, center[1]); fill.distance = span * 1.4; fill.intensity = night ? 6 : 0;
+  ls.forEach((l, i) => { const sp = lampSpots[i]; if (sp) l.position.set(sp[0], sp[1], sp[2]); l.intensity = night && sp ? 5 : 0; });
   frame();
 }
 function setTurn(on) {

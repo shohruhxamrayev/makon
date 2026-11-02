@@ -700,3 +700,5 @@ body[data-mode="furnish"] .three-act { top: 108px; }
 .share-ic { width: 42px; height: 42px; flex: none; display: grid; place-items: center; background: var(--ink); color: #fff; font-size: 16px; }
 .share-st { min-height: 20px; margin: 12px 0 6px; }
 .share-link { display: inline-block; font-size: 13px; color: #2a8bc9; margin-top: 4px; }
+#three-host.warming::after { content: "Preparing 3D…"; position: absolute; inset: 0; display: grid; place-items: center; background: #e9e3d8; color: #6f675c; font: 500 14px Inter, system-ui, sans-serif; letter-spacing: .04em; z-index: 4; animation: warmPulse 1.2s ease-in-out infinite alternate; }
+@keyframes warmPulse { from { color: #9a9184; } to { color: #3a352e; } }
