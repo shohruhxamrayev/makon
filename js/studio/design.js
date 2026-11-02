@@ -118,11 +118,12 @@ export function init(c) {
   // ---- viewer ----
   $$("#view-mode button").forEach(b => b.addEventListener("click", () => { view = b.dataset.v; renderViewer(); }));
   wireSlider();
-  $("#v-download").addEventListener("click", () => {
+  $("#v-download").addEventListener("click", async () => {
     const v = cur(); const src = v ? v.img : p().photo; if (!src) return;
     const name = (p().name || "room").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase();
-    if (src.startsWith("data:")) download(name + (v ? "-v" + (p().design.versions.indexOf(v) + 1) : "-original") + ".jpg", src);
-    else loadImage(src).then(i => download(name + ".jpg", scaleImage(i, 4000, 0.92)));
+    if (!v) { loadImage(src).then(i => download(name + "-original.jpg", scaleImage(i, 4000, 0.92))); return; }
+    try { toast("Preparing a sharp HD copy…"); download(name + "-v" + (p().design.versions.indexOf(v) + 1) + "-hd.jpg", await hdImage(src)); }
+    catch (e) { download(name + ".jpg", src); }
   });
   const share = () => {
     const v = cur(); if (!v) { toast("Generate a redesign first, then share it."); return; }
@@ -139,6 +140,17 @@ export function init(c) {
   $("#refine-form").addEventListener("submit", e => { e.preventDefault(); refine($("#refine").value.trim()); });
   $("#refine").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#refine-form").requestSubmit(); } });
   $("#refine-undo").addEventListener("click", undoRefine);
+
+  // ---- quick edits ----
+  $$("#qe button").forEach(b => b.addEventListener("click", () => quickEdit(b.dataset.q, b)));
+  $("#busy-x").addEventListener("click", () => { if (abortCtl) { cancelled = true; abortCtl.abort(); } });
+  // press and hold the picture to peek at the original
+  const cmpEl = $("#cmp");
+  const peek = on => { if (on && cur() && cmpEl.dataset.v === "after") cmpEl.dataset.peek = "1"; else delete cmpEl.dataset.peek; };
+  cmpEl.addEventListener("pointerdown", e => { if (e.button <= 0) peek(true); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => cmpEl.addEventListener(ev, () => peek(false)));
+  document.addEventListener("keydown", e => { if (e.key === "o" && ctx.mode === "design" && !e.target.closest("input, textarea, select")) peek(true); });
+  document.addEventListener("keyup", e => { if (e.key === "o") peek(false); });
 
   ctx.bus.on("project", render);
   ctx.bus.on("mode", m => { if (m === "design") render(); });
@@ -275,6 +287,9 @@ function renderControls() {
   renderSum();
   $("#share-btn").hidden = !cur() || busy; $("#v-share").hidden = !cur();
   $("#refine-box").hidden = !cur();
+  $("#quick-box").hidden = !p.photo;
+  $$("#qe button").forEach(b => { b.disabled = busy; });
+  $("#qe-hint").textContent = aiOn ? "Each edit changes only that one thing and keeps your room, camera and furniture." : "Quick edits redraw part of the photo, so they need AI renders. Evening light also works as an instant preview.";
   $("#palette-box").hidden = !cur();
 }
 
@@ -389,11 +404,54 @@ async function renderPalette() {
 }
 
 // ---------- generate ----------
-function setBusy(on, title = "", sub = "") {
+let abortCtl = null, cancelled = false, busyTimer = 0;
+const AVG_KEY = "makon_ai_ms";
+const avgMs = () => { let v = 0; try { v = +localStorage.getItem(AVG_KEY) || 0; } catch (e) {} return v > 4000 && v < 150000 ? v : 30000; };
+const noteMs = ms => { try { localStorage.setItem(AVG_KEY, String(Math.round(avgMs() * 0.6 + ms * 0.4))); } catch (e) {} };
+// ai: show a progress bar that follows how long renders usually take here, and a Cancel button
+function setBusy(on, title = "", sub = "", ai = false) {
   busy = on;
   $("#busy").hidden = !on;
   $("#busy-t").textContent = title; $("#busy-s").textContent = sub;
+  clearInterval(busyTimer);
+  const bar = $("#busy-bar"); bar.hidden = !(on && ai); $("#busy-x").hidden = !(on && ai);
+  if (on && ai) {
+    const t0 = Date.now(), avg = avgMs();
+    const tick = () => {
+      const t = Date.now() - t0, k = 1 - Math.exp(-t / (avg * 0.55));
+      bar.style.setProperty("--p", Math.min(96, k * 100).toFixed(1) + "%");
+      const left = Math.round((avg - t) / 1000);
+      $("#busy-s").textContent = Math.round(t / 1000) + " s" + (left > 2 ? " · about " + left + " s left" : " · almost there…");
+    };
+    tick(); busyTimer = setInterval(tick, 1000);
+  }
   renderControls();
+}
+
+// sharper, larger download: 2× upscale with high-quality smoothing, then a light unsharp mask
+async function hdImage(src) {
+  const img = await loadImage(src);
+  const w0 = img.naturalWidth, h0 = img.naturalHeight;
+  const k = Math.min(2, 3200 / Math.max(w0, h0));
+  if (k <= 1.05) return src;
+  const w = Math.round(w0 * k), h = Math.round(h0 * k);
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+  g.drawImage(img, 0, 0, w, h);
+  const id = g.getImageData(0, 0, w, h), d = id.data, o = new Uint8ClampedArray(d), amt = 0.45, row = w * 4;
+  for (let y = 1; y < h - 1; y++) {
+    if (y % 200 === 0) await new Promise(r => setTimeout(r));   // stay responsive on big pictures
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * row + x * 4;
+      for (let ch = 0; ch < 3; ch++) {
+        const j = i + ch, blur = (o[j - 4] + o[j + 4] + o[j - row] + o[j + row]) * 0.25;
+        d[j] = o[j] + (o[j] - blur) * amt;
+      }
+    }
+  }
+  g.putImageData(id, 0, 0);
+  return c.toDataURL("image/jpeg", 0.93);
 }
 
 // FLUX follows a clear description best: the person's own request first, then the style, the options and what must not move.
@@ -426,7 +484,8 @@ async function callAI(image, prompt, retried, opts = {}) {
   if (opts.ref) body.ref = scaleImage(await loadImage(opts.ref), ctx.ai.maxInput || 1024, 0.86);
   if (opts.strict) body.strict = true;
   let code = ""; try { code = localStorage.getItem(CODE_KEY) || ""; } catch (e) {}
-  const c = new AbortController(); const t = setTimeout(() => c.abort(), 150000);
+  const c = new AbortController(); abortCtl = c; cancelled = false; const t = setTimeout(() => c.abort(), 150000);
+  const t0 = Date.now();
   try {
     const r = await fetch("api/redesign", { method: "POST", headers: { "Content-Type": "application/json", "x-makon-code": code }, body: JSON.stringify(body), signal: c.signal });
     const j = await r.json().catch(() => ({}));
@@ -441,11 +500,12 @@ async function callAI(image, prompt, retried, opts = {}) {
     }
     if (j.remaining != null) { ctx.ai.remaining = j.remaining; renderControls(); }
     if (!r.ok || !j.image) throw new Error(j.error || "The AI service returned an error (" + r.status + ").");
+    noteMs(Date.now() - t0);
     return j.image;
   } catch (e) {
-    if (e.name === "AbortError") throw new Error("The AI render took too long.");
+    if (e.name === "AbortError") { const er = new Error(cancelled ? "Cancelled." : "The AI render took too long."); er.cancelled = cancelled; throw er; }
     throw e;
-  } finally { clearTimeout(t); }
+  } finally { clearTimeout(t); if (abortCtl === c) abortCtl = null; }
 }
 
 async function addVersion(v) {
@@ -476,8 +536,7 @@ async function generate() {
   let timer;
   try {
     if (engine === "ai") {
-      setBusy(true, "Rendering with AI…", "Usually 20–60 seconds. You can keep using the other tools.");
-      timer = setInterval(() => { $("#busy-s").textContent = Math.round((Date.now() - t0) / 1000) + " s · usually 20–60 seconds"; }, 1000);
+      setBusy(true, "Rendering with AI…", "", true);
       try {
         const img = await callAI(p.photo, buildPrompt(), false, { ref: d.ref || null, strict: !!(d.notes || "").trim() });
         if (ctx.p.id !== projectId) { toast("The AI render finished for a room you've left."); return; }
@@ -487,6 +546,7 @@ async function generate() {
         return;
       } catch (e) {
         clearInterval(timer); setBusy(false);
+        if (e.cancelled) { toast("Render cancelled."); return; }
         ctx.ai.lastError = e.message; renderControls();
         const again = await confirmBox("The AI redesign didn't work", e.message + " Nothing was changed — press Try again in a moment.", "Try again", false);
         if (again) return generate();
@@ -517,14 +577,14 @@ async function refine(text) {
   RULES.forEach(([re, label, fn]) => { if (re.test(text.toLowerCase())) { fn(adj); applied.push(label); } });
 
   if (engineChoice() === "ai") {
-    setBusy(true, "Refining with AI…", "Usually 20–60 seconds");
+    setBusy(true, "Refining with AI…", "", true);
     try {
       const img = await callAI(v.img, "MAIN REQUEST — follow it exactly: " + text + ". This is an interior design photo: make only that change and keep everything else identical — same camera, room, furniture, positions and lighting. Most important: " + text + ". Photorealistic, no text.", false, { strict: true });
       if (ctx.p.id !== projectId) return;
       await addVersion({ img, style: v.style, engine: "ai", label: "AI refine: " + text.slice(0, 40), intensity: v.intensity, light: v.light, adj: { b: 1, c: 1, s: 1, w: 0 }, parent: v.id, baseSelf: true, refine: text });
       $("#refine").value = ""; toast("Refined.");
       return;
-    } catch (e) { toast(e.message, "error"); if (!applied.length) return; }
+    } catch (e) { if (e.cancelled) { toast("Cancelled."); return; } toast(e.message, "error"); if (!applied.length) return; }
     finally { setBusy(false); }
   }
 
@@ -548,4 +608,68 @@ async function undoRefine() {
   d.current = v.parent;
   const c = cur(); ctx.p.thumb = c ? c.thumb : ctx.p.thumb;
   ctx.save(); render(); toast("Undone.");
+}
+
+// ---------- quick edits: one tap, one change, everything else kept ----------
+const PAINTS = [["Warm white", "#f1ece2"], ["Greige", "#cfc5b5"], ["Sage green", "#a7b49d"], ["Olive", "#6f7352"], ["Dusty blue", "#7f97aa"], ["Navy", "#2c3a4f"], ["Terracotta", "#c46a48"], ["Blush", "#e2c3b6"], ["Charcoal", "#3a3c3b"]];
+const FLOORS = [["Light oak planks", "wide light natural oak wooden planks"], ["Walnut herringbone", "dark walnut herringbone parquet"], ["White marble", "large polished white Carrara marble tiles"], ["Terrazzo", "light terrazzo with small coloured chips"], ["Polished concrete", "smooth polished light-grey concrete"], ["Patterned tiles", "patterned encaustic cement tiles in muted colours"], ["Wool carpet", "soft wall-to-wall beige wool carpet"]];
+const KEEP_ALL = " Keep exactly the same camera, room shape, walls, windows, doors, furniture and their positions unless this asks to change them. Photorealistic, natural light, no text.";
+const QUICK = {
+  stage: s => ["Furnish this room completely in " + s.name + " style: " + s.prompt + ". Add a full, well-proportioned set of real furniture that fits the room size, a rug, lamps, curtains, wall art and plants. Keep the walls, floor, ceiling, windows, doors and camera exactly the same. Photorealistic, no text.", "Furnished · " + s.name],
+  declutter: () => ["Remove all clutter: loose items, boxes, bags, clothes, cables, papers and mess on the floor and surfaces. Make the room clean and tidy." + KEEP_ALL, "Decluttered"],
+  paint: (s, x) => ["Repaint all the walls in " + x[0].toLowerCase() + " (" + x[1] + ") matte paint. Change only the wall colour; keep the ceiling, trim, floor, furniture, decor and light identical." + KEEP_ALL, "Walls: " + x[0]],
+  floor: (s, x) => ["Replace the floor with " + x[1] + ". Change only the floor surface; keep rugs that are on it, the walls, furniture and light identical." + KEEP_ALL, "Floor: " + x[0]],
+  evening: () => ["Make this the same room in the evening: dusk outside the windows, every lamp and ceiling light switched on with a warm cosy glow." + KEEP_ALL, "Evening light"],
+  plants: () => ["Add finishing touches: two or three large healthy indoor plants, framed art on the walls, cushions and a throw. Keep all existing furniture where it is." + KEEP_ALL, "Plants & art"]
+};
+
+function quickEdit(q, btn) {
+  const pick = $("#qe-pick");
+  if (q === "paint" || q === "floor") {
+    const open = btn.getAttribute("aria-expanded") === "true";
+    $$("#qe button").forEach(b => b.removeAttribute("aria-expanded"));
+    if (open) { pick.hidden = true; return; }
+    btn.setAttribute("aria-expanded", "true");
+    pick.innerHTML = ""; pick.hidden = false;
+    if (q === "paint") {
+      PAINTS.forEach(x => pick.append(el("button", { type: "button", class: "qe-sw", style: "--c:" + x[1], title: x[0], "aria-label": x[0], onclick: () => runQuick("paint", x) })));
+      const c = el("input", { type: "color", value: "#d9cbb8", title: "Any colour", "aria-label": "Any colour" });
+      c.addEventListener("change", () => runQuick("paint", ["Colour " + c.value, c.value]));
+      pick.append(c);
+    } else FLOORS.forEach(x => pick.append(el("button", { type: "button", class: "qe-fl", text: x[0], onclick: () => runQuick("floor", x) })));
+    return;
+  }
+  runQuick(q);
+}
+
+async function runQuick(q, arg) {
+  const p = ctx.p; if (busy || !p || !p.photo) return;
+  $("#qe-pick").hidden = true; $$("#qe button").forEach(b => b.removeAttribute("aria-expanded"));
+  const v = cur(), styleKey = v ? v.style : p.design.style, s = STYLES[styleKey] || STYLES.warm;
+  const [prompt, label] = QUICK[q](s, arg);
+  const projectId = p.id;
+  if (engineChoice() !== "ai") {
+    if (q !== "evening") { toast("This quick edit redraws part of the photo, so it needs AI renders.", "error"); return; }
+    setBusy(true, "Evening light", "On your device");
+    try {
+      const base = v ? (v.baseSelf ? v.img : (p.sample ? SAMPLE_AFTER : p.photo)) : (p.sample ? SAMPLE_AFTER : p.photo);
+      const adj = { b: 0.84, c: 1.06, s: 1.05, w: 0.4 };
+      const img = await renderMood(base, s, { intensity: v && !v.baseSelf ? v.intensity : 0, light: v ? v.light : p.design.light, keep: [], adj });
+      if (ctx.p.id !== projectId) return;
+      await addVersion({ img, style: styleKey, engine: "local", label, intensity: v ? v.intensity : 0, light: v ? v.light : p.design.light, adj, keep: [], parent: v ? v.id : null });
+      toast("Evening preview ready.");
+    } catch (e) { toast("Couldn't apply that change.", "error"); }
+    finally { setBusy(false); }
+    return;
+  }
+  setBusy(true, label + "…", "", true);
+  try {
+    const img = await callAI(v ? v.img : p.photo, prompt, false, { strict: true });
+    if (ctx.p.id !== projectId) { toast("The edit finished for a room you've left."); return; }
+    await addVersion({ img, style: styleKey, engine: "ai", label, intensity: v ? v.intensity : p.design.intensity, light: v ? v.light : p.design.light, adj: { b: 1, c: 1, s: 1, w: 0 }, parent: v ? v.id : null, baseSelf: true, refine: label });
+    toast(label + " — ready. Drag the slider to compare.");
+  } catch (e) {
+    if (e.cancelled) toast("Cancelled.");
+    else { ctx.ai.lastError = e.message; toast(e.message, "error"); }
+  } finally { setBusy(false); }
 }

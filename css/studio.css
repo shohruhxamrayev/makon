@@ -246,7 +246,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .compass button[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 .compass-c { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 22px; color: var(--accent-2); }
 .refine textarea { margin-bottom: 8px; }
-.palette { display: flex; height: 64px; border: 1px solid var(--line); }
+.palette { display: flex; overflow: hidden; height: 64px; border: 1px solid var(--line); }
 .pal { flex: 1 1 0; border: 0; background: var(--c); position: relative; min-width: 28px; }
 .pal span { position: absolute; left: 4px; bottom: 4px; font-size: 9.5px; font-weight: 600; background: rgba(255,255,255,.85); color: var(--ink); padding: 1px 4px; opacity: 0; transition: opacity .2s; }
 .pal:hover span, .pal:focus-visible span { opacity: 1; }
@@ -702,3 +702,27 @@ body[data-mode="furnish"] .three-act { top: 108px; }
 .share-link { display: inline-block; font-size: 13px; color: #2a8bc9; margin-top: 4px; }
 #three-host.warming::after { content: "Preparing 3D…"; position: absolute; inset: 0; display: grid; place-items: center; background: #e9e3d8; color: #6f675c; font: 500 14px Inter, system-ui, sans-serif; letter-spacing: .04em; z-index: 4; animation: warmPulse 1.2s ease-in-out infinite alternate; }
 @keyframes warmPulse { from { color: #9a9184; } to { color: #3a352e; } }
+
+/* quick edits */
+.qe { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.qe button { display: grid; gap: 1px; text-align: left; padding: 9px 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); color: inherit; cursor: pointer; transition: border-color .15s, transform .15s, background .15s; }
+.qe button b { font-size: 13px; font-weight: 600; }
+.qe button small { font-size: 11px; color: var(--muted); }
+.qe button:hover:not(:disabled) { border-color: var(--accent-2); transform: translateY(-1px); }
+.qe button[aria-expanded="true"] { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
+.qe button:disabled { opacity: .5; cursor: not-allowed; }
+.qe-pick { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.qe-sw { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); background: var(--c); cursor: pointer; padding: 0; }
+.qe-sw:hover, .qe-sw:focus-visible { box-shadow: 0 0 0 2px var(--accent-2); }
+.qe-pick input[type=color] { width: 34px; height: 34px; border: 0; padding: 0; background: none; cursor: pointer; }
+.qe-pick .qe-fl { padding: 6px 10px; border-radius: 99px; border: 1px solid var(--line); background: var(--paper); font-size: 12px; cursor: pointer; color: inherit; }
+.qe-pick .qe-fl:hover { border-color: var(--accent-2); }
+/* render progress */
+.busy-bar { width: min(260px, 70%); height: 4px; border-radius: 4px; background: rgba(255,255,255,.18); overflow: hidden; margin-top: 4px; }
+.busy-bar i { display: block; height: 100%; width: var(--p, 0%); background: #fff; transition: width .9s linear; }
+.busy-x { margin-top: 6px; border: 1px solid rgba(255,255,255,.4); background: transparent; color: #fff; border-radius: 99px; padding: 6px 16px; font: 500 12.5px var(--sans, inherit); cursor: pointer; }
+.busy-x:hover { background: rgba(255,255,255,.12); }
+/* hold to peek at the original */
+.cmp[data-peek] .c-after { opacity: 0; }
+.qe-pick { max-width: 100%; min-width: 0; }
+@media (max-width: 600px) { .qe-sw, .qe-pick input[type=color] { width: 30px; height: 30px; } }

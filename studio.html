@@ -143,7 +143,7 @@
                   <div class="c-handle" id="c-handle"><span>↔</span></div>
                   <span class="c-lab l">Original</span><span class="c-lab r">Redesign</span>
                 </div>
-                <div class="busy" id="busy" hidden><span class="spin"></span><b id="busy-t">Rendering…</b><small id="busy-s"></small></div>
+                <div class="busy" id="busy" hidden><span class="spin"></span><b id="busy-t">Rendering…</b><small id="busy-s"></small><span class="busy-bar" id="busy-bar" hidden><i></i></span><button type="button" class="busy-x" id="busy-x" hidden>Cancel</button></div>
               </div>
               <div class="versions" id="versions" aria-label="Versions"></div>
             </div>
@@ -288,6 +288,20 @@
             <p class="ai-warn" id="ai-warn" hidden></p>
             <button class="btn btn-primary btn-block" type="button" id="generate">Generate redesign</button>
             <button class="btn btn-share btn-block" type="button" id="share-btn" hidden><svg><use href="#i-share"/></svg>Share this redesign</button>
+
+            <div class="sub" id="quick-box" hidden>
+              <h3>Quick edits</h3>
+              <div class="qe" id="qe" role="group" aria-label="Quick edits">
+                <button type="button" data-q="stage"><b>Furnish it</b><small>Fill an empty room</small></button>
+                <button type="button" data-q="declutter"><b>Declutter</b><small>Clear the mess</small></button>
+                <button type="button" data-q="paint"><b>Repaint walls</b><small>Pick a colour</small></button>
+                <button type="button" data-q="floor"><b>New floor</b><small>Wood, stone, tile</small></button>
+                <button type="button" data-q="evening"><b>Evening light</b><small>Lamps on, dusk</small></button>
+                <button type="button" data-q="plants"><b>Plants &amp; art</b><small>Finishing touches</small></button>
+              </div>
+              <div class="qe-pick" id="qe-pick" hidden></div>
+              <small class="hint" id="qe-hint">Each edit changes only that one thing and keeps your room, camera and furniture.</small>
+            </div>
 
             <div class="sub" id="refine-box" hidden>
               <h3>Refine in plain words</h3>
