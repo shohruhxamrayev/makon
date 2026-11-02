@@ -1,0 +1,21 @@
+name: Guide screenshots
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["tools/shots.mjs", ".github/workflows/shots.yml"]
+permissions:
+  contents: write
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: node tools/shots.mjs
+      - name: Push to the shots branch (never deployed)
+        run: |
+          git config user.name "Shohruh Xamrayev"; git config user.email "shohruhxamrayev37@gmail.com"
+          git checkout --orphan shots-out && git rm -rf --cached . >/dev/null && git add shots && git commit -m "Guide screenshots [skip ci]" && git push -f origin shots-out
