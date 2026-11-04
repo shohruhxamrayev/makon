@@ -1,7 +1,7 @@
 // Makon — turn a redesign into something people post: a branded before/after picture or a 9:16 reel.
 import { el, toast, download } from "./util.js";
 
-const SITE = "makon-khaki.vercel.app";
+const SITE = "makonbuild.uz";
 const INK = "#121614", CREAM = "#f4efe6", ACCENT = "#e2a964";
 const load = src => new Promise((ok, no) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = no; i.src = src; });
 let wordmark = null;

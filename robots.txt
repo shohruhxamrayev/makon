@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://makon-khaki.vercel.app/sitemap.xml
+Sitemap: https://www.makonbuild.uz/sitemap.xml
